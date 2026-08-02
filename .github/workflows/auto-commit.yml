@@ -1,0 +1,30 @@
+name: Auto Commit Manual Changes
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  commit-changes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Git User
+        run: |
+          git config --global user.name "lovable-bot"
+          git config --global user.email "lovable@bot.dev"
+
+      - name: Commit and Push Changes
+        run: |
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto Commit via Workflow"
+            git push
+          fi

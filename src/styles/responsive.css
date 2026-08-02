@@ -1,0 +1,74 @@
+/* Global responsive utilities */
+
+/* Consistent grid breakpoints */
+.responsive-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+.responsive-grid-2 {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+.responsive-grid-4 {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4;
+}
+
+/* Table responsive wrapper */
+.table-responsive {
+  @apply overflow-x-auto;
+}
+
+.table-responsive table {
+  @apply min-w-full;
+}
+
+/* Mobile-friendly touch targets */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* Mobile form spacing */
+.form-mobile {
+  @apply space-y-4 md:space-y-6;
+}
+
+.form-mobile .form-row {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+/* Mobile card layouts */
+.card-mobile {
+  @apply p-4 md:p-6;
+}
+
+/* Mobile navigation */
+.nav-mobile {
+  @apply flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4;
+}
+
+/* Responsive text sizes */
+.text-responsive-sm {
+  @apply text-xs md:text-sm;
+}
+
+.text-responsive-base {
+  @apply text-sm md:text-base;
+}
+
+.text-responsive-lg {
+  @apply text-base md:text-lg;
+}
+
+/* Mobile-optimized buttons */
+.btn-mobile {
+  @apply px-3 py-2 md:px-4 md:py-2 text-sm md:text-base;
+}
+
+/* Consistent spacing */
+.spacing-mobile {
+  @apply space-y-3 md:space-y-4;
+}
+
+.spacing-mobile-lg {
+  @apply space-y-4 md:space-y-6;
+}
