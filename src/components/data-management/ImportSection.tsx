@@ -6,6 +6,7 @@ import { TemplateDownload } from "./TemplateDownload";
 import { ImportProgress } from "./ImportProgress";
 import { ImportPreview } from "./ImportPreview";
 import { useImportData } from "./hooks/useImportData";
+import { SqlImportSection } from "./SqlImportSection";
 import { Upload, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -46,6 +47,8 @@ export function ImportSection() {
 
   return (
     <div className="space-y-6">
+      <SqlImportSection />
+
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>

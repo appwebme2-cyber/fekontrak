@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ExportFieldSelector } from "./ExportFieldSelector";
 import { useExportData } from "./hooks/useExportData";
+import { SqlBackupExport } from "./SqlBackupExport";
 import { FileDown, FileSpreadsheet } from "lucide-react";
 
 export function ExportSection() {
@@ -44,6 +45,8 @@ export function ExportSection() {
 
   return (
     <div className="space-y-6">
+      <SqlBackupExport />
+
       {/* Export Kontrak */}
       <Card>
         <CardHeader>
