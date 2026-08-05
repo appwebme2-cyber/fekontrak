@@ -93,6 +93,10 @@ export const useUserManagement = () => {
       toast({ title: "Validasi Error", description: "Nama tidak boleh kosong.", variant: "destructive" });
       return;
     }
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      toast({ title: "Validasi Error", description: "Format email tidak valid.", variant: "destructive" });
+      return;
+    }
     if (formData.role === 'external' && !formData.id_vendor) {
       toast({ title: "Validasi Error", description: "Pilih vendor untuk role External.", variant: "destructive" });
       return;
@@ -107,15 +111,15 @@ export const useUserManagement = () => {
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data?.message);
 
-        // Update nama juga
+        // Update nama & email juga
         await fetch(`${API_URL}/profile/${selectedUser.id}`, {
           method: 'PUT', headers: authHeaders(),
-          body: JSON.stringify({ fullName: formData.full_name.trim(), role: 'external' })
+          body: JSON.stringify({ fullName: formData.full_name.trim(), email: formData.email.trim(), role: 'external' })
         });
       } else {
         const res = await fetch(`${API_URL}/profile/${selectedUser.id}`, {
           method: 'PUT', headers: authHeaders(),
-          body: JSON.stringify({ fullName: formData.full_name.trim(), role: formData.role })
+          body: JSON.stringify({ fullName: formData.full_name.trim(), email: formData.email.trim(), role: formData.role })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data?.message);

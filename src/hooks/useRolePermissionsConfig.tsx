@@ -1,7 +1,5 @@
 import { useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { useKonfigurasiSistem, useUpdateKonfigurasi } from '@/hooks/useKonfigurasiSistem';
-import { useToast } from '@/hooks/use-toast';
+import { useKonfigurasiSistem, useCreateKonfigurasi, useUpdateKonfigurasi } from '@/hooks/useKonfigurasiSistem';
 
 export type ConfigurableRole =
   | 'manager'
@@ -233,9 +231,8 @@ export const useRolePermissionsConfig = () => {
 
 export const useUpdateRolePermissions = () => {
   const { konfigurasi = [] } = useKonfigurasiSistem();
+  const createKonfigurasi = useCreateKonfigurasi();
   const updateKonfigurasi = useUpdateKonfigurasi();
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   const remoteConfig = (konfigurasi as KonfigurasiItem[]).find(
     (c) => c.nama_setting === CONFIG_SETTING_NAME
@@ -246,17 +243,17 @@ export const useUpdateRolePermissions = () => {
 
     if (remoteConfig) {
       await updateKonfigurasi.mutateAsync({ id: remoteConfig.id_setting, nilai_setting: value });
-      return;
+    } else {
+      await createKonfigurasi.mutateAsync({
+        nama_setting: CONFIG_SETTING_NAME,
+        nilai_setting: value,
+        deskripsi: 'Matriks hak akses per role yang dapat dikonfigurasi oleh admin',
+      });
     }
-
-    localStorage.setItem(LOCAL_STORAGE_KEY, value);
-    queryClient.invalidateQueries({ queryKey: ['konfigurasi'] });
-    toast({
-      title: 'Disimpan secara lokal',
-      description:
-        'Backend belum memiliki baris konfigurasi "Role_Permission_Matrix", jadi perubahan hanya tersimpan di perangkat ini.',
-    });
   };
 
-  return { save, isPending: updateKonfigurasi.isPending };
+  return {
+    save,
+    isPending: updateKonfigurasi.isPending || createKonfigurasi.isPending,
+  };
 };

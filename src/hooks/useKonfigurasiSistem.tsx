@@ -41,6 +41,67 @@ export const useKonfigurasiSistem = () => {
   };
 };
 
+// ===================== CREATE =====================
+export const useCreateKonfigurasi = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      nama_setting,
+      nilai_setting,
+      deskripsi,
+    }: {
+      nama_setting: string;
+      nilai_setting: string;
+      deskripsi?: string;
+    }) => {
+      const token = localStorage.getItem("token");
+
+      const payload = {
+        namaSetting: nama_setting,
+        nilaiSetting: nilai_setting,
+        ...(deskripsi ? { deskripsi } : {}),
+      };
+
+      const res = await fetch(`${API_URL}/konfigurasi`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("❌ Create error:", data);
+        throw new Error(data.message || "Gagal membuat konfigurasi");
+      }
+
+      return data;
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['konfigurasi'] });
+
+      toast({
+        title: "Berhasil",
+        description: "Konfigurasi berhasil disimpan",
+      });
+    },
+
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Gagal menyimpan konfigurasi",
+        variant: "destructive",
+      });
+    },
+  });
+};
+
 // ===================== UPDATE =====================
 export const useUpdateKonfigurasi = () => {
   const { toast } = useToast();

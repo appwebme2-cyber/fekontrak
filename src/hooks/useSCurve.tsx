@@ -7,6 +7,7 @@ export interface SCurveActivity {
   id: string;
   nama: string;
   bobot: number;
+  urutan?: number;
 }
 
 export interface SCurvePeriodActivity {

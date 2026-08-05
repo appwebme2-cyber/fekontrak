@@ -123,12 +123,24 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
 
   useEffect(() => {
     if (sCurveData && !isEditing) {
-      setActivities(sCurveData.activities || []);
+      // Pastikan setiap aktivitas punya urutan; aktivitas lama yang belum punya
+      // mendapat nomor berdasarkan posisi array saat ini.
+      const normalized = (sCurveData.activities || []).map((a, i) => ({
+        ...a,
+        urutan: a.urutan ?? i + 1,
+      }));
+      setActivities(normalized);
       setPeriods(sCurveData.periods || []);
     }
   }, [sCurveData]);
 
   const totalBobot = parseFloat(activities.reduce((sum, a) => sum + (a.bobot || 0), 0).toFixed(2));
+
+  // Selalu render berdasarkan urutan agar order stabil meski backend mengembalikan order berbeda
+  const sortedActivities = useMemo(
+    () => [...activities].sort((a, b) => (a.urutan ?? 0) - (b.urutan ?? 0)),
+    [activities]
+  );
 
   // Build chart data (cumulative)
   const chartData = useMemo(() => {
@@ -160,10 +172,14 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
   // Add activity
   const handleAddActivity = () => {
     if (!newActivity.nama.trim() || !newActivity.bobot) return;
+    const nextUrutan = activities.length > 0
+      ? Math.max(...activities.map(a => a.urutan ?? 0)) + 1
+      : 1;
     const newAct: SCurveActivity = {
       id: Date.now().toString(),
       nama: newActivity.nama.trim(),
       bobot: parseFloat(newActivity.bobot),
+      urutan: nextUrutan,
     };
     const updatedActivities = [...activities, newAct];
     setActivities(updatedActivities);
@@ -403,6 +419,7 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                   <table className="w-full text-sm border-collapse">
                     <thead>
                       <tr className="bg-gray-50">
+                        <th className="text-center p-2 border font-medium text-xs w-10">No.</th>
                         <th className="text-left p-3 border font-medium min-w-[160px]">Aktivitas</th>
                         <th className="text-center p-2 border font-medium text-xs">Bobot</th>
                         {periods.map((p, i) => (
@@ -424,8 +441,11 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                       </tr>
                     </thead>
                     <tbody>
-                      {activities.map((act) => (
+                      {sortedActivities.map((act) => (
                         <tr key={act.id} className="hover:bg-gray-50">
+                          <td className="p-2 border text-center text-xs font-bold text-gray-500">
+                            {act.urutan}
+                          </td>
                           <td className="p-3 border font-medium">{act.nama}</td>
                           <td className="p-2 border text-center">
                             <Badge variant="outline">{act.bobot}%</Badge>
@@ -475,7 +495,7 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                       ))}
                       {/* Weighted total row */}
                       <tr className="bg-gray-100 font-semibold">
-                        <td className="p-3 border" colSpan={2}>Total Weighted Progress</td>
+                        <td className="p-3 border" colSpan={3}>Total Weighted Progress</td>
                         {periods.map((p, pi) => (
                           <td key={pi} className="p-2 border text-center">
                             <div className="text-xs">
@@ -549,9 +569,25 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
 
               {activities.length > 0 ? (
                 <div className="space-y-2">
-                  {activities.map((a) => (
+                  {sortedActivities.map((a) => (
                     <div key={a.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
                       <div className="flex items-center gap-3">
+                        {/* Nomor urut — bisa diedit untuk reorder */}
+                        <input
+                          type="number"
+                          min="1"
+                          value={a.urutan ?? ''}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            if (isNaN(val)) return;
+                            setActivities(prev => prev.map(x =>
+                              x.id === a.id ? { ...x, urutan: val } : x
+                            ));
+                            setIsEditing(true);
+                          }}
+                          className="w-10 h-8 text-center text-xs font-bold border border-gray-300 rounded bg-gray-100 text-gray-600 focus:outline-none focus:border-blue-400"
+                          title="Nomor urut (ubah untuk reorder)"
+                        />
                         <div className="w-12 h-8 bg-blue-100 rounded flex items-center justify-center">
                           <span className="text-blue-700 text-xs font-bold">{a.bobot}%</span>
                         </div>

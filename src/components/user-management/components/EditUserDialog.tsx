@@ -19,7 +19,7 @@ interface EditUserDialogProps {
 
 export const EditUserDialog = ({ isOpen, onOpenChange, formData, setFormData, onSubmit }: EditUserDialogProps) => {
   const [vendors, setVendors] = useState<{ idVendor: string; namaVendor: string }[]>([]);
-  const { roleLabels } = usePermissions();
+  const { roleLabels, isAdmin } = usePermissions();
 
   useEffect(() => {
     const fetchVendors = async () => {
@@ -53,7 +53,19 @@ export const EditUserDialog = ({ isOpen, onOpenChange, formData, setFormData, on
           </div>
           <div className="grid gap-2">
             <Label htmlFor="edit-email">Email</Label>
-            <Input id="edit-email" value={formData.email} disabled className="bg-muted" />
+            {isAdmin ? (
+              <>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">Hanya Admin yang dapat mengubah email pengguna.</p>
+              </>
+            ) : (
+              <Input id="edit-email" value={formData.email} disabled className="bg-muted" />
+            )}
           </div>
           <div className="grid gap-2">
             <Label>Role</Label>
