@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Users, UserPlus } from 'lucide-react';
+import { Search, Users, UserPlus, Copy, Check, KeyRound } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useUserManagement } from './user-management/hooks/useUserManagement';
@@ -14,9 +14,11 @@ import { AddUserDialog } from './user-management/components/AddUserDialog';
 import { EditUserDialog } from './user-management/components/EditUserDialog';
 import { DeleteConfirmDialog } from './user-management/components/DeleteConfirmDialog';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [copied, setCopied] = useState(false);
   const { userProfile } = useAuth();
   const { roleLabel } = usePermissions();
 
@@ -32,6 +34,9 @@ const UserManagement = () => {
     deleteConfirm,
     setDeleteConfirm,
     isAdmin,
+    createdUserPassword,
+    showCreatedPassword,
+    setShowCreatedPassword,
     handleToggleUserStatus,
     handleEditUser,
     handleUpdateUser,
@@ -39,6 +44,12 @@ const UserManagement = () => {
     handleDeleteUser,
     confirmDelete
   } = useUserManagement();
+
+  const handleCopyPassword = () => {
+    navigator.clipboard.writeText(createdUserPassword);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const filteredUsers = users.filter(user =>
     user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -202,6 +213,35 @@ const UserManagement = () => {
         user={deleteConfirm.user}
         onConfirm={confirmDelete}
       />
+
+      {/* Dialog password user baru */}
+      <Dialog open={showCreatedPassword} onOpenChange={setShowCreatedPassword}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-amber-500" />
+              Password User Baru
+            </DialogTitle>
+            <DialogDescription>
+              Catat dan bagikan password ini ke pengguna. Password tidak akan ditampilkan lagi setelah dialog ini ditutup.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="flex-1 bg-muted rounded-md px-4 py-3 font-mono text-lg font-bold tracking-widest text-center select-all">
+              {createdUserPassword}
+            </div>
+            <Button size="icon" variant="outline" onClick={handleCopyPassword} title="Salin password">
+              {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1 text-center">
+            Klik kotak password atau tombol salin untuk menyalin
+          </p>
+          <Button className="w-full mt-2" onClick={() => setShowCreatedPassword(false)}>
+            Sudah Dicatat, Tutup
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

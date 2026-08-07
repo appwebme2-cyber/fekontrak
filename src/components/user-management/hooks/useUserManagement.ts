@@ -24,11 +24,32 @@ const mapUser = (u: any): UserProfile => ({
   updated_at: u.updatedAt ?? u.updated_at,
 });
 
+const generatePassword = (): string => {
+  const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lower = 'abcdefghjkmnpqrstuvwxyz';
+  const digits = '23456789';
+  const special = '!@#$%&*';
+  const pick = (s: string) => s[Math.floor(Math.random() * s.length)];
+  const chars = [
+    pick(upper), pick(upper), pick(upper),
+    pick(lower), pick(lower), pick(lower),
+    pick(digits), pick(digits),
+    pick(special),
+  ];
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  return chars.join('');
+};
+
 export const useUserManagement = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [createdUserPassword, setCreatedUserPassword] = useState('');
+  const [showCreatedPassword, setShowCreatedPassword] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState<UserFormData>({
     email: '', full_name: '', role: 'guest', id_vendor: '',
@@ -145,10 +166,11 @@ export const useUserManagement = () => {
       return;
     }
     try {
+      const password = generatePassword();
       // Pakai admin-register agar role bisa diset apapun
       const res = await fetch(`${API_URL}/auth/admin-register`, {
         method: 'POST', headers: authHeaders(),
-        body: JSON.stringify({ email: cleanEmail, fullName: cleanName, role: formData.role, password: 'Password123!' })
+        body: JSON.stringify({ email: cleanEmail, fullName: cleanName, role: formData.role, password })
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 400 && data?.message?.toLowerCase().includes('terdaftar')) {
@@ -165,9 +187,10 @@ export const useUserManagement = () => {
         });
       }
 
-      toast({ title: "Berhasil", description: "User baru ditambahkan. Password default: Password123!" });
       setIsAddDialogOpen(false);
       setFormData({ email: '', full_name: '', role: 'guest', id_vendor: '' });
+      setCreatedUserPassword(password);
+      setShowCreatedPassword(true);
       fetchUsers();
     } catch {
       toast({ title: "Error", description: "Gagal menambah user baru.", variant: "destructive" });
@@ -206,6 +229,7 @@ export const useUserManagement = () => {
     formData, setFormData,
     deleteConfirm, setDeleteConfirm,
     isAdmin,
+    createdUserPassword, showCreatedPassword, setShowCreatedPassword,
     handleToggleUserStatus,
     handleEditUser, handleUpdateUser,
     handleAddUser, handleDeleteUser, confirmDelete

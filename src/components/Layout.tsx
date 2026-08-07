@@ -24,7 +24,10 @@ import {
   PanelLeftOpen,
   ShoppingCart,
   GitBranch,
-  BookOpen
+  BookOpen,
+  KeyRound,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,19 +38,30 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RealTimeNotifications } from '@/components/ui/real-time-notifications';
 import { usePermissions } from '@/hooks/usePermissions';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
+const API_URL = "https://bekontrak-production.up.railway.app/api";
+
 const Layout = ({ children }: LayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  // const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-  //   const saved = localStorage.getItem('sidebar-collapsed');
-  //   return saved ? JSON.parse(saved) : true; // default to collapsed on desktop
-  // });
-
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+
+  // Ganti Password state
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [cpOld, setCpOld] = useState('');
+  const [cpNew, setCpNew] = useState('');
+  const [cpConfirm, setCpConfirm] = useState('');
+  const [cpLoading, setCpLoading] = useState(false);
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -68,6 +82,43 @@ const Layout = ({ children }: LayoutProps) => {
   const { signOut, userProfile } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { isAdmin, canViewMenu, roleLabel } = usePermissions();
+  const { toast } = useToast();
+
+  const handleChangePassword = async () => {
+    if (!cpNew || !cpOld) {
+      toast({ title: 'Error', description: 'Password lama dan baru wajib diisi', variant: 'destructive' });
+      return;
+    }
+    if (cpNew !== cpConfirm) {
+      toast({ title: 'Error', description: 'Konfirmasi password tidak cocok', variant: 'destructive' });
+      return;
+    }
+    if (cpNew.length < 6) {
+      toast({ title: 'Error', description: 'Password baru minimal 6 karakter', variant: 'destructive' });
+      return;
+    }
+    setCpLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/auth/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ oldPassword: cpOld, newPassword: cpNew }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast({ title: 'Gagal', description: data.message || 'Password lama tidak sesuai', variant: 'destructive' });
+      } else {
+        toast({ title: 'Berhasil', description: 'Password berhasil diubah' });
+        setShowChangePassword(false);
+        setCpOld(''); setCpNew(''); setCpConfirm('');
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Gagal terhubung ke server', variant: 'destructive' });
+    } finally {
+      setCpLoading(false);
+    }
+  };
 
   // useEffect(() => {
   //   localStorage.setItem('sidebar-collapsed', JSON.stringify(sidebarCollapsed));
@@ -178,20 +229,13 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#E4002B]" />
 
           {(!sidebarCollapsed || isMobile) ? (
-            <div className="relative z-10 ml-1">
-              <img
-                src="/logo.png"
-                alt="Pertamina Patra Niaga"
-                className="h-11 rounded-xl shadow-[0_4px_14px_rgba(0,0,0,0.35)] ring-1 ring-white/20"
-              />
+            <div className="relative z-10 ml-1 flex flex-col leading-none">
+              <span className="text-white font-black text-2xl tracking-widest drop-shadow-md">MAESTRO</span>
+              <span className="text-white/60 text-[9px] tracking-wider font-medium uppercase">Contract Management</span>
             </div>
           ) : (
-            <div className="relative z-10">
-              <img
-                src="/logo.png"
-                alt="Pertamina Patra Niaga"
-                className="h-9 w-9 rounded-lg object-cover object-left shadow-[0_4px_10px_rgba(0,0,0,0.35)] ring-1 ring-white/20"
-              />
+            <div className="relative z-10 flex items-center justify-center">
+              <span className="text-white font-black text-xs tracking-widest drop-shadow-md">M</span>
             </div>
           )}
 
@@ -323,6 +367,28 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             )}
           </div>
+          {/* Ganti Password button */}
+          {(!sidebarCollapsed || isMobile) ? (
+            <button
+              onClick={() => setShowChangePassword(true)}
+              className="mt-3 w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+            >
+              <KeyRound className="h-3.5 w-3.5" />
+              Ganti Password
+            </button>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setShowChangePassword(true)}
+                  className="mt-2 w-full flex items-center justify-center p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+                >
+                  <KeyRound className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Ganti Password</p></TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </div>
     </TooltipProvider>
@@ -405,6 +471,80 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="p-6">{children}</div>
         </main>
       </div>
+
+      {/* Dialog Ganti Password */}
+      <Dialog open={showChangePassword} onOpenChange={setShowChangePassword}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-primary" />
+              Ganti Password
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="cp-old">Password Lama</Label>
+              <div className="relative">
+                <Input
+                  id="cp-old"
+                  type={showOld ? 'text' : 'password'}
+                  placeholder="Masukkan password lama"
+                  value={cpOld}
+                  onChange={e => setCpOld(e.target.value)}
+                  className="pr-10"
+                />
+                <button type="button" onClick={() => setShowOld(!showOld)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showOld ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cp-new">Password Baru</Label>
+              <div className="relative">
+                <Input
+                  id="cp-new"
+                  type={showNew ? 'text' : 'password'}
+                  placeholder="Minimal 6 karakter"
+                  value={cpNew}
+                  onChange={e => setCpNew(e.target.value)}
+                  className="pr-10"
+                />
+                <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cp-confirm">Konfirmasi Password Baru</Label>
+              <div className="relative">
+                <Input
+                  id="cp-confirm"
+                  type={showConfirm ? 'text' : 'password'}
+                  placeholder="Ulangi password baru"
+                  value={cpConfirm}
+                  onChange={e => setCpConfirm(e.target.value)}
+                  className="pr-10"
+                  onKeyDown={e => e.key === 'Enter' && handleChangePassword()}
+                />
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {cpConfirm && cpNew !== cpConfirm && (
+                <p className="text-xs text-red-500">Password tidak cocok</p>
+              )}
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => { setShowChangePassword(false); setCpOld(''); setCpNew(''); setCpConfirm(''); }}>
+              Batal
+            </Button>
+            <Button onClick={handleChangePassword} disabled={cpLoading}>
+              {cpLoading ? 'Menyimpan...' : 'Simpan Password'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
