@@ -153,7 +153,6 @@ const UserManagement = () => {
                   <TableHead className="font-semibold">Email</TableHead>
                   <TableHead className="font-semibold">Role</TableHead>
                   <TableHead className="font-semibold">Status</TableHead>
-                  <TableHead className="font-semibold">Perusahaan</TableHead>
                   {isAdmin && <TableHead className="font-semibold">Aktif</TableHead>}
                   {isAdmin && <TableHead className="font-semibold">Aksi</TableHead>}
                 </TableRow>
@@ -161,7 +160,7 @@ const UserManagement = () => {
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={isAdmin ? 7 : 5} className="text-center py-8">
+                    <TableCell colSpan={isAdmin ? 6 : 4} className="text-center py-8">
                       <div className="flex flex-col items-center space-y-2">
                         <Users className="w-8 h-8 text-muted-foreground" />
                         <p className="text-muted-foreground">

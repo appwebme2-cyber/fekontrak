@@ -34,7 +34,7 @@ export const useAuthActions = (setUser: any, setSession: any, setUserProfile: an
       setUser(userData);
       setSession({ token: result.token });
 
-      toast({ title: "Berhasil", description: "Login berhasil!" });
+      toast({ title: "Berhasil", description: "Login berhasil!", variant: "success" as any, duration: 3000 });
       return { data: { user: userData }, error: null };
 
     } catch (error: any) {

@@ -69,7 +69,6 @@ export const UserTableRow = ({
       <TableCell>{user.email}</TableCell>
       <TableCell>{getRoleBadge(user.role)}</TableCell>
       <TableCell>{getStatusBadge(user.is_active)}</TableCell>
-      <TableCell>{user.id_vendor || '-'}</TableCell>
       {isAdmin && (
         <TableCell>
           <Switch
