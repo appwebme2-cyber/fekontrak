@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Coins, 
+import {
+  LayoutDashboard,
+  FileText,
+  Coins,
   Target,
   Settings,
   Users,
@@ -23,7 +23,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ShoppingCart,
-  GitBranch
+  GitBranch,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -166,18 +167,40 @@ const Layout = ({ children }: LayoutProps) => {
     <TooltipProvider>
       <div className="flex flex-col h-full">
         {/* Logo/Brand */}
-        <div className={`flex items-center p-4 border-b border-gray-200 dark:border-gray-700 ${sidebarCollapsed && !isMobile ? 'justify-center' : 'justify-between'}`}>
-          {(!sidebarCollapsed || isMobile) && (
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white truncate">
-              Monitor Kontrak
-            </h1>
+        <div className={`relative overflow-hidden flex items-center border-b border-blue-950
+          bg-gradient-to-br from-[#002060] via-[#003B8E] to-[#0055B3]
+          ${sidebarCollapsed && !isMobile ? 'justify-center p-3' : 'justify-between p-4'}`}
+        >
+          {/* Dekorasi lingkaran blur */}
+          <div className="pointer-events-none absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10 blur-xl" />
+          <div className="pointer-events-none absolute -bottom-6 -left-4 w-20 h-20 rounded-full bg-[#E4002B]/20 blur-xl" />
+          {/* Stripe merah kiri */}
+          <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#E4002B]" />
+
+          {(!sidebarCollapsed || isMobile) ? (
+            <div className="relative z-10 ml-1">
+              <img
+                src="/logo.png"
+                alt="Pertamina Patra Niaga"
+                className="h-11 rounded-xl shadow-[0_4px_14px_rgba(0,0,0,0.35)] ring-1 ring-white/20"
+              />
+            </div>
+          ) : (
+            <div className="relative z-10">
+              <img
+                src="/logo.png"
+                alt="Pertamina Patra Niaga"
+                className="h-9 w-9 rounded-lg object-cover object-left shadow-[0_4px_10px_rgba(0,0,0,0.35)] ring-1 ring-white/20"
+              />
+            </div>
           )}
+
           {!isMobile && (
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleSidebar}
-              className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 flex-shrink-0"
+              className="relative z-10 p-2 text-white/80 hover:text-white hover:bg-white/15 flex-shrink-0"
             >
               {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             </Button>
@@ -252,6 +275,33 @@ const Layout = ({ children }: LayoutProps) => {
                 )}
               </div>
             ))}
+        </div>
+
+        {/* Manual Book Download */}
+        <div className="border-t border-gray-200 dark:border-gray-700 px-2 py-2 flex-shrink-0">
+          {sidebarCollapsed && !isMobile ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <a
+                  href="/docs/Manual_Book_Fekontrak.pdf"
+                  download
+                  className="flex items-center justify-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-all duration-200"
+                >
+                  <BookOpen className="h-5 w-5 flex-shrink-0" />
+                </a>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Manual Book</p></TooltipContent>
+            </Tooltip>
+          ) : (
+            <a
+              href="/docs/Manual_Book_Fekontrak.pdf"
+              download
+              className="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-all duration-200 w-full"
+            >
+              <BookOpen className="h-5 w-5 flex-shrink-0 mr-3" />
+              <span className="truncate">Manual Book</span>
+            </a>
+          )}
         </div>
 
         {/* User Profile */}
