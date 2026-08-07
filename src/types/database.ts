@@ -32,6 +32,7 @@ export interface Kontrak {
   judul_kontrak: string;
   no_dokumen_kontrak?: string;
   no_po_pr?: string;
+  no_irkap?: string;
   direksi_pekerjaan?: string;
   id_program_kerja?: string;
   program_kerja_detail?: ProgramKerja;
@@ -100,7 +101,7 @@ export interface Tagihan {
   tipe_kontrak: 'Lumpsum' | 'Unit Price' | 'TSA';
   termin?: string;
   nilai_tagihan: number;
-  status_tagihan: 'Punchlist' | 'BAST/BAPP' | 'Pengajuan' | 'BAST I Vendor' | 'SA' | 'PA' | 'Verification' | 'Payment/Selesai';
+  status_tagihan: 'BA Joint Inspection' | 'BA Commissioning' | 'BA Penerimaan Material' | 'LKP' | 'BASTP' | 'BAKP/BAPP' | 'Submit i-Vendor' | 'SA' | 'PA' | 'Verification' | 'Payment/Selesai' | string;
   memo_required?: boolean;
   tanggal_pengiriman_memo?: string;
   dokumen_memo?: string;

@@ -10,6 +10,7 @@ interface ContractBillingTermsProps {
 
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
+    case 'payment/selesai':
     case 'selesai':
     case 'payment':
       return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
@@ -17,12 +18,19 @@ const getStatusColor = (status: string) => {
     case 'pa':
     case 'sa':
       return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
-    case 'pengajuan':
-    case 'bast i vendor':
+    case 'submit i-vendor':
       return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
-    case 'punchlist':
-    case 'bast / bapp':
+    case 'bakp/bapp':
+    case 'bastp':
       return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400';
+    case 'lkp':
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+    case 'ba joint inspection':
+      return 'bg-sky-100 text-sky-800 dark:bg-sky-900/20 dark:text-sky-400';
+    case 'ba commissioning':
+      return 'bg-teal-100 text-teal-800 dark:bg-teal-900/20 dark:text-teal-400';
+    case 'ba penerimaan material':
+      return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/20 dark:text-cyan-400';
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
   }

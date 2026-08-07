@@ -11,6 +11,7 @@ interface NewBasicInfoFormProps {
     judul_kontrak: string;
     no_dokumen_kontrak?: string;
     no_po_pr?: string;
+    no_irkap?: string;
     tipe_kontrak: string;
     status_kontrak: string;
     nilai_awal: string;
@@ -143,6 +144,16 @@ export const NewBasicInfoForm = ({ formData, setFormData }: NewBasicInfoFormProp
             value={formData.no_po_pr || ''}
             onChange={(e) => updateField('no_po_pr', e.target.value)}
             placeholder="Nomor PO/PR"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="no_irkap_new">No. iRKAP</Label>
+          <Input
+            id="no_irkap_new"
+            value={formData.no_irkap || ''}
+            onChange={(e) => updateField('no_irkap', e.target.value)}
+            placeholder="Nomor iRKAP"
           />
         </div>
 

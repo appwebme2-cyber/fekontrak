@@ -155,13 +155,6 @@ const Auth = () => {
       <div className="w-full lg:w-[45%] h-full flex items-center justify-center bg-white dark:bg-gray-950 overflow-hidden px-6">
         <div className={`w-full max-w-[390px] transition-all duration-700 delay-200 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
 
-          {/* Logo compact — visible on mobile too */}
-          <div className="flex justify-center mb-5">
-            <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl px-4 py-2.5">
-              <img src="/logo.png" alt="Pertamina Patra Niaga" className="h-10 w-auto object-contain" />
-            </div>
-          </div>
-
           {/* Heading */}
           <div className="text-center mb-5">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Selamat Datang</h2>

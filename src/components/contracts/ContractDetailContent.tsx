@@ -42,7 +42,24 @@ export const ContractDetailContent = ({
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       if (!res.ok) return [];
-      return await res.json() || [];
+      const data = await res.json();
+      return (data || []).map((t: any) => ({
+        id_tagihan: t.idTagihan,
+        id_kontrak: t.idKontrak,
+        nomor_tagihan: t.nomorTagihan,
+        tanggal_tagihan: t.tanggalTagihan,
+        tipe_kontrak: t.tipeKontrak,
+        termin: t.termin,
+        nilai_tagihan: t.nilaiTagihan,
+        status_tagihan: t.statusTagihan,
+        memo_required: t.memoRequired,
+        tanggal_pengiriman_memo: t.tanggalPengirimanMemo,
+        dokumen_tagihan: t.dokumenTagihan,
+        dokumen_memo: t.dokumenMemo,
+        catatan: t.catatan,
+        created_at: t.createdAt,
+        updated_at: t.updatedAt,
+      }));
     },
   });
 

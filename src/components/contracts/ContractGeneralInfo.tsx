@@ -42,6 +42,13 @@ export const ContractGeneralInfo = ({ contract, fieldText }: ContractGeneralInfo
         </div>
         <div className="bg-white rounded-lg p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105">
           <h4 className="text-blue-600 font-semibold mb-2 flex items-center gap-2">
+            <FileText className="h-4 w-4 text-blue-500" />
+            No. iRKAP
+          </h4>
+          <p className="text-gray-800">{fieldText(contract.no_irkap)}</p>
+        </div>
+        <div className="bg-white rounded-lg p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105">
+          <h4 className="text-blue-600 font-semibold mb-2 flex items-center gap-2">
             <Calendar className="h-4 w-4 text-green-500" />
             Tanggal Aktual KOM
           </h4>

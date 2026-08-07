@@ -4,6 +4,7 @@ export interface ContractFormData {
   judul_kontrak: string;
   no_dokumen_kontrak?: string;
   no_po_pr?: string;
+  no_irkap?: string;
   tipe_kontrak: string;
   status_kontrak: string;
   nilai_awal: string;
@@ -49,6 +50,7 @@ export const initialFormData: ContractFormData = {
   judul_kontrak: '',
   no_dokumen_kontrak: '',
   no_po_pr: '',
+  no_irkap: '',
   tipe_kontrak: '',
   status_kontrak: 'Pre-KOM',
   nilai_awal: '',
@@ -106,6 +108,7 @@ export const createFormDataFromContract = (contract: Kontrak): ContractFormData 
     judul_kontrak: contract.judul_kontrak || '',
     no_dokumen_kontrak: contract.no_dokumen_kontrak || '',
     no_po_pr: contract.no_po_pr || '',
+    no_irkap: contract.no_irkap || '',
     tipe_kontrak: normalizedTipeKontrak,
     status_kontrak: contract.status_kontrak || 'Pre-KOM',
     nilai_awal: contract.nilai_awal?.toString() || '',
@@ -155,6 +158,7 @@ export const createContractFromFormData = (formData: ContractFormData) => {
     judul_kontrak: formData.judul_kontrak,
     no_dokumen_kontrak: formData.no_dokumen_kontrak || null,
     no_po_pr: formData.no_po_pr || null,
+    no_irkap: formData.no_irkap || null,
     tipe_kontrak: tipeKontrak,
     status_kontrak: formData.status_kontrak,
     nilai_awal: formData.nilai_awal ? parseFloat(formData.nilai_awal) : 0,

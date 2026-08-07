@@ -11,7 +11,8 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Plus, Trash2, Save, TrendingUp, BarChart2, Settings, AlertCircle, History, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Save, TrendingUp, BarChart2, Settings, AlertCircle, History, Sparkles, Download, Upload } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer, ReferenceLine
@@ -246,6 +247,68 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
   const handleSave = () => {
     saveSCurve.mutate({ activities, periods });
     setIsEditing(false);
+  };
+
+  const handleDownloadTemplate = () => {
+    const ws = XLSX.utils.aoa_to_sheet([
+      ['Nama Aktivitas', 'Bobot (%)'],
+      ['Mobilisasi', 10],
+      ['Pekerjaan Sipil', 30],
+      ['Instalasi', 40],
+      ['Commissioning', 20],
+    ]);
+    ws['!cols'] = [{ wch: 40 }, { wch: 15 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Aktivitas');
+    XLSX.writeFile(wb, 'template_aktivitas_scurve.xlsx');
+  };
+
+  const handleUploadExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = new Uint8Array(ev.target?.result as ArrayBuffer);
+        const wb = XLSX.read(data, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+        const imported: SCurveActivity[] = [];
+        const startUrutan = activities.length > 0
+          ? Math.max(...activities.map(a => a.urutan ?? 0)) + 1
+          : 1;
+
+        rows.slice(1).forEach((row, i) => {
+          const nama = String(row[0] ?? '').trim();
+          const bobot = parseFloat(String(row[1] ?? ''));
+          if (!nama || isNaN(bobot)) return;
+          imported.push({
+            id: `import-${Date.now()}-${i}`,
+            nama,
+            bobot,
+            urutan: startUrutan + i,
+          });
+        });
+
+        if (imported.length === 0) return;
+
+        setActivities(prev => [...prev, ...imported]);
+        setPeriods(prev => prev.map(p => ({
+          ...p,
+          activities: [
+            ...p.activities,
+            ...imported.map(a => ({ activityId: a.id, plan: 0, actual: null })),
+          ],
+        })));
+        setIsEditing(true);
+      } catch {
+        // silently ignore parse errors
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = '';
   };
 
   if (isLoading) {
@@ -531,11 +594,22 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
         <TabsContent value="activities">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <CardTitle className="text-base">Daftar Aktivitas & Bobot</CardTitle>
-               <Badge variant={Math.abs(totalBobot - 100) <= 0.01 ? "default" : "destructive"}>
-              Total: {totalBobot}% {Math.abs(totalBobot - 100) <= 0.01 ? '✓' : '(harus 100%)'}
-            </Badge>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Button variant="outline" size="sm" className="gap-1" onClick={handleDownloadTemplate}>
+                    <Download className="h-4 w-4" /> Download Template
+                  </Button>
+                  <label className="cursor-pointer">
+                    <input type="file" accept=".xlsx,.xls" className="hidden" onChange={handleUploadExcel} />
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer">
+                      <Upload className="h-4 w-4" /> Upload Excel
+                    </span>
+                  </label>
+                  <Badge variant={Math.abs(totalBobot - 100) <= 0.01 ? "default" : "destructive"}>
+                    Total: {totalBobot}% {Math.abs(totalBobot - 100) <= 0.01 ? '✓' : '(harus 100%)'}
+                  </Badge>
+                </div>
               </div>
             </CardHeader>
 <CardContent className="space-y-4">

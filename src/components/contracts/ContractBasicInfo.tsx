@@ -6,6 +6,7 @@ interface ContractBasicInfoProps {
     judul_kontrak: string;
     no_dokumen_kontrak?: string;
     no_po_pr?: string;
+    no_irkap?: string;
     tipe_kontrak: string;
     status_kontrak: string;
     nilai_awal: string;

@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckCircle, Circle } from 'lucide-react';
+import { CheckCircle, Circle, RefreshCw } from 'lucide-react';
 import { statusOptions } from './constants/statusOptions';
 
 interface InvoiceFormHorizontalTimelineProps {
@@ -64,26 +64,24 @@ export const InvoiceFormHorizontalTimeline = ({
           ></div>
           
           {/* Timeline Items */}
-          <div className="grid grid-cols-3 lg:grid-cols-9 gap-2">
-            {statusOptions.map((status, index) => {
-              const IconComponent = status.icon;
+          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-2">
+            {statusOptions.map((status) => {
               const isSelected = formData.status_tagihan === status.value;
               const isCompleted = progressData.currentStep > 0 && status.step <= progressData.currentStep;
               const isDisabled = statusLoading;
-              
+              const isRepeatable = (status as any).repeatable === true;
+
               return (
                 <div key={status.value} className="flex flex-col items-center">
                   {/* Timeline Node */}
-                  <div 
+                  <div
                     className={`relative flex items-center justify-center w-12 h-12 rounded-full border-2 cursor-pointer transition-all duration-300 ${
-                      isDisabled 
-                        ? 'cursor-not-allowed opacity-60' 
-                        : 'hover:scale-110'
+                      isDisabled ? 'cursor-not-allowed opacity-60' : 'hover:scale-110'
                     } ${
-                      isSelected 
-                        ? 'bg-blue-500 border-blue-500 shadow-lg ring-4 ring-blue-200' 
-                        : isCompleted 
-                          ? 'bg-green-500 border-green-500 shadow-md' 
+                      isSelected
+                        ? 'bg-blue-500 border-blue-500 shadow-lg ring-4 ring-blue-200'
+                        : isCompleted
+                          ? 'bg-green-500 border-green-500 shadow-md'
                           : 'bg-white border-gray-300 hover:border-gray-400'
                     }`}
                     onClick={() => !isDisabled && handleStatusChange(formData.status_tagihan, status.value, updateFormData)}
@@ -94,7 +92,14 @@ export const InvoiceFormHorizontalTimeline = ({
                     }`}>
                       {status.step}
                     </span>
-                    
+
+                    {/* Repeatable indicator */}
+                    {isRepeatable && (
+                      <span className="absolute -top-2 -left-2 w-4 h-4 rounded-full bg-sky-400 flex items-center justify-center" title="Bisa beberapa kali">
+                        <RefreshCw className="w-2.5 h-2.5 text-white" />
+                      </span>
+                    )}
+
                     {/* Icon or Checkbox */}
                     {isCompleted ? (
                       <CheckCircle className="w-6 h-6 text-white" />
@@ -108,18 +113,24 @@ export const InvoiceFormHorizontalTimeline = ({
                       <Circle className="w-6 h-6 text-gray-400" />
                     )}
                   </div>
-                  
+
                   {/* Status Label */}
                   <div className="mt-2 text-center">
-                    <Badge 
-                      className={`${status.color} text-xs px-2 py-1 mb-1 ${
+                    <Badge
+                      className={`${status.color} text-xs px-1.5 py-0.5 mb-1 leading-tight text-center whitespace-normal ${
                         isSelected ? 'ring-2 ring-blue-300' : ''
                       }`}
                     >
                       {status.label}
                     </Badge>
-                    
-                    {/* Status Indicators */}
+
+                    {isRepeatable && (
+                      <div className="flex items-center justify-center gap-0.5 mt-0.5">
+                        <RefreshCw className="w-2.5 h-2.5 text-sky-500" />
+                        <span className="text-[10px] text-sky-600">multi</span>
+                      </div>
+                    )}
+
                     {isSelected && (
                       <div className="flex items-center justify-center space-x-1 mt-1">
                         <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></div>
