@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { Mail, Lock, Eye, EyeOff, User, CheckCircle, Check, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { isVendorRole } from '@/hooks/useRolePermissionsConfig';
@@ -26,6 +26,11 @@ const pwStrength = [
 const getRedirectPath = (role?: string) =>
   isVendorRole(role) ? '/kontrak-lumpsum' : '/dashboard';
 
+const MAX_ATTEMPTS   = 5;
+const LOCKOUT_SECS   = 60;
+const LS_ATTEMPTS    = 'login_attempts';
+const LS_LOCKOUT_TS  = 'login_lockout_until';
+
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +43,9 @@ const Auth = () => {
   const [pwTouched, setPwTouched] = useState(false);
   const [signupPassword, setSignupPassword] = useState('');
   const [pwFocused, setPwFocused] = useState(false);
+  const [lockoutCountdown, setLockoutCountdown] = useState(0);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const countdownRef = useRef<ReturnType<typeof setInterval>>();
 
   const pwPassed = useMemo(() => pwRules.map(r => r.test(signupPassword)), [signupPassword]);
   const pwScore = pwPassed.filter(Boolean).length;
@@ -53,6 +61,29 @@ const Auth = () => {
   }, []);
 
   useEffect(() => {
+    const lockoutUntil = parseInt(localStorage.getItem(LS_LOCKOUT_TS) || '0');
+    const remaining = Math.ceil((lockoutUntil - Date.now()) / 1000);
+    if (remaining > 0) startCountdown(remaining);
+    setLoginAttempts(parseInt(localStorage.getItem(LS_ATTEMPTS) || '0'));
+    return () => clearInterval(countdownRef.current);
+  }, []);
+
+  const startCountdown = (seconds: number) => {
+    setLockoutCountdown(seconds);
+    clearInterval(countdownRef.current);
+    countdownRef.current = setInterval(() => {
+      setLockoutCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current);
+          localStorage.removeItem(LS_LOCKOUT_TS);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  useEffect(() => {
     if (!authLoading && user) {
       navigate(getRedirectPath((user as any)?.role));
     }
@@ -60,12 +91,30 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (lockoutCountdown > 0) return;
+
     setLoading(true);
     const { error } = await signIn(email, password);
+
     if (!error) {
+      localStorage.removeItem(LS_ATTEMPTS);
+      localStorage.removeItem(LS_LOCKOUT_TS);
+      setLoginAttempts(0);
       const token = localStorage.getItem('token');
       const payload = token ? JSON.parse(atob(token.split('.')[1])) : {};
       navigate(getRedirectPath(payload?.role));
+    } else {
+      const nextAttempts = (parseInt(localStorage.getItem(LS_ATTEMPTS) || '0')) + 1;
+      if (nextAttempts >= MAX_ATTEMPTS) {
+        const lockoutUntil = Date.now() + LOCKOUT_SECS * 1000;
+        localStorage.setItem(LS_LOCKOUT_TS, String(lockoutUntil));
+        localStorage.setItem(LS_ATTEMPTS, '0');
+        setLoginAttempts(0);
+        startCountdown(LOCKOUT_SECS);
+      } else {
+        localStorage.setItem(LS_ATTEMPTS, String(nextAttempts));
+        setLoginAttempts(nextAttempts);
+      }
     }
     setLoading(false);
   };
@@ -260,25 +309,7 @@ const Auth = () => {
             </div>
           ) : (
             <>
-              <Tabs defaultValue="signin" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl h-auto">
-                  <TabsTrigger
-                    value="signin"
-                    className="rounded-lg py-1.5 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-red-600 dark:data-[state=active]:text-red-400 transition-all"
-                  >
-                    Masuk
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="signup"
-                    className="rounded-lg py-1.5 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm data-[state=active]:text-red-600 dark:data-[state=active]:text-red-400 transition-all"
-                  >
-                    Daftar
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* ── Masuk ── */}
-                <TabsContent value="signin" className="mt-0">
-                  <form onSubmit={handleSignIn} className="space-y-3.5">
+              <form onSubmit={handleSignIn} className="space-y-3.5">
                     <div className="space-y-1">
                       <Label htmlFor="s-email" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                         <Mail className="h-3.5 w-3.5 text-gray-400" /> Email
@@ -312,26 +343,60 @@ const Auth = () => {
                         />
                         <button type="button" tabIndex={-1} onClick={() => setShowPassword(p => !p)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                          {showPassword ? <Eye className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                       </div>
                     </div>
 
-                    <Button type="submit" disabled={loading} className="w-full h-10 rounded-xl font-semibold text-sm text-white border-0 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98]"
-                      style={{ background: loading ? '#9ca3af' : '#E31E24' }}>
+                    {/* Attempt warning */}
+                    {loginAttempts > 0 && lockoutCountdown === 0 && (
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
+                        style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                        <span className="text-amber-500">⚠</span>
+                        <span className="text-amber-600 dark:text-amber-400">
+                          {loginAttempts}/{MAX_ATTEMPTS} percobaan gagal.{' '}
+                          {MAX_ATTEMPTS - loginAttempts === 1
+                            ? 'Akun akan dikunci pada percobaan berikutnya.'
+                            : `Sisa ${MAX_ATTEMPTS - loginAttempts} percobaan.`}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Lockout banner */}
+                    {lockoutCountdown > 0 && (
+                      <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs"
+                        style={{ background: 'rgba(227,30,36,0.08)', border: '1px solid rgba(227,30,36,0.25)' }}>
+                        <div className="relative flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                          <svg className="absolute inset-0 -rotate-90" viewBox="0 0 32 32">
+                            <circle cx="16" cy="16" r="13" fill="none" stroke="rgba(227,30,36,0.2)" strokeWidth="3"/>
+                            <circle cx="16" cy="16" r="13" fill="none" stroke="#E31E24" strokeWidth="3"
+                              strokeDasharray={`${2 * Math.PI * 13}`}
+                              strokeDashoffset={`${2 * Math.PI * 13 * (1 - lockoutCountdown / LOCKOUT_SECS)}`}
+                              strokeLinecap="round"
+                              style={{ transition: 'stroke-dashoffset 0.9s linear' }}/>
+                          </svg>
+                          <span className="text-[10px] font-bold text-red-500">{lockoutCountdown}</span>
+                        </div>
+                        <span className="text-red-600 dark:text-red-400 leading-snug">
+                          Terlalu banyak percobaan. Login diblokir sementara. Coba lagi dalam <strong>{lockoutCountdown}</strong> detik.
+                        </span>
+                      </div>
+                    )}
+
+                    <Button type="submit" disabled={loading || lockoutCountdown > 0}
+                      className="w-full h-10 rounded-xl font-semibold text-sm text-white border-0 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98]"
+                      style={{ background: loading || lockoutCountdown > 0 ? '#9ca3af' : '#E31E24' }}>
                       {loading ? (
                         <span className="flex items-center gap-2">
                           <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                           Memproses...
                         </span>
-                      ) : 'Masuk'}
+                      ) : lockoutCountdown > 0 ? `Tunggu ${lockoutCountdown}s` : 'Masuk'}
                     </Button>
                   </form>
-                </TabsContent>
 
-                {/* ── Daftar ── */}
-                <TabsContent value="signup" className="mt-0">
-                  <form onSubmit={handleSignUp} className="space-y-3.5">
+              {/* hidden signup form - kept for future use */}
+              {false && <form onSubmit={handleSignUp} className="space-y-3.5">
                     <div className="space-y-1">
                       <Label htmlFor="r-name" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                         <User className="h-3.5 w-3.5 text-gray-400" /> Nama Lengkap
@@ -421,8 +486,7 @@ const Auth = () => {
                       ) : 'Daftar'}
                     </Button>
                   </form>
-                </TabsContent>
-              </Tabs>
+              }
 
               {/* Info box */}
               <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-100 dark:border-blue-900/50">

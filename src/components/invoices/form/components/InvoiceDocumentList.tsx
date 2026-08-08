@@ -4,6 +4,7 @@ import { FilePreviewModal } from '@/components/ui/file-preview-modal';
 import { TagihanDocument } from '@/lib/utils/typeUtils';
 import { formatFileSize, getFileIcon } from '@/components/contracts/forms/utils/documentUtils';
 import { Eye, Trash2, Download, ExternalLink } from 'lucide-react';
+import { openFileInTab, downloadFile as downloadFileSecure } from '@/lib/utils/fileTokenUtils';
 
 interface InvoiceDocumentListProps {
   documents: TagihanDocument[];
@@ -22,19 +23,9 @@ export const InvoiceDocumentList = ({ documents, onRemove, title }: InvoiceDocum
     setPreviewDocument(document);
   };
 
-  const handleDownload = (doc: TagihanDocument) => {
-    const link = window.document.createElement('a');
-    link.href = doc.url;
-    link.download = doc.name;
-    link.target = '_blank';
-    window.document.body.appendChild(link);
-    link.click();
-    window.document.body.removeChild(link);
-  };
+  const handleDownload = (doc: TagihanDocument) => downloadFileSecure(doc.url, doc.name);
 
-  const handleOpenInNewTab = (doc: TagihanDocument) => {
-    window.open(doc.url, '_blank');
-  };
+  const handleOpenInNewTab = (doc: TagihanDocument) => openFileInTab(doc.url);
 
   return (
     <>

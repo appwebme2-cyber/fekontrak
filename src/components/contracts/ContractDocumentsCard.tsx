@@ -2,6 +2,7 @@
 import { CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, ExternalLink, File, FolderOpen } from "lucide-react";
+import { openFileInTab, downloadFile as downloadFileSecure } from "@/lib/utils/fileTokenUtils";
 
 interface ContractDocumentsCardProps {
   contractDocuments: any[];
@@ -31,15 +32,7 @@ const ContractDocumentsCard = ({ contractDocuments = [], amendmentDocuments = []
     return `${(size / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  const downloadFile = (url: string, filename: string) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  const downloadFile = (url: string, filename: string) => downloadFileSecure(url, filename);
 
   const renderDocumentSection = (documents: any[], title: string, emptyMessage: string) => {
     return (
@@ -88,7 +81,7 @@ const ContractDocumentsCard = ({ contractDocuments = [], amendmentDocuments = []
                             variant="outline"
                             size="sm"
                             className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200 flex items-center gap-1.5"
-                            onClick={() => window.open(doc.url, '_blank')}
+                            onClick={() => openFileInTab(doc.url)}
                             title="Lihat"
                           >
                             <ExternalLink className="h-4 w-4 flex-shrink-0" />

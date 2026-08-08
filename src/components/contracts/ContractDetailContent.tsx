@@ -14,6 +14,7 @@ import { DokumenUploadForm } from "./DokumenUploadForm";
 import { usePermissions } from '@/hooks/usePermissions';
 import { jsonToTagihanDocuments } from '@/lib/utils/databaseTypes';
 import { formatFileSize } from '@/lib/utils/formatters';
+import { openFileInTab, downloadFile as downloadFileSecure } from '@/lib/utils/fileTokenUtils';
 
 interface ContractDetailContentProps {
   contract: Kontrak;
@@ -272,10 +273,10 @@ export const ContractDetailContent = ({
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => window.open(doc.url, '_blank')}>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openFileInTab(doc.url)}>
                                     <ExternalLink className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { const a = document.createElement('a'); a.href = doc.url; a.download = doc.name; a.target = '_blank'; a.click(); }}>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => downloadFileSecure(doc.url, doc.name)}>
                                     <Download className="h-4 w-4" />
                                   </Button>
                                 </div>
@@ -288,10 +289,10 @@ export const ContractDetailContent = ({
                                   <p className="text-sm font-medium text-gray-800">Dokumen Memo</p>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => window.open(memoUrl, '_blank')}>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => openFileInTab(memoUrl)}>
                                     <ExternalLink className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { const a = document.createElement('a'); a.href = memoUrl; a.download = 'memo'; a.target = '_blank'; a.click(); }}>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => downloadFileSecure(memoUrl, 'memo')}>
                                     <Download className="h-4 w-4" />
                                   </Button>
                                 </div>

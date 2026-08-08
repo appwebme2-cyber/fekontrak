@@ -14,6 +14,7 @@ import { id as localeId } from "date-fns/locale";
 import { useState } from "react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { formatCurrency } from "@/lib/utils/formatters";
+import { openFileInTab } from "@/lib/utils/fileTokenUtils";
 
 const UserPurchaseDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -41,7 +42,7 @@ const UserPurchaseDetail = () => {
   };
 
   const handleDownload = (document: any) => {
-    if (document.url) window.open(document.url, '_blank');
+    if (document.url) openFileInTab(document.url);
   };
 
   const handleUpdatePadi = async (formData: PadiFormData) => {

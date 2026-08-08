@@ -38,8 +38,7 @@ export const useAuthActions = (setUser: any, setSession: any, setUserProfile: an
       return { data: { user: userData }, error: null };
 
     } catch (error: any) {
-      console.error('[DEBUG] Login error:', error);
-      return { error: error.message };
+      return { error: (error as Error).message };
     }
   };
 
@@ -88,13 +87,23 @@ export const useAuthActions = (setUser: any, setSession: any, setUserProfile: an
   // ==================== SIGN OUT ====================
   const signOut = async () => {
     try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        fetch(`${API_URL}/auth/logout`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        }).catch(() => {});
+      }
       localStorage.removeItem("token");
       setUser(null);
       setSession(null);
       setUserProfile(null);
       toast({ title: "Berhasil", description: "Logout berhasil!" });
     } catch (error) {
-      console.error('Sign out error:', error);
+      localStorage.removeItem("token");
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
     }
   };
 

@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Eye, Upload, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { openFileInTab } from '@/lib/utils/fileTokenUtils';
 
 const API_URL = "https://bekontrak-production.up.railway.app/api";
 const FILE_BASE = "https://bekontrak-production.up.railway.app";
@@ -211,15 +212,14 @@ export const GuidedDocumentSection = ({
                     <td className="p-3 text-center">
                       {doc.url ? (
                         <div className="flex items-center justify-center gap-1">
-                          <a
-                            href={doc.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            type="button"
+                            onClick={() => openFileInTab(doc.url)}
                             className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-xs underline"
                           >
                             <FileText className="h-3 w-3" />
                             Buka
-                          </a>
+                          </button>
                           {onPreview && (
                             <Button
                               type="button"

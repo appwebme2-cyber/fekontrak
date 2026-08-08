@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Download, Eye, X, Image as ImageIcon } from 'lucide-react';
 import { formatFileSize } from '@/lib/utils/formatters';
+import { getTokenizedUrl, openFileInTab, downloadFile } from '@/lib/utils/fileTokenUtils';
 
 interface FilePreviewModalProps {
   open: boolean;
@@ -20,6 +21,17 @@ interface FilePreviewModalProps {
 
 export const FilePreviewModal = ({ open, onOpenChange, file }: FilePreviewModalProps) => {
   const [imageError, setImageError] = useState(false);
+  const [resolvedUrl, setResolvedUrl] = useState('');
+
+  useEffect(() => {
+    if (!open || !file) {
+      setResolvedUrl('');
+      setImageError(false);
+      return;
+    }
+    setImageError(false);
+    getTokenizedUrl(file.url).then(setResolvedUrl);
+  }, [open, file]);
 
   if (!file) return null;
 
@@ -27,22 +39,22 @@ export const FilePreviewModal = ({ open, onOpenChange, file }: FilePreviewModalP
   const isPDF = file.type === 'application/pdf';
   const isDocument = file.type.includes('word') || file.type.includes('document');
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = file.url;
-    link.download = file.name;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  const handleDownload = () => downloadFile(file.url, file.name);
 
   const renderPreview = () => {
+    if (!resolvedUrl) {
+      return (
+        <div className="flex justify-center items-center bg-muted/10 rounded-lg p-4 h-48">
+          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+        </div>
+      );
+    }
+
     if (isImage && !imageError) {
       return (
         <div className="flex justify-center items-center bg-muted/10 rounded-lg p-4">
           <img
-            src={file.url}
+            src={resolvedUrl}
             alt={file.name}
             className="max-w-full max-h-96 object-contain rounded-lg shadow-sm"
             onError={() => setImageError(true)}
@@ -57,9 +69,9 @@ export const FilePreviewModal = ({ open, onOpenChange, file }: FilePreviewModalP
           <FileText className="h-16 w-16 text-muted-foreground mx-auto" />
           <div>
             <p className="text-sm text-muted-foreground mb-2">PDF Document</p>
-            <Button 
-              variant="outline" 
-              onClick={() => window.open(file.url, '_blank')}
+            <Button
+              variant="outline"
+              onClick={() => openFileInTab(file.url)}
               className="gap-2"
             >
               <Eye className="h-4 w-4" />
@@ -125,7 +137,7 @@ export const FilePreviewModal = ({ open, onOpenChange, file }: FilePreviewModalP
             </div>
           </div>
         </DialogHeader>
-        
+
         <div className="flex-1 overflow-auto">
           {renderPreview()}
         </div>
