@@ -36,6 +36,7 @@ const NewContracts = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterDireksi, setFilterDireksi] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedKontrak, setSelectedKontrak] = useState<Kontrak | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -43,6 +44,8 @@ const NewContracts = () => {
   useEffect(() => {
     const status = searchParams.get('status');
     if (status) setFilterStatus(status);
+    const direksi = searchParams.get('direksi');
+    if (direksi) setFilterDireksi(direksi);
   }, [searchParams]);
 
   const { contracts: kontraks = [], isLoading } = useContracts();
@@ -60,8 +63,9 @@ const NewContracts = () => {
       (kontrak.vendor?.nama_vendor || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || kontrak.tipe_kontrak === filterType;
     const matchesStatus = filterStatus === 'all' || kontrak.status_kontrak === filterStatus;
+    const matchesDireksi = filterDireksi === 'all' || kontrak.direksi_pekerjaan === filterDireksi;
 
-    return matchesSearch && matchesType && matchesStatus;
+    return matchesSearch && matchesType && matchesStatus && matchesDireksi;
   });
 
   const getStatusColor = (status: string) => {

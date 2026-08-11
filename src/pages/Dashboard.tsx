@@ -102,9 +102,10 @@ const Dashboard = () => {
       </div>
 
       {/* Interactive Dashboard with filtered data */}
-      <OptimizedInteractiveDashboard 
+      <OptimizedInteractiveDashboard
         onContractClick={handleCardClick}
         filteredContracts={filteredContracts}
+        direksiFilter={direksiFilter}
       />
     </div>
   );

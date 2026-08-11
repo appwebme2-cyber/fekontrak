@@ -14,7 +14,7 @@ interface SecurityConfig {
 }
 
 const DEFAULT_SECURITY_CONFIG: SecurityConfig = {
-  maxFileSize: 10 * 1024 * 1024, // 10MB
+  maxFileSize: 50 * 1024 * 1024, // 50MB
   allowedFileTypes: [
     'application/pdf',
     'application/msword',

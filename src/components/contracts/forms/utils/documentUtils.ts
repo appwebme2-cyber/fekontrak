@@ -16,8 +16,8 @@ export const getFileIcon = (type: string | undefined | null): string => {
 };
 
 export const validateFile = (file: File): { isValid: boolean; error?: string } => {
-  // Validate file size (10MB limit)
-  if (file.size > 10 * 1024 * 1024) {
+  // Validate file size (50MB limit)
+  if (file.size > 50 * 1024 * 1024) {
     return {
       isValid: false,
       error: `${file.name} melebihi batas 10MB`

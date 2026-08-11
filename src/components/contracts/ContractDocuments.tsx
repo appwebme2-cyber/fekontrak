@@ -32,8 +32,8 @@ export const ContractDocuments = ({ formData, setFormData }: ContractDocumentsPr
         
         console.log('📤 Processing file:', file.name, 'size:', file.size);
         
-        // Validate file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
+        // Validate file size (max 50MB)
+        if (file.size > 50 * 1024 * 1024) {
           console.warn('❌ File too large:', file.name);
           toast({
             title: "File terlalu besar",
@@ -80,7 +80,7 @@ export const ContractDocuments = ({ formData, setFormData }: ContractDocumentsPr
             const { error: createError } = await supabase.storage.createBucket('contract-documents', {
               public: true,
               allowedMimeTypes: allowedTypes,
-              fileSizeLimit: 10485760 // 10MB
+              fileSizeLimit: 52428800 // 50MB
             });
             
             if (createError) {

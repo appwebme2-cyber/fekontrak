@@ -18,11 +18,13 @@ const Top5Chart = lazy(() => import('./Top5Chart').then(m => ({ default: m.Top5C
 interface OptimizedInteractiveDashboardProps {
   onContractClick?: (contractId: string) => void;
   filteredContracts?: SuperOptimizedContract[];
+  direksiFilter?: string;
 }
 
 export const OptimizedInteractiveDashboard = ({
   onContractClick,
   filteredContracts: externalContracts,
+  direksiFilter,
 }: OptimizedInteractiveDashboardProps) => {
   const [activeTab, setActiveTab] = useState('ringkasan');
   const navigate = useNavigate();
@@ -84,21 +86,24 @@ export const OptimizedInteractiveDashboard = ({
   };
 
   const handleCardClick = (type: string) => {
+    const direksiParam = direksiFilter && direksiFilter !== 'all'
+      ? `&direksi=${encodeURIComponent(direksiFilter)}`
+      : '';
     switch (type) {
       case 'total':
-        navigate('/contracts');
+        navigate(direksiParam ? `/contracts?${direksiParam.slice(1)}` : '/contracts');
         break;
       case 'pre-kom':
-        navigate('/contracts?status=Pre-KOM');
+        navigate(`/contracts?status=Pre-KOM${direksiParam}`);
         break;
       case 'active':
-        navigate('/contracts?status=Aktif');
+        navigate(`/contracts?status=Aktif${direksiParam}`);
         break;
       case 'completed':
-        navigate('/contracts?status=Selesai');
+        navigate(`/contracts?status=Selesai${direksiParam}`);
         break;
       case 'nearing-end':
-        navigate('/contracts?status=Aktif');
+        navigate(`/contracts?status=Aktif${direksiParam}`);
         break;
       default:
         break;
