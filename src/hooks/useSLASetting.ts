@@ -5,15 +5,17 @@ const API_URL = "https://bekontrak-production.up.railway.app/api";
 
 // urutan flow statis
 const urutanTahap: any = {
-  LKP: 1,
-  PUNCHLIST: 2,
-  BAST: 3,
-  BAKP: 4,
-  IVENDOR: 5,
-  SA: 6,
-  PA: 7,
-  VERIFIKASI: 8,
-  PAYMENT: 9
+  BA_JOINT_INSPECTION:    1,
+  BA_COMMISSIONING:       2,
+  BA_PENERIMAAN_MATERIAL: 3,
+  LKP:                    4,
+  BASTP:                  5,
+  BAKP:                   6,
+  IVENDOR:                7,
+  SA:                     8,
+  PA:                     9,
+  VERIFIKASI:             10,
+  PAYMENT:                11,
 };
 
 // ===================== GET =====================

@@ -37,7 +37,7 @@ export const ContractDocuments = ({ formData, setFormData }: ContractDocumentsPr
           console.warn('❌ File too large:', file.name);
           toast({
             title: "File terlalu besar",
-            description: `File ${file.name} melebihi batas 10MB`,
+            description: `File ${file.name} melebihi batas 50MB`,
             variant: "destructive",
           });
           continue;

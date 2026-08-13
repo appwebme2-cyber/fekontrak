@@ -6,10 +6,14 @@ export interface SlaTagihanData {
   id: number;
   idKontrak: string;
   idTagihan: string | null;
+  tglMasukBaJointInspection: string | null;
+  tglSelesaiBaJointInspection: string | null;
+  tglMasukBaCommissioning: string | null;
+  tglSelesaiBaCommissioning: string | null;
+  tglMasukBaPenerimaanMaterial: string | null;
+  tglSelesaiBaPenerimaanMaterial: string | null;
   tglMasukLkp: string | null;
   tglSelesaiLkp: string | null;
-  tglMasukPunchlist: string | null;
-  tglSelesaiPunchlist: string | null;
   tglMasukBast: string | null;
   tglSelesaiBast: string | null;
   tglMasukBakp: string | null;

@@ -1,16 +1,18 @@
 import { SlaTagihanData } from '@/hooks/useSlaTagihan';
 
-// Definisi 9 tahap: kode_tahap, label tampilan, dan nama field di SlaTagihanData
+// Definisi 11 tahap: kode_tahap, label tampilan, dan nama field di SlaTagihanData
 export const SLA_STAGES = [
-  { kode: 'LKP',        label: 'LKP',             masuk: 'tglMasukLkp',        selesai: 'tglSelesaiLkp' },
-  { kode: 'PUNCHLIST',  label: 'Punchlist',       masuk: 'tglMasukPunchlist',  selesai: 'tglSelesaiPunchlist' },
-  { kode: 'BAST',       label: 'BAST',            masuk: 'tglMasukBast',       selesai: 'tglSelesaiBast' },
-  { kode: 'BAKP',       label: 'BAKP/BAPP',       masuk: 'tglMasukBakp',       selesai: 'tglSelesaiBakp' },
-  { kode: 'IVENDOR',    label: 'Submit i-Vendor', masuk: 'tglMasukIvendor',    selesai: 'tglSelesaiIvendor' },
-  { kode: 'SA',         label: 'SA',              masuk: 'tglMasukSa',         selesai: 'tglSelesaiSa' },
-  { kode: 'PA',         label: 'PA',              masuk: 'tglMasukPa',         selesai: 'tglSelesaiPa' },
-  { kode: 'VERIFIKASI', label: 'Verification',    masuk: 'tglMasukVerifikasi', selesai: 'tglSelesaiVerifikasi' },
-  { kode: 'PAYMENT',    label: 'Payment/Selesai', masuk: 'tglMasukPayment',    selesai: 'tglSelesaiPayment' },
+  { kode: 'BA_JOINT_INSPECTION',    label: 'BA Joint Inspection',    masuk: 'tglMasukBaJointInspection',    selesai: 'tglSelesaiBaJointInspection' },
+  { kode: 'BA_COMMISSIONING',       label: 'BA Commissioning',       masuk: 'tglMasukBaCommissioning',       selesai: 'tglSelesaiBaCommissioning' },
+  { kode: 'BA_PENERIMAAN_MATERIAL', label: 'BA Penerimaan Material', masuk: 'tglMasukBaPenerimaanMaterial', selesai: 'tglSelesaiBaPenerimaanMaterial' },
+  { kode: 'LKP',                    label: 'LKP',                    masuk: 'tglMasukLkp',                  selesai: 'tglSelesaiLkp' },
+  { kode: 'BASTP',                  label: 'BASTP',                  masuk: 'tglMasukBast',                 selesai: 'tglSelesaiBast' },
+  { kode: 'BAKP',                   label: 'BAKP/BAPP',              masuk: 'tglMasukBakp',                 selesai: 'tglSelesaiBakp' },
+  { kode: 'IVENDOR',                label: 'Submit i-Vendor',        masuk: 'tglMasukIvendor',              selesai: 'tglSelesaiIvendor' },
+  { kode: 'SA',                     label: 'SA',                     masuk: 'tglMasukSa',                   selesai: 'tglSelesaiSa' },
+  { kode: 'PA',                     label: 'PA',                     masuk: 'tglMasukPa',                   selesai: 'tglSelesaiPa' },
+  { kode: 'VERIFIKASI',             label: 'Verification',           masuk: 'tglMasukVerifikasi',           selesai: 'tglSelesaiVerifikasi' },
+  { kode: 'PAYMENT',                label: 'Payment/Selesai',        masuk: 'tglMasukPayment',              selesai: 'tglSelesaiPayment' },
 ] as const;
 
 export type SlaLevel = 'belum' | 'aman' | 'warning' | 'lewat';

@@ -54,17 +54,17 @@ export const useInvoiceManagement = () => {
   });
 
   // ================= STATISTICS =================
-  const totalInvoices = (tagihans || []).length;
+  const totalInvoices = filteredTagihans.length;
 
-  const completedInvoices = (tagihans || []).filter(
+  const completedInvoices = filteredTagihans.filter(
     t => t?.status_tagihan === 'Payment/Selesai'
   ).length;
 
-  const pendingInvoices = (tagihans || []).filter(
+  const pendingInvoices = filteredTagihans.filter(
     t => !['Payment/Selesai', 'Verification'].includes(t?.status_tagihan)
   ).length;
 
-  const totalValue = (tagihans || []).reduce(
+  const totalValue = filteredTagihans.reduce(
     (sum, t) => sum + (t?.nilai_tagihan || 0),
     0
   );

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Eye, Upload, FileText } from 'lucide-react';
+import { Trash2, Eye, Upload, FileText, Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { openFileInTab } from '@/lib/utils/fileTokenUtils';
 
@@ -57,12 +57,24 @@ export const GuidedDocumentSection = ({
   const [docType, setDocType] = useState('');
   const [docLabel, setDocLabel] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [editingTypeId, setEditingTypeId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleInlineTypeChange = (docId: string, newType: string) => {
+    onDocumentsChange(documents.map(d => d.id === docId ? { ...d, doc_type: newType } : d));
+    setEditingTypeId(null);
+  };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !docType) return;
+
+    if (file.size > 100 * 1024 * 1024) {
+      toast({ title: 'Upload Gagal', description: 'Ukuran file maksimal 100MB', variant: 'destructive' });
+      if (fileRef.current) fileRef.current.value = '';
+      return;
+    }
 
     setUploading(true);
     const token = localStorage.getItem('token');
@@ -178,7 +190,7 @@ export const GuidedDocumentSection = ({
               )}
             </div>
           </div>
-          <p className="text-xs text-gray-400">Mendukung: PDF, DOC, DOCX, JPG, PNG (Max 10MB per file)</p>
+          <p className="text-xs text-gray-400">Mendukung: PDF, DOC, DOCX, JPG, PNG (Max 100MB per file)</p>
         </div>
 
         {/* Tabel dokumen */}
@@ -204,9 +216,42 @@ export const GuidedDocumentSection = ({
                   <tr key={doc.id} className="border-t hover:bg-gray-50">
                     <td className="p-3 text-center text-gray-500 text-xs font-bold">{idx + 1}</td>
                     <td className="p-3">
-                      <Badge variant="secondary" className="text-xs whitespace-normal text-left">
-                        {doc.doc_type || '-'}
-                      </Badge>
+                      {editingTypeId === doc.id ? (
+                        <Select
+                          value={doc.doc_type || ''}
+                          onValueChange={(v) => handleInlineTypeChange(doc.id, v)}
+                          onOpenChange={(open) => { if (!open) setEditingTypeId(null); }}
+                        >
+                          <SelectTrigger className="h-7 text-xs w-48">
+                            <SelectValue placeholder="Pilih type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {DOC_TYPES.map(t => (
+                              <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="flex items-center gap-1 group">
+                          {doc.doc_type ? (
+                            <Badge variant="secondary" className="text-xs whitespace-normal text-left">
+                              {doc.doc_type}
+                            </Badge>
+                          ) : (
+                            <span className="text-xs text-orange-500 italic">Belum dikategorikan</span>
+                          )}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingTypeId(doc.id)}
+                            className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600"
+                            title="Ubah type"
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
                     </td>
                     <td className="p-3 text-gray-700 text-sm">{doc.doc_label || doc.name}</td>
                     <td className="p-3 text-center">

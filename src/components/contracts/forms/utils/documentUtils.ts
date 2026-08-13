@@ -20,7 +20,7 @@ export const validateFile = (file: File): { isValid: boolean; error?: string } =
   if (file.size > 50 * 1024 * 1024) {
     return {
       isValid: false,
-      error: `${file.name} melebihi batas 10MB`
+      error: `${file.name} melebihi batas 50MB`
     };
   }
   
