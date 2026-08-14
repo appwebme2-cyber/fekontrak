@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useBlocker } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -146,11 +145,6 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isEditing]);
-
-  // Peringatan saat navigasi keluar dalam app dengan perubahan belum tersimpan
-  const blocker = useBlocker(({ currentLocation, nextLocation }) =>
-    isEditing && currentLocation.pathname !== nextLocation.pathname
-  );
 
   const totalBobot = parseFloat(activities.reduce((sum, a) => sum + (a.bobot || 0), 0).toFixed(2));
 
@@ -767,37 +761,6 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
           </TabsContent>
         )}
       </Tabs>
-
-      {/* Dialog peringatan perubahan belum tersimpan */}
-      <Dialog open={blocker.state === 'blocked'} onOpenChange={() => blocker.reset?.()}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Perubahan belum disimpan</DialogTitle>
-            <DialogDescription>
-              Ada perubahan yang belum disimpan. Simpan sekarang sebelum keluar?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex gap-2 sm:justify-end">
-            <Button
-              variant="outline"
-              onClick={() => blocker.proceed?.()}
-            >
-              Keluar tanpa simpan
-            </Button>
-            <Button
-              onClick={() => {
-                saveSCurve.mutate({ activities, periods });
-                setIsEditing(false);
-                blocker.proceed?.();
-              }}
-              disabled={saveSCurve.isPending}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {saveSCurve.isPending ? 'Menyimpan...' : 'Simpan & Keluar'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Modal S-Curve Recovery */}
       <Dialog open={showRecoveryModal} onOpenChange={setShowRecoveryModal}>

@@ -1,3 +1,4 @@
+import React from 'react';
 import { CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,30 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { jsonToTagihanDocuments } from '@/lib/utils/databaseTypes';
 import { formatFileSize } from '@/lib/utils/formatters';
 import { openFileInTab, downloadFile as downloadFileSecure } from '@/lib/utils/fileTokenUtils';
+
+class SCurveBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-12 text-center text-gray-400">
+          <p className="text-base">S-Curve tidak dapat dimuat.</p>
+          <p className="text-sm mt-1">Coba refresh halaman.</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 interface ContractDetailContentProps {
   contract: Kontrak;
@@ -149,11 +174,13 @@ export const ContractDetailContent = ({
         {!isVendor && (
           <TabsContent value="scurve">
             <div className="p-8">
-              <SCurveManager
-                idKontrak={(contract as any).idKontrak || contract.id_kontrak}
-                judulKontrak={(contract as any).judulKontrak || contract.judul_kontrak}
-                hasAmendment={!!contract.has_amendment}
-              />
+              <SCurveBoundary>
+                <SCurveManager
+                  idKontrak={(contract as any).idKontrak || contract.id_kontrak}
+                  judulKontrak={(contract as any).judulKontrak || contract.judul_kontrak}
+                  hasAmendment={!!contract.has_amendment}
+                />
+              </SCurveBoundary>
             </div>
           </TabsContent>
         )}
