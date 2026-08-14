@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Settings, 
@@ -18,23 +17,19 @@ import {
   Activity,
   Database,
   Shield,
-  Palette,
   FileEdit
 } from 'lucide-react';
 import { useKonfigurasiSistem, useUpdateKonfigurasi } from '@/hooks/useNewDatabase';
-import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-
 import SLASettings from '@/components/sla/SLASettings';
-
-// di dalam TabsContent
+import { useSLASetting } from '@/hooks/useSLASetting';
 
 
 const AdminSettings = () => {
   const { userProfile } = useAuth();
   const { konfigurasi = [], isLoading } = useKonfigurasiSistem();
   const updateKonfigurasi = useUpdateKonfigurasi();
-  const { toast } = useToast();
+  const { slaSetting = [] } = useSLASetting();
   const [editingValues, setEditingValues] = useState<Record<string, string>>({});
 
   // Only admin can access admin settings
@@ -68,7 +63,7 @@ const AdminSettings = () => {
     try {
       await updateKonfigurasi.mutateAsync({
         id: config.id_setting,
-        updates: { nilai_setting: newValue }
+        nilai_setting: newValue
       });
       
       setEditingValues(prev => {
@@ -261,7 +256,7 @@ const AdminSettings = () => {
 
       {/* Tabbed Interface */}
       <Tabs defaultValue="sla" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="sla" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             SLA Settings
@@ -278,8 +273,10 @@ const AdminSettings = () => {
             <Settings className="h-4 w-4" />
             System
           </TabsTrigger>
-
-          
+          <TabsTrigger value="sla-tagihan" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            SLA Tagihan
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="sla" className="space-y-4">
@@ -374,9 +371,9 @@ const AdminSettings = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="sla">
-  <SLASettings />
-</TabsContent>
+        <TabsContent value="sla-tagihan" className="space-y-4">
+          <SLASettings />
+        </TabsContent>
 
       </Tabs>
 
@@ -389,7 +386,7 @@ const AdminSettings = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <Clock className="h-8 w-8 text-blue-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-blue-600">{categories.sla.length}</div>
@@ -412,6 +409,12 @@ const AdminSettings = () => {
               <Settings className="h-8 w-8 text-gray-600 mx-auto mb-2" />
               <div className="text-2xl font-bold text-gray-600">{categories.system.length}</div>
               <div className="text-sm text-gray-600">System Settings</div>
+            </div>
+
+            <div className="text-center p-4 bg-teal-50 rounded-lg">
+              <Clock className="h-8 w-8 text-teal-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-teal-600">{slaSetting.length}</div>
+              <div className="text-sm text-gray-600">SLA Tagihan</div>
             </div>
           </div>
         </CardContent>
