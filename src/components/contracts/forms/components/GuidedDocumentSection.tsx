@@ -152,7 +152,7 @@ export const GuidedDocumentSection = ({
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih jenis dokumen" />
                 </SelectTrigger>
-                <SelectContent position="popper">
+                 <SelectContent position="popper" className="max-h-[500px]">
                   {DOC_TYPES.map(t => (
                     <SelectItem key={t} value={t}>{t}</SelectItem>
                   ))}
@@ -225,7 +225,7 @@ export const GuidedDocumentSection = ({
                           <SelectTrigger className="h-7 text-xs w-48">
                             <SelectValue placeholder="Pilih type" />
                           </SelectTrigger>
-                          <SelectContent position="popper">
+                           <SelectContent position="popper" className="max-h-[500px]">
                             {DOC_TYPES.map(t => (
                               <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
                             ))}
