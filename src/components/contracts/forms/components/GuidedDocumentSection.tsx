@@ -225,7 +225,7 @@ export const GuidedDocumentSection = ({
                           <SelectTrigger className="h-7 text-xs w-48">
                             <SelectValue placeholder="Pilih type" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent position="popper">
                             {DOC_TYPES.map(t => (
                               <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>
                             ))}
