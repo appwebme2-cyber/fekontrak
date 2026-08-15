@@ -98,7 +98,7 @@ const AdminSettings = () => {
       sla: konfigurasi.filter(config => config.nama_setting.includes('SLA')),
       notifications: konfigurasi.filter(config =>
         (config.nama_setting.includes('Notifikasi') || config.nama_setting.includes('Reminder')) &&
-        !config.nama_setting.toLowerCase().includes('notifikasi email')
+        !config.nama_setting.toLowerCase().replace(/_/g, ' ').includes('notifikasi email')
       ),
       monitoring: konfigurasi.filter(config =>
         config.nama_setting.includes('Progress_Billing') ||
