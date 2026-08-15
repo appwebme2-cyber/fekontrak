@@ -84,24 +84,34 @@ const AdminSettings = () => {
     });
   };
 
+  const isJsonValue = (value: string) => {
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'object' && parsed !== null;
+    } catch {
+      return false;
+    }
+  };
+
   const getConfigsByCategory = () => {
     const categories = {
       sla: konfigurasi.filter(config => config.nama_setting.includes('SLA')),
-      notifications: konfigurasi.filter(config => 
-        config.nama_setting.includes('Notifikasi') || 
-        config.nama_setting.includes('Reminder')
+      notifications: konfigurasi.filter(config =>
+        (config.nama_setting.includes('Notifikasi') || config.nama_setting.includes('Reminder')) &&
+        !config.nama_setting.toLowerCase().includes('notifikasi email')
       ),
-      monitoring: konfigurasi.filter(config => 
-        config.nama_setting.includes('Progress_Billing') || 
+      monitoring: konfigurasi.filter(config =>
+        config.nama_setting.includes('Progress_Billing') ||
         config.nama_setting.includes('Progress_Deviation')
       ),
-      system: konfigurasi.filter(config => 
-        config.nama_setting.includes('Format') || 
+      system: konfigurasi.filter(config =>
+        !isJsonValue(config.nilai_setting) &&
+        (config.nama_setting.includes('Format') ||
         (config.nama_setting.includes('Threshold') && !config.nama_setting.includes('Notifikasi')) ||
-        (!config.nama_setting.includes('SLA') && 
-         !config.nama_setting.includes('Notifikasi') && 
+        (!config.nama_setting.includes('SLA') &&
+         !config.nama_setting.includes('Notifikasi') &&
          !config.nama_setting.includes('Reminder') &&
-         !config.nama_setting.includes('Progress_'))
+         !config.nama_setting.includes('Progress_')))
       )
     };
     return categories;
