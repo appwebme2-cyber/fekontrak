@@ -122,31 +122,51 @@ const AmendmentMonitoringTab: React.FC = () => {
       {/* Header with Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="border-0 text-white bg-gradient-to-r from-red-500 to-red-600">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-white">{statistics.critical}</div>
-            <div className="text-sm text-white/90">Critical</div>
-            <div className="text-xs text-white/75 mt-1">Perlu tindakan segera</div>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-2xl font-bold text-white">{statistics.critical}</div>
+                <div className="text-sm text-white/90">Critical</div>
+                <div className="text-xs text-white/75 mt-1">Perlu tindakan segera</div>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-white/80" />
+            </div>
           </CardContent>
         </Card>
         <Card className="border-0 text-white bg-gradient-to-r from-amber-500 to-amber-600">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-white">{statistics.warning}</div>
-            <div className="text-sm text-white/90">Warning</div>
-            <div className="text-xs text-white/75 mt-1">Perhatian khusus</div>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-2xl font-bold text-white">{statistics.warning}</div>
+                <div className="text-sm text-white/90">Warning</div>
+                <div className="text-xs text-white/75 mt-1">Perhatian khusus</div>
+              </div>
+              <Clock className="h-8 w-8 text-white/80" />
+            </div>
           </CardContent>
         </Card>
         <Card className="border-0 text-white bg-gradient-to-r from-blue-500 to-blue-600">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-white">{statistics.info}</div>
-            <div className="text-sm text-white/90">Info</div>
-            <div className="text-xs text-white/75 mt-1">Monitoring rutin</div>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-2xl font-bold text-white">{statistics.info}</div>
+                <div className="text-sm text-white/90">Info</div>
+                <div className="text-xs text-white/75 mt-1">Monitoring rutin</div>
+              </div>
+              <TrendingUp className="h-8 w-8 text-white/80" />
+            </div>
           </CardContent>
         </Card>
         <Card className="border-0 text-white bg-gradient-to-r from-slate-500 to-slate-600">
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-white">{statistics.total}</div>
-            <div className="text-sm text-white/90">Total</div>
-            <div className="text-xs text-white/75 mt-1">Kontrak perlu amandemen</div>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-2xl font-bold text-white">{statistics.total}</div>
+                <div className="text-sm text-white/90">Total</div>
+                <div className="text-xs text-white/75 mt-1">Kontrak perlu amandemen</div>
+              </div>
+              <FileEdit className="h-8 w-8 text-white/80" />
+            </div>
           </CardContent>
         </Card>
       </div>

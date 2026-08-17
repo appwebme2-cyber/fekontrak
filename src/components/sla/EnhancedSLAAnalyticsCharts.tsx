@@ -110,25 +110,53 @@ export const EnhancedSLAAnalyticsCharts: React.FC<Props> = ({ slaAnalysis }) => 
 
         {/* KPI */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="border-0 text-white bg-gradient-to-r from-blue-500 to-blue-600"><CardContent className="p-4">
-            <p className="text-white/90">Total</p>
-            <p className="text-xl font-bold text-white">{stats.total}</p>
-          </CardContent></Card>
+          <Card className="border-0 text-white bg-gradient-to-r from-blue-500 to-blue-600">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-white/90">Total</p>
+                  <p className="text-2xl font-bold text-white">{stats.total}</p>
+                </div>
+                <Activity className="h-8 w-8 text-white/80" />
+              </div>
+            </CardContent>
+          </Card>
 
-          <Card className="border-0 text-white bg-gradient-to-r from-green-500 to-green-600"><CardContent className="p-4">
-            <p className="text-white/90">Compliance</p>
-            <p className="text-xl font-bold text-white">{Number(stats.complianceRate || 0).toFixed(2)}%</p>
-          </CardContent></Card>
+          <Card className="border-0 text-white bg-gradient-to-r from-green-500 to-green-600">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-white/90">Compliance</p>
+                  <p className="text-2xl font-bold text-white">{Number(stats.complianceRate || 0).toFixed(2)}%</p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-white/80" />
+              </div>
+            </CardContent>
+          </Card>
 
-          <Card className="border-0 text-white bg-gradient-to-r from-amber-500 to-amber-600"><CardContent className="p-4">
-            <p className="text-white/90">Warning</p>
-            <p className="text-xl font-bold text-white">{stats.warning}</p>
-          </CardContent></Card>
+          <Card className="border-0 text-white bg-gradient-to-r from-amber-500 to-amber-600">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-white/90">Warning</p>
+                  <p className="text-2xl font-bold text-white">{stats.warning}</p>
+                </div>
+                <AlertTriangle className="h-8 w-8 text-white/80" />
+              </div>
+            </CardContent>
+          </Card>
 
-          <Card className="border-0 text-white bg-gradient-to-r from-red-500 to-red-600"><CardContent className="p-4">
-            <p className="text-white/90">Overdue</p>
-            <p className="text-xl font-bold text-white">{stats.overdue}</p>
-          </CardContent></Card>
+          <Card className="border-0 text-white bg-gradient-to-r from-red-500 to-red-600">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-white/90">Overdue</p>
+                  <p className="text-2xl font-bold text-white">{stats.overdue}</p>
+                </div>
+                <TrendingDown className="h-8 w-8 text-white/80" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* PIE */}
