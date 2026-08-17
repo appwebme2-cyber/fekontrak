@@ -19,6 +19,7 @@ export interface DokumenApproval {
   reviewed_by?: string;
   reviewed_at?: string;
   created_at?: string;
+  updated_at?: string;
   judul_kontrak?: string;
 }
 
@@ -59,6 +60,7 @@ export const useDokumenApproval = (idKontrak?: string, status?: string) => {
         reviewed_by: d.reviewedBy,
         reviewed_at: d.reviewedAt,
         created_at: d.createdAt,
+        updated_at: d.updatedAt,
         judul_kontrak: d.judulKontrak,
       })) as DokumenApproval[];
     }
