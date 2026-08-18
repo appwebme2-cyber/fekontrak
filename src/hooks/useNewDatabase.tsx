@@ -11,7 +11,7 @@ export { useVendors } from './useVendors';
 export { useTagihans, useCreateTagihan } from './useTagihans';
 
 // System configuration hooks
-export { useKonfigurasiSistem, useUpdateKonfigurasi } from './useKonfigurasiSistem';
+export { useKonfigurasiSistem, useUpdateKonfigurasi, useCreateKonfigurasi } from './useKonfigurasiSistem';
 
 // PADI-related hooks
 export { usePadi } from './usePadi';
