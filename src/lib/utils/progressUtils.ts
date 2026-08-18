@@ -221,8 +221,13 @@ export const calculateTimeAlertLevel = (contract: Kontrak): ContractAlertLevel =
   const remainingMonths = monthsUntil(getEffectiveTanggalSelesai(contract));
   if (remainingMonths === null) return 'Good';
   if (remainingMonths <= 0) return 'Danger';
-  if (remainingMonths < 6) return 'Alert';
-  if (remainingMonths < 8) return 'Warning';
+
+  const isLumpsum = contract.tipe_kontrak === 'Lumpsum';
+  const alertThreshold = isLumpsum ? 3 : 6;
+  const warningThreshold = isLumpsum ? 5 : 8;
+
+  if (remainingMonths < alertThreshold) return 'Alert';
+  if (remainingMonths < warningThreshold) return 'Warning';
   return 'Good';
 };
 
