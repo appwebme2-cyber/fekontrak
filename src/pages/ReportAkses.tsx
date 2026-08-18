@@ -43,6 +43,39 @@ const Tick = ({ ok }: { ok: boolean }) =>
     <X className="h-4 w-4 text-muted-foreground/40 mx-auto" />
   );
 
+const MENU_PREVIEW = 3;
+
+const MenuList = ({ labels }: { labels: string[] }) => {
+  const [expanded, setExpanded] = useState(false);
+  const shown = expanded ? labels : labels.slice(0, MENU_PREVIEW);
+  const remaining = labels.length - MENU_PREVIEW;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {shown.map((label) => (
+        <span key={label} className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground whitespace-nowrap">
+          {label}
+        </span>
+      ))}
+      {!expanded && remaining > 0 && (
+        <button
+          onClick={() => setExpanded(true)}
+          className="text-xs px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 whitespace-nowrap cursor-pointer"
+        >
+          +{remaining} selengkapnya
+        </button>
+      )}
+      {expanded && remaining > 0 && (
+        <button
+          onClick={() => setExpanded(false)}
+          className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground hover:bg-muted/80 whitespace-nowrap cursor-pointer"
+        >
+          Sembunyikan
+        </button>
+      )}
+    </div>
+  );
+};
+
 const ReportAkses: React.FC = () => {
   const [search, setSearch] = useState('');
   const { users, loading } = useUserManagement();
@@ -210,16 +243,7 @@ const ReportAkses: React.FC = () => {
                         </TableCell>
                       ))}
                       <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {menuLabels.map((label) => (
-                            <span key={label} className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground whitespace-nowrap">
-                              {label}
-                            </span>
-                          ))}
-                          {user.role === 'admin' && (
-                            <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">+ semua menu admin</span>
-                          )}
-                        </div>
+                        <MenuList labels={user.role === 'admin' ? [...menuLabels, '+ semua menu admin'] : menuLabels} />
                       </TableCell>
                     </TableRow>
                   );
