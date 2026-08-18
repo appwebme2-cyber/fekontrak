@@ -121,6 +121,7 @@ const Layout = ({ children }: LayoutProps) => {
         { name: 'Manajemen Data', href: '/data-management', icon: Database },
         { name: 'Pengaturan Admin', href: '/admin-settings', icon: Settings },
         { name: 'Pengaturan Role', href: '/role-settings', icon: Shield },
+        { name: 'Report Akses', href: '/report-akses', icon: ClipboardList },
       ]
     }
   ];

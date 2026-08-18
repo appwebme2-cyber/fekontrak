@@ -49,6 +49,7 @@ import UserPurchaseDetail from "@/pages/UserPurchaseDetail";
 import DataManagement from "@/pages/DataManagement";
 import LaporanHarian from "@/pages/LaporanHarian";
 import Profile from "@/pages/Profile";
+import ReportAkses from "@/pages/ReportAkses";
 
 const queryClient = new QueryClient();
 
@@ -93,6 +94,7 @@ const App = () => (
                         <Route path="/user-purchase" element={<ModuleGuard moduleKey="user-purchase"><UserPurchase /></ModuleGuard>} />
                         <Route path="/user-purchase/:id" element={<ModuleGuard moduleKey="user-purchase"><UserPurchaseDetail /></ModuleGuard>} />
                         <Route path="/data-management" element={<DataManagement />} />
+                        <Route path="/report-akses" element={<ReportAkses />} />
                         <Route path="/laporan-harian" element={<ModuleGuard moduleKey="laporan-harian"><LaporanHarian /></ModuleGuard>} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="*" element={<NotFound />} />
