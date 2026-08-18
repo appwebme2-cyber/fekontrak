@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ShieldCheck, Check, X, Search } from 'lucide-react';
+import { ShieldCheck, Check, X, Search, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useUserManagement } from '@/components/user-management/hooks/useUserManagement';
 import {
   useRolePermissionsConfig,
@@ -104,6 +105,40 @@ const ReportAkses: React.FC = () => {
 
   const isLoading = loading || matrixLoading;
 
+  const exportCsv = () => {
+    const headers = [
+      'Nama Akun', 'Email', 'Role', 'Status',
+      ...PERMISSION_KEYS.map((k) => PERMISSION_LABELS[k]),
+      'Menu yang Dapat Diakses',
+    ];
+    const rows = filtered.map((user) => {
+      const flags = getFlags(user.role);
+      const menuLabels =
+        user.role === 'admin'
+          ? [...CONFIGURABLE_MENU_ITEMS.map((m) => m.label), '(semua menu admin)']
+          : CONFIGURABLE_MENU_ITEMS.filter((m) => flags.visibleMenus.includes(m.key)).map((m) => m.label);
+      return [
+        user.full_name || '',
+        user.email,
+        getRoleLabel(user.role),
+        user.is_active ? 'Aktif' : 'Nonaktif',
+        ...PERMISSION_KEYS.map((k) => (flags[k] ? 'Ya' : 'Tidak')),
+        menuLabels.join(', '),
+      ];
+    });
+
+    const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const csv = [headers, ...rows].map((r) => r.map(escape).join(',')).join('\n');
+    const bom = '﻿';
+    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `report-akses-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-3">
@@ -173,14 +208,26 @@ const ReportAkses: React.FC = () => {
             <CardTitle className="text-base">
               {isLoading ? 'Memuat...' : `${filtered.length} akun pengguna`}
             </CardTitle>
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Cari nama / email / role..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 w-64"
-              />
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Cari nama / email / role..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-8 w-64"
+                />
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={exportCsv}
+                disabled={isLoading || !filtered.length}
+                className="flex items-center gap-1.5 whitespace-nowrap"
+              >
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
             </div>
           </div>
         </CardHeader>
