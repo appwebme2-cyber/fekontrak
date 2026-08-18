@@ -1,144 +1,153 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ClipboardList, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
-import { useLogAkses, LogAksesFilter } from '@/hooks/useLogAkses';
-import { formatDate } from '@/lib/utils/formatters';
+import { ShieldCheck, Check, X, Search } from 'lucide-react';
+import { useUserManagement } from '@/components/user-management/hooks/useUserManagement';
+import {
+  useRolePermissionsConfig,
+  resolveConfigurableRole,
+  CONFIGURABLE_MENU_ITEMS,
+  PERMISSION_LABELS,
+  type RolePermissionFlags,
+} from '@/hooks/useRolePermissionsConfig';
 
-const MENU_OPTIONS = [
-  'Kontrak', 'Tagihan', 'Vendor', 'User Purchase (PADI)',
-  'Approval Dokumen', 'Amandemen', 'Progress Lumpsum',
-  'Progress Unit Price', 'Monitoring LTSA', 'Laporan Harian',
-  'Konfigurasi Sistem', 'SLA Setting', 'Auth',
-];
-
-const ACTIVITY_OPTIONS = ['Login', 'Logout', 'Lihat', 'Tambah', 'Ubah', 'Hapus'];
-
-const ACTIVITY_COLOR: Record<string, string> = {
-  Login:  'bg-green-100 text-green-800',
-  Logout: 'bg-gray-100 text-gray-700',
-  Lihat:  'bg-blue-100 text-blue-800',
-  Tambah: 'bg-emerald-100 text-emerald-800',
-  Ubah:   'bg-amber-100 text-amber-800',
-  Hapus:  'bg-red-100 text-red-800',
+const ADMIN_FLAGS: RolePermissionFlags = {
+  canCreate: true,
+  canEdit: true,
+  canDelete: true,
+  canManageUsers: true,
+  canManageVendors: true,
+  canUploadDokumen: true,
+  canApprovalDokumen: true,
+  visibleMenus: CONFIGURABLE_MENU_ITEMS.map((m) => m.key),
 };
 
-const PAGE_SIZE = 50;
+const PERMISSION_KEYS = Object.keys(PERMISSION_LABELS) as (keyof typeof PERMISSION_LABELS)[];
+
+const ROLE_BADGE_COLOR: Record<string, string> = {
+  admin: 'bg-red-100 text-red-800 border-red-200',
+  manager: 'bg-blue-100 text-blue-800 border-blue-200',
+  section_head: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  supervisor: 'bg-violet-100 text-violet-800 border-violet-200',
+  technician: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+  external: 'bg-orange-100 text-orange-800 border-orange-200',
+  guest: 'bg-gray-100 text-gray-700 border-gray-200',
+};
+
+const Tick = ({ ok }: { ok: boolean }) =>
+  ok ? (
+    <Check className="h-4 w-4 text-green-600 mx-auto" />
+  ) : (
+    <X className="h-4 w-4 text-muted-foreground/40 mx-auto" />
+  );
 
 const ReportAkses: React.FC = () => {
-  const [page, setPage] = useState(1);
-  const [filter, setFilter] = useState<Omit<LogAksesFilter, 'page' | 'pageSize'>>({});
-  const [draft, setDraft] = useState<typeof filter>({});
+  const [search, setSearch] = useState('');
+  const { users, loading } = useUserManagement();
+  const { matrix, labels, isLoading: matrixLoading } = useRolePermissionsConfig();
 
-  const { data, isLoading } = useLogAkses({ ...filter, page, pageSize: PAGE_SIZE });
+  const filtered = users.filter((u) => {
+    const q = search.toLowerCase();
+    return (
+      !q ||
+      u.full_name.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      u.role.toLowerCase().includes(q)
+    );
+  });
 
-  const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 1;
-
-  const applyFilter = () => {
-    setFilter(draft);
-    setPage(1);
+  const getFlags = (role: string): RolePermissionFlags => {
+    if (role === 'admin') return ADMIN_FLAGS;
+    return matrix[resolveConfigurableRole(role)] ?? matrix.guest;
   };
 
-  const resetFilter = () => {
-    setDraft({});
-    setFilter({});
-    setPage(1);
+  const getRoleLabel = (role: string): string => {
+    if (role === 'admin') return 'Admin';
+    const resolved = resolveConfigurableRole(role);
+    return labels[resolved] ?? resolved;
   };
+
+  const isLoading = loading || matrixLoading;
 
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-3">
-        <ClipboardList className="h-6 w-6 text-blue-600" />
+        <ShieldCheck className="h-6 w-6 text-blue-600" />
         <div>
           <h1 className="text-2xl font-bold">Report Akses</h1>
           <p className="text-sm text-muted-foreground">
-            Riwayat aktivitas pengguna berdasarkan menu dan tipe aksi
+            Matriks hak akses per akun pengguna berdasarkan role yang dikonfigurasi
           </p>
         </div>
       </div>
 
-      {/* Filter */}
+      {/* Ringkasan menu per role */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Filter</CardTitle>
+          <CardTitle className="text-base">Referensi Hak Akses per Role</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            <Input
-              placeholder="Nama user..."
-              value={draft.userId ?? ''}
-              onChange={(e) => setDraft((p) => ({ ...p, userId: e.target.value || undefined }))}
-            />
-
-            <Select
-              value={draft.menu ?? 'all'}
-              onValueChange={(v) => setDraft((p) => ({ ...p, menu: v === 'all' ? undefined : v }))}
-            >
-              <SelectTrigger><SelectValue placeholder="Semua menu" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua menu</SelectItem>
-                {MENU_OPTIONS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={draft.activity ?? 'all'}
-              onValueChange={(v) => setDraft((p) => ({ ...p, activity: v === 'all' ? undefined : v }))}
-            >
-              <SelectTrigger><SelectValue placeholder="Semua aktivitas" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Semua aktivitas</SelectItem>
-                {ACTIVITY_OPTIONS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
-              </SelectContent>
-            </Select>
-
-            <Input
-              type="date"
-              value={draft.dari ?? ''}
-              onChange={(e) => setDraft((p) => ({ ...p, dari: e.target.value || undefined }))}
-            />
-            <Input
-              type="date"
-              value={draft.sampai ?? ''}
-              onChange={(e) => setDraft((p) => ({ ...p, sampai: e.target.value || undefined }))}
-            />
-          </div>
-          <div className="flex gap-2 mt-3">
-            <Button onClick={applyFilter} size="sm">Terapkan</Button>
-            <Button onClick={resetFilter} size="sm" variant="outline" className="flex items-center gap-1">
-              <RotateCcw className="h-3 w-3" /> Reset
-            </Button>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-36">Role</TableHead>
+                  {PERMISSION_KEYS.map((k) => (
+                    <TableHead key={k} className="text-center text-xs whitespace-nowrap">
+                      {PERMISSION_LABELS[k]}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {/* Admin selalu semua bisa */}
+                <TableRow className="bg-red-50/40">
+                  <TableCell>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${ROLE_BADGE_COLOR.admin}`}>
+                      Admin
+                    </span>
+                  </TableCell>
+                  {PERMISSION_KEYS.map((k) => (
+                    <TableCell key={k} className="text-center"><Tick ok /></TableCell>
+                  ))}
+                </TableRow>
+                {(Object.entries(matrix) as [string, RolePermissionFlags][]).map(([role, flags]) => (
+                  <TableRow key={role}>
+                    <TableCell>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${ROLE_BADGE_COLOR[role] ?? ROLE_BADGE_COLOR.guest}`}>
+                        {labels[role as keyof typeof labels] ?? role}
+                      </span>
+                    </TableCell>
+                    {PERMISSION_KEYS.map((k) => (
+                      <TableCell key={k} className="text-center">
+                        <Tick ok={flags[k] as boolean} />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
 
-      {/* Tabel */}
+      {/* Tabel per akun */}
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
             <CardTitle className="text-base">
-              {isLoading ? 'Memuat...' : `${data?.total ?? 0} entri`}
+              {isLoading ? 'Memuat...' : `${filtered.length} akun pengguna`}
             </CardTitle>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Button
-                size="sm" variant="outline"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span>Hal {page} / {totalPages}</span>
-              <Button
-                size="sm" variant="outline"
-                disabled={page >= totalPages}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Cari nama / email / role..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8 w-64"
+              />
             </div>
           </div>
         </CardHeader>
@@ -147,52 +156,74 @@ const ReportAkses: React.FC = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-40">Waktu</TableHead>
-                  <TableHead>Nama User</TableHead>
+                  <TableHead className="min-w-40">Nama Akun</TableHead>
+                  <TableHead className="min-w-48">Email</TableHead>
                   <TableHead>Role</TableHead>
-                  <TableHead>Menu</TableHead>
-                  <TableHead>Aktivitas</TableHead>
-                  <TableHead className="hidden md:table-cell">Detail</TableHead>
+                  <TableHead>Status</TableHead>
+                  {PERMISSION_KEYS.map((k) => (
+                    <TableHead key={k} className="text-center text-xs whitespace-nowrap">
+                      {PERMISSION_LABELS[k]}
+                    </TableHead>
+                  ))}
+                  <TableHead className="min-w-56">Menu yang Dapat Diakses</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={4 + PERMISSION_KEYS.length + 1} className="text-center py-8 text-muted-foreground">
                       Memuat data...
                     </TableCell>
                   </TableRow>
                 )}
-                {!isLoading && !data?.items.length && (
+                {!isLoading && !filtered.length && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      Tidak ada data log
+                    <TableCell colSpan={4 + PERMISSION_KEYS.length + 1} className="text-center py-8 text-muted-foreground">
+                      Tidak ada akun ditemukan
                     </TableCell>
                   </TableRow>
                 )}
-                {data?.items.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(log.createdAt).toLocaleString('id-ID', {
-                        day: '2-digit', month: 'short', year: 'numeric',
-                        hour: '2-digit', minute: '2-digit',
-                      })}
-                    </TableCell>
-                    <TableCell className="font-medium">{log.namaUser}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs capitalize">{log.role}</Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">{log.menu}</TableCell>
-                    <TableCell>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ACTIVITY_COLOR[log.activity] ?? 'bg-gray-100 text-gray-700'}`}>
-                        {log.activity}
-                      </span>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
-                      {log.detail}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filtered.map((user) => {
+                  const flags = getFlags(user.role);
+                  const menuLabels =
+                    user.role === 'admin'
+                      ? CONFIGURABLE_MENU_ITEMS.map((m) => m.label)
+                      : CONFIGURABLE_MENU_ITEMS.filter((m) => flags.visibleMenus.includes(m.key)).map((m) => m.label);
+
+                  return (
+                    <TableRow key={user.id} className={!user.is_active ? 'opacity-50' : ''}>
+                      <TableCell className="font-medium whitespace-nowrap">{user.full_name || '—'}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{user.email}</TableCell>
+                      <TableCell>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${ROLE_BADGE_COLOR[user.role] ?? ROLE_BADGE_COLOR.guest}`}>
+                          {getRoleLabel(user.role)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.is_active ? 'default' : 'secondary'} className="text-xs">
+                          {user.is_active ? 'Aktif' : 'Nonaktif'}
+                        </Badge>
+                      </TableCell>
+                      {PERMISSION_KEYS.map((k) => (
+                        <TableCell key={k} className="text-center">
+                          <Tick ok={flags[k] as boolean} />
+                        </TableCell>
+                      ))}
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {menuLabels.map((label) => (
+                            <span key={label} className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground whitespace-nowrap">
+                              {label}
+                            </span>
+                          ))}
+                          {user.role === 'admin' && (
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">+ semua menu admin</span>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
