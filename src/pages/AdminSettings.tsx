@@ -267,10 +267,10 @@ const AdminSettings = () => {
 
       {/* Tabbed Interface */}
       <Tabs defaultValue="sla" className="w-full">
-        <TabsList className="grid w-full grid-cols-6 mb-6">
+        <TabsList className="grid w-full grid-cols-5 mb-6">
           <TabsTrigger value="sla" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
-            SLA Settings
+            SLA
           </TabsTrigger>
           <TabsTrigger value="monitoring" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
@@ -284,10 +284,6 @@ const AdminSettings = () => {
             <Settings className="h-4 w-4" />
             System
           </TabsTrigger>
-          <TabsTrigger value="sla-tagihan" className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            SLA Tagihan
-          </TabsTrigger>
           <TabsTrigger value="badge-threshold" className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
             Badge Alert
@@ -295,17 +291,20 @@ const AdminSettings = () => {
         </TabsList>
 
         <TabsContent value="sla" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-blue-600" />
-                Service Level Agreement Configuration
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {categories.sla.map(renderConfigCard)}
-            </CardContent>
-          </Card>
+          <SLASettings />
+          {categories.sla.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-blue-600" />
+                  Konfigurasi SLA Lainnya
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {categories.sla.map(renderConfigCard)}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="monitoring" className="space-y-4">
@@ -384,10 +383,6 @@ const AdminSettings = () => {
               {categories.system.map(renderConfigCard)}
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="sla-tagihan" className="space-y-4">
-          <SLASettings />
         </TabsContent>
 
         <TabsContent value="badge-threshold" className="space-y-4">
