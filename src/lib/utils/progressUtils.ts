@@ -217,14 +217,54 @@ const monthsUntil = (dateString?: string | null): number | null => {
  * Status waktu berdasarkan sisa bulan sampai tanggal_selesai efektif kontrak.
  * < 8 bulan: Warning, < 6 bulan: Alert, sudah lewat: Danger (Habis).
  */
-export const calculateTimeAlertLevel = (contract: Kontrak): ContractAlertLevel => {
+export interface BadgeThresholdConfig {
+  lumpsumKritisBulan: number;
+  lumpsumMenipisBulan: number;
+  unitPriceTsaKritisBulan: number;
+  unitPriceTsaMenipisBulan: number;
+  progressWarningPersen: number;
+  progressAlertPersen: number;
+  progressDangerPersen: number;
+}
+
+export const DEFAULT_BADGE_THRESHOLD: BadgeThresholdConfig = {
+  lumpsumKritisBulan: 3,
+  lumpsumMenipisBulan: 5,
+  unitPriceTsaKritisBulan: 6,
+  unitPriceTsaMenipisBulan: 8,
+  progressWarningPersen: 10,
+  progressAlertPersen: 20,
+  progressDangerPersen: 40,
+};
+
+export const getBadgeThresholdConfig = (konfigurasi: any[]): BadgeThresholdConfig => {
+  const get = (key: string, fallback: number) => {
+    const found = konfigurasi.find((k) => k.nama_setting === key);
+    const parsed = found ? parseInt(found.nilai_setting) : NaN;
+    return isNaN(parsed) ? fallback : parsed;
+  };
+  return {
+    lumpsumKritisBulan:       get('Badge_Lumpsum_Kritis_Bulan',        3),
+    lumpsumMenipisBulan:      get('Badge_Lumpsum_Menipis_Bulan',       5),
+    unitPriceTsaKritisBulan:  get('Badge_UnitPriceTSA_Kritis_Bulan',   6),
+    unitPriceTsaMenipisBulan: get('Badge_UnitPriceTSA_Menipis_Bulan',  8),
+    progressWarningPersen:    get('Badge_Progress_Warning_Persen',     10),
+    progressAlertPersen:      get('Badge_Progress_Alert_Persen',       20),
+    progressDangerPersen:     get('Badge_Progress_Danger_Persen',      40),
+  };
+};
+
+export const calculateTimeAlertLevel = (
+  contract: Kontrak,
+  config: BadgeThresholdConfig = DEFAULT_BADGE_THRESHOLD,
+): ContractAlertLevel => {
   const remainingMonths = monthsUntil(getEffectiveTanggalSelesai(contract));
   if (remainingMonths === null) return 'Good';
   if (remainingMonths <= 0) return 'Danger';
 
   const isLumpsum = contract.tipe_kontrak === 'Lumpsum';
-  const alertThreshold = isLumpsum ? 3 : 6;
-  const warningThreshold = isLumpsum ? 5 : 8;
+  const alertThreshold   = isLumpsum ? config.lumpsumKritisBulan       : config.unitPriceTsaKritisBulan;
+  const warningThreshold = isLumpsum ? config.lumpsumMenipisBulan       : config.unitPriceTsaMenipisBulan;
 
   if (remainingMonths < alertThreshold) return 'Alert';
   if (remainingMonths < warningThreshold) return 'Warning';
@@ -256,7 +296,10 @@ const expectedProgress = (contract: Kontrak): number | null => {
  * akan tertandai tertinggal.
  * tertinggal >= 40%: Danger, >= 20%: Alert, >= 10%: Warning.
  */
-export const calculateProgressAlertLevel = (contract: Kontrak): ContractAlertLevel => {
+export const calculateProgressAlertLevel = (
+  contract: Kontrak,
+  config: BadgeThresholdConfig = DEFAULT_BADGE_THRESHOLD,
+): ContractAlertLevel => {
   const actual = Number(contract.progress_actual) || 0;
   if (actual >= 100) return 'Good';
 
@@ -264,9 +307,9 @@ export const calculateProgressAlertLevel = (contract: Kontrak): ContractAlertLev
   if (expected === null) return 'Good';
 
   const deviation = expected - actual; // positif = tertinggal dari rencana
-  if (deviation >= 40) return 'Danger';
-  if (deviation >= 20) return 'Alert';
-  if (deviation >= 10) return 'Warning';
+  if (deviation >= config.progressDangerPersen) return 'Danger';
+  if (deviation >= config.progressAlertPersen)  return 'Alert';
+  if (deviation >= config.progressWarningPersen) return 'Warning';
   return 'Good';
 };
 
@@ -275,9 +318,12 @@ export const calculateProgressAlertLevel = (contract: Kontrak): ContractAlertLev
  * dari kedua kriteria; teks badge mengikuti penyebab (waktu vs progress)
  * supaya jelas apakah kontrak habis waktu atau tertinggal progress.
  */
-export const calculateContractAlertStatus = (contract: Kontrak): ContractAlertStatus => {
-  const timeLevel = calculateTimeAlertLevel(contract);
-  const progressLevel = calculateProgressAlertLevel(contract);
+export const calculateContractAlertStatus = (
+  contract: Kontrak,
+  config: BadgeThresholdConfig = DEFAULT_BADGE_THRESHOLD,
+): ContractAlertStatus => {
+  const timeLevel = calculateTimeAlertLevel(contract, config);
+  const progressLevel = calculateProgressAlertLevel(contract, config);
 
   const timeIsWorst = ALERT_RANK[timeLevel] >= ALERT_RANK[progressLevel];
   const level = timeIsWorst ? timeLevel : progressLevel;

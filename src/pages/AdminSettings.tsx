@@ -22,6 +22,7 @@ import {
 import { useKonfigurasiSistem, useUpdateKonfigurasi } from '@/hooks/useNewDatabase';
 import { useAuth } from '@/hooks/useAuth';
 import SLASettings from '@/components/sla/SLASettings';
+import BadgeThresholdSettings from '@/components/sla/BadgeThresholdSettings';
 import { useSLASetting } from '@/hooks/useSLASetting';
 
 
@@ -266,7 +267,7 @@ const AdminSettings = () => {
 
       {/* Tabbed Interface */}
       <Tabs defaultValue="sla" className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6">
+        <TabsList className="grid w-full grid-cols-6 mb-6">
           <TabsTrigger value="sla" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             SLA Settings
@@ -286,6 +287,10 @@ const AdminSettings = () => {
           <TabsTrigger value="sla-tagihan" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             SLA Tagihan
+          </TabsTrigger>
+          <TabsTrigger value="badge-threshold" className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Badge Alert
           </TabsTrigger>
         </TabsList>
 
@@ -383,6 +388,20 @@ const AdminSettings = () => {
 
         <TabsContent value="sla-tagihan" className="space-y-4">
           <SLASettings />
+        </TabsContent>
+
+        <TabsContent value="badge-threshold" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                Badge Alert Threshold
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <BadgeThresholdSettings />
+            </CardContent>
+          </Card>
         </TabsContent>
 
       </Tabs>
