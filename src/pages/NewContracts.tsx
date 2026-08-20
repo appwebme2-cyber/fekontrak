@@ -56,13 +56,22 @@ const NewContracts = () => {
 
   const isAdminOrPIC = isStaffOrAdminRole(userProfile?.role);
 
+  // Normalisasi nilai status yang campuran Inggris/Indonesia di database
+  const normalizeStatus = (s: string | null | undefined): string => {
+    switch (s) {
+      case 'Aktif':   return 'Active';
+      case 'Selesai': return 'Completed';
+      default:        return s ?? '';
+    }
+  };
+
   // Filter contracts
   const filteredKontraks = kontraks.filter(kontrak => {
     const matchesSearch = !searchTerm ||
       (kontrak.judul_kontrak || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (kontrak.vendor?.nama_vendor || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || kontrak.tipe_kontrak === filterType;
-    const matchesStatus = filterStatus === 'all' || kontrak.status_kontrak === filterStatus;
+    const matchesStatus = filterStatus === 'all' || normalizeStatus(kontrak.status_kontrak) === filterStatus;
     const matchesDireksi = filterDireksi === 'all' || kontrak.direksi_pekerjaan === filterDireksi;
 
     return matchesSearch && matchesType && matchesStatus && matchesDireksi;
