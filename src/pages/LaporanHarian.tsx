@@ -124,23 +124,6 @@ const LaporanHarian = () => {
         </Button>
       </div>
 
-      {/* Summary Cards — hanya tampil disiplin yang ada datanya */}
-      {Object.keys(summary).length > 0 && (
-        <div className="flex flex-wrap gap-3">
-          {Object.entries(summary)
-            .sort((a, b) => b[1] - a[1])
-            .map(([d, count]) => (
-              <Card key={d}
-                className={`cursor-pointer hover:shadow-lg transition-shadow border-0 text-white bg-gradient-to-r ${DISIPLIN_GRADIENTS[d] ?? 'from-gray-500 to-gray-600'} ${filters.disiplin === d ? 'ring-2 ring-offset-2 ring-gray-700' : ''}`}
-                onClick={() => handleFilterChange('disiplin', filters.disiplin === d ? 'all' : d)}>
-                <CardContent className="p-3 text-center min-w-[90px]">
-                  <p className="text-xl font-bold text-white">{count}</p>
-                  <p className="text-[11px] text-white/90 mt-0.5 leading-tight">{d}</p>
-                </CardContent>
-              </Card>
-            ))}
-        </div>
-      )}
 
       {/* Filter */}
       <Card>
