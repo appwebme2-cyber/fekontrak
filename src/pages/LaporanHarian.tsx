@@ -26,7 +26,7 @@ const DISIPLIN_GRADIENTS: Record<string, string> = {
   'AC Central':    'from-sky-500 to-sky-600',
   Motor:           'from-violet-500 to-violet-600',
 };
-const KATEGORI_OPTIONS = ['Corrective Maintenance', 'Preventive Maintenance', 'Plant Patrol', 'Progress', 'Challenge Session'];
+const KATEGORI_OPTIONS = ['Corrective Maintenance', 'Preventive Maintenance', 'Plant Patrol', 'Progress', 'Challenge Session', 'Service by WS', 'Service by Kontraktor'];
 const STATUS_OPTIONS   = ['Done', 'In Progress', 'Waiting Material', 'Pending'];
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
