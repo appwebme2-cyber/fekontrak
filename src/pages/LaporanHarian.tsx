@@ -7,14 +7,24 @@ import { Button } from '@/components/ui/button';
 import { ClipboardList, Filter, RefreshCw, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useDailyReport } from '@/hooks/useDailyReport';
 
-const DISIPLIN_OPTIONS = ['Electrical', 'Instrument', 'Rotating', 'Stationary', 'Alat Berat', 'Tools'];
+const DISIPLIN_OPTIONS = [
+  'Electrical', 'Instrument', 'Rotating', 'Stationary',
+  'Alat Berat', 'Tools', 'Pompa', 'Bubut', 'Valve',
+  'Las Konstruksi', 'AC Central', 'Motor',
+];
 const DISIPLIN_GRADIENTS: Record<string, string> = {
-  Electrical: 'from-blue-500 to-blue-600',
-  Instrument: 'from-green-500 to-green-600',
-  Rotating: 'from-purple-500 to-purple-600',
-  Stationary: 'from-orange-500 to-orange-600',
-  'Alat Berat': 'from-teal-500 to-teal-600',
-  Tools: 'from-rose-500 to-rose-600',
+  Electrical:      'from-blue-500 to-blue-600',
+  Instrument:      'from-green-500 to-green-600',
+  Rotating:        'from-purple-500 to-purple-600',
+  Stationary:      'from-orange-500 to-orange-600',
+  'Alat Berat':    'from-teal-500 to-teal-600',
+  Tools:           'from-rose-500 to-rose-600',
+  Pompa:           'from-cyan-500 to-cyan-600',
+  Bubut:           'from-amber-500 to-amber-600',
+  Valve:           'from-indigo-500 to-indigo-600',
+  'Las Konstruksi':'from-red-500 to-red-600',
+  'AC Central':    'from-sky-500 to-sky-600',
+  Motor:           'from-violet-500 to-violet-600',
 };
 const KATEGORI_OPTIONS = ['Corrective Maintenance', 'Preventive Maintenance', 'Plant Patrol', 'Progress', 'Challenge Session'];
 const STATUS_OPTIONS   = ['Done', 'In Progress', 'Waiting Material', 'Pending'];
@@ -114,19 +124,21 @@ const LaporanHarian = () => {
         </Button>
       </div>
 
-      {/* Summary Cards */}
+      {/* Summary Cards — hanya tampil disiplin yang ada datanya */}
       {Object.keys(summary).length > 0 && (
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-          {DISIPLIN_OPTIONS.map(d => (
-            <Card key={d}
-              className={`cursor-pointer hover:shadow-lg transition-shadow border-0 text-white bg-gradient-to-r ${DISIPLIN_GRADIENTS[d] ?? 'from-gray-500 to-gray-600'} ${filters.disiplin === d ? 'ring-2 ring-offset-2 ring-gray-700' : ''}`}
-              onClick={() => handleFilterChange('disiplin', filters.disiplin === d ? 'all' : d)}>
-              <CardContent className="p-3 text-center">
-                <p className="text-xl font-bold text-white">{summary[d] || 0}</p>
-                <p className="text-[11px] text-white/90 mt-0.5 leading-tight">{d}</p>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex flex-wrap gap-3">
+          {Object.entries(summary)
+            .sort((a, b) => b[1] - a[1])
+            .map(([d, count]) => (
+              <Card key={d}
+                className={`cursor-pointer hover:shadow-lg transition-shadow border-0 text-white bg-gradient-to-r ${DISIPLIN_GRADIENTS[d] ?? 'from-gray-500 to-gray-600'} ${filters.disiplin === d ? 'ring-2 ring-offset-2 ring-gray-700' : ''}`}
+                onClick={() => handleFilterChange('disiplin', filters.disiplin === d ? 'all' : d)}>
+                <CardContent className="p-3 text-center min-w-[90px]">
+                  <p className="text-xl font-bold text-white">{count}</p>
+                  <p className="text-[11px] text-white/90 mt-0.5 leading-tight">{d}</p>
+                </CardContent>
+              </Card>
+            ))}
         </div>
       )}
 
