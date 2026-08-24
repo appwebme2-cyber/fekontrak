@@ -101,6 +101,25 @@ export const normalizeTipeKontrak = (tipeKontrak: string): string => {
   return tipeKontrak;
 };
 
+// Normalisasi dokumen dari DB: handle string JSON, array, dan dokumen lama tanpa doc_type
+const parseDocuments = (raw: any): any[] => {
+  let docs: any[];
+  if (Array.isArray(raw)) {
+    docs = raw;
+  } else if (typeof raw === 'string' && raw.trim()) {
+    try { docs = JSON.parse(raw); } catch { return []; }
+  } else {
+    return [];
+  }
+  // Dokumen lama (upload sebelum GuidedDocumentSection) tidak punya doc_type/doc_label.
+  // Tambahkan field kosong agar GuidedDocumentSection bisa menampilkan & mengeditnya.
+  return docs.map(d => ({
+    doc_type: '',
+    doc_label: '',
+    ...d,
+  }));
+};
+
 export const createFormDataFromContract = (contract: Kontrak): ContractFormData => {
   const normalizedTipeKontrak = normalizeTipeKontrak(contract.tipe_kontrak || '');
  
@@ -142,8 +161,8 @@ export const createFormDataFromContract = (contract: Kontrak): ContractFormData 
     tanggal_mulai_baru: toDateStr(contract.tanggal_mulai_baru),
     tanggal_selesai_baru: toDateStr(contract.tanggal_selesai_baru),
     alasan_perubahan: contract.alasan_perubahan || '',
-    contract_documents: Array.isArray(contract.contract_documents) ? contract.contract_documents : [],
-    amendment_documents: Array.isArray(contract.amendment_documents) ? contract.amendment_documents : [],
+    contract_documents: parseDocuments(contract.contract_documents),
+    amendment_documents: parseDocuments(contract.amendment_documents),
     // MPL/MPA sekarang angka (hari) — JANGAN lewat toDateStr
     tanggal_mpl: (contract as any).tanggal_mpl ?? undefined,
     tanggal_mpa: (contract as any).tanggal_mpa ?? undefined,
