@@ -18,37 +18,55 @@ const parseUploadDates = (raw: any): string[] => {
   }
 };
 
-const latestDate = (...dateLists: (string | undefined)[][]): string | undefined =>
-  dateLists.flat().filter(Boolean).sort().pop() as string | undefined;
+type DocSource = 'kontrak' | 'progress' | 'tagihan';
+
+const latestWithSource = (
+  groups: { dates: string[]; source: DocSource }[]
+): { date: string; source: DocSource } | undefined => {
+  let best: { date: string; source: DocSource } | undefined;
+  for (const { dates, source } of groups) {
+    const top = [...dates].filter(Boolean).sort().pop();
+    if (top && (!best || top > best.date)) {
+      best = { date: top, source };
+    }
+  }
+  return best;
+};
+
+const SOURCE_LABEL: Record<DocSource, string> = {
+  kontrak: 'kontrak',
+  progress: 'progress',
+  tagihan: 'tagihan',
+};
 
 export function ContractLastUpdateInfo({ contract }: ContractLastUpdateInfoProps) {
   const { data: billingTerms } = useContractBilling(contract.id_kontrak);
   const { dokumens } = useDokumenApproval(contract.id_kontrak);
 
-  // Dokumen kontrak utama
   const kontrakDocDates = parseUploadDates(contract.contract_documents);
-
-  // Dokumen approval/progress
   const approvalDocDates = dokumens.map((d) => d.updated_at).filter(Boolean) as string[];
-
-  // Dokumen dari setiap tagihan
   const tagihanDocDates = (billingTerms ?? []).flatMap((t) =>
     parseUploadDates(t.dokumen_tagihan)
   );
 
-  const lastDokumenUpdate = latestDate(kontrakDocDates, approvalDocDates, tagihanDocDates);
+  const latestDok = latestWithSource([
+    { dates: kontrakDocDates, source: 'kontrak' },
+    { dates: approvalDocDates, source: 'progress' },
+    { dates: tagihanDocDates, source: 'tagihan' },
+  ]);
 
-  // Update tagihan (perubahan status/nilai billing)
-  const lastTagihanUpdate = latestDate(
-    (billingTerms ?? []).map((t) => t.updated_at).filter(Boolean) as string[]
-  );
+  const lastTagihanUpdate = [...((billingTerms ?? []).map((t) => t.updated_at).filter(Boolean) as string[])]
+    .sort()
+    .pop();
 
   return (
     <div className="flex flex-col gap-1 text-xs text-muted-foreground">
       <div className="flex items-center gap-2">
         <FileText className="h-3 w-3 shrink-0" />
         <span>
-          Dok: {lastDokumenUpdate ? formatDate(lastDokumenUpdate) : 'Belum ada dokumen'}
+          {latestDok
+            ? `Dok: ${formatDate(latestDok.date)} (${SOURCE_LABEL[latestDok.source]})`
+            : 'Dok: Belum ada dokumen'}
         </span>
       </div>
       <div className="flex items-center gap-2">
