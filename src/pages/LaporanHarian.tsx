@@ -27,15 +27,16 @@ const DISIPLIN_GRADIENTS: Record<string, string> = {
   Motor:           'from-violet-500 to-violet-600',
 };
 const KATEGORI_OPTIONS = ['Corrective Maintenance', 'Preventive Maintenance', 'Plant Patrol', 'Progress', 'Challenge Session', 'Service by WS', 'Service by Kontraktor', 'Overhaul', 'Peminjaman', 'Pengembalian'];
-const STATUS_OPTIONS   = ['Done', 'In Progress', 'Waiting Material', 'Pending'];
+const STATUS_OPTIONS   = ['Done', 'In Progress', 'Waiting Material', 'Waiting Recommendation', 'Pending'];
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
 const getStatusColor = (status: string) => {
   switch (status?.toLowerCase()) {
     case 'done':             return 'bg-green-100 text-green-800 border-green-300';
     case 'in progress':      return 'bg-blue-100 text-blue-800 border-blue-300';
-    case 'waiting material': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-    case 'pending':          return 'bg-gray-100 text-gray-800 border-gray-300';
+    case 'waiting material':        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+    case 'waiting recommendation':  return 'bg-orange-100 text-orange-800 border-orange-300';
+    case 'pending':                 return 'bg-gray-100 text-gray-800 border-gray-300';
     default:                 return 'bg-gray-100 text-gray-600 border-gray-200';
   }
 };
