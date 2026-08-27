@@ -8,6 +8,7 @@ export interface BillingTerm {
   nilai_tagihan: number;
   tanggal_tagihan: string;
   updated_at?: string;
+  dokumen_tagihan?: string | null;
 }
 
 export const useContractBilling = (contractId: string) => {
@@ -40,6 +41,7 @@ export const useContractBilling = (contractId: string) => {
         nilai_tagihan: t.nilaiTagihan,
         tanggal_tagihan: t.tanggalTagihan,
         updated_at: t.updatedAt,
+        dokumen_tagihan: t.dokumenTagihan ?? null,
       }));
     },
     enabled: !!contractId,
