@@ -322,6 +322,91 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
     e.target.value = '';
   };
 
+  // Download template progress (plan/actual per periode) berisi aktivitas & periode yang sudah ada
+  const handleDownloadProgressTemplate = () => {
+    const header = [
+      'Nama Aktivitas',
+      ...periods.flatMap(p => [`${p.periode} - Plan (%)`, `${p.periode} - Actual (%)`]),
+    ];
+    const rows = sortedActivities.map(act => {
+      const row: (string | number)[] = [act.nama];
+      periods.forEach(p => {
+        const pa = p.activities.find(a => a.activityId === act.id);
+        row.push(pa?.plan ?? 0);
+        row.push(pa?.actual ?? '');
+      });
+      return row;
+    });
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    ws['!cols'] = [{ wch: 40 }, ...periods.flatMap(() => [{ wch: 16 }, { wch: 16 }])];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Progress');
+    XLSX.writeFile(wb, 'template_progress_scurve.xlsx');
+  };
+
+  // Upload progress massal dari Excel: cocokkan baris berdasarkan Nama Aktivitas
+  // dan kolom berdasarkan nama periode ("<periode> - Plan (%)" / "<periode> - Actual (%)")
+  const handleUploadProgressExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = new Uint8Array(ev.target?.result as ArrayBuffer);
+        const wb = XLSX.read(data, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        if (rows.length < 2) return;
+
+        const header = rows[0] as string[];
+        const periodColMap: Record<string, { planCol: number; actualCol: number }> = {};
+        for (let c = 1; c < header.length; c += 2) {
+          const label = String(header[c] ?? '').replace(/\s*-\s*Plan.*$/i, '').trim();
+          if (label) periodColMap[label] = { planCol: c, actualCol: c + 1 };
+        }
+
+        const rowByActivityName = new Map<string, any[]>();
+        rows.slice(1).forEach(row => {
+          const nama = String(row[0] ?? '').trim().toLowerCase();
+          if (nama) rowByActivityName.set(nama, row);
+        });
+
+        const parseNum = (val: any): number | null => {
+          if (val === undefined || val === null || val === '') return null;
+          const n = parseFloat(String(val));
+          return isNaN(n) ? null : n;
+        };
+
+        setPeriods(prev => prev.map(p => {
+          const colInfo = periodColMap[p.periode];
+          if (!colInfo) return p;
+          return {
+            ...p,
+            activities: p.activities.map(pa => {
+              const act = activities.find(a => a.id === pa.activityId);
+              if (!act) return pa;
+              const row = rowByActivityName.get(act.nama.trim().toLowerCase());
+              if (!row) return pa;
+              const planVal = parseNum(row[colInfo.planCol]);
+              const actualVal = parseNum(row[colInfo.actualCol]);
+              return {
+                ...pa,
+                plan: planVal !== null ? planVal : pa.plan,
+                actual: actualVal !== null ? actualVal : pa.actual,
+              };
+            }),
+          };
+        }));
+        setIsEditing(true);
+      } catch {
+        // silently ignore parse errors
+      }
+    };
+    reader.readAsArrayBuffer(file);
+    e.target.value = '';
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -464,7 +549,7 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base">Input Progress Per Periode</CardTitle>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Input
                     value={newPeriodName}
                     onChange={(e) => setNewPeriodName(e.target.value)}
@@ -475,6 +560,22 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                   <Button onClick={handleAddPeriod} size="sm" className="gap-1">
                     <Plus className="h-4 w-4" /> Tambah Periode
                   </Button>
+                  {periods.length > 0 && activities.length > 0 && (
+                    <>
+                      <Button
+                        variant="outline" size="sm" className="gap-1"
+                        onClick={handleDownloadProgressTemplate}
+                      >
+                        <Download className="h-4 w-4" /> Download Template Progress
+                      </Button>
+                      <label className="cursor-pointer">
+                        <input type="file" accept=".xlsx,.xls" className="hidden" onChange={handleUploadProgressExcel} />
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer">
+                          <Upload className="h-4 w-4" /> Upload Progress Excel
+                        </span>
+                      </label>
+                    </>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -497,7 +598,7 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                         <th className="text-left p-3 border font-medium min-w-[160px]">Aktivitas</th>
                         <th className="text-center p-2 border font-medium text-xs">Bobot</th>
                         {periods.map((p, i) => (
-                          <th key={i} className="text-center p-2 border font-medium min-w-[120px]">
+                          <th key={i} className="text-center p-2 border font-medium min-w-[170px]">
                             <div className="flex items-center justify-center gap-1">
                               {p.periode}
                               <button
@@ -510,8 +611,8 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                             <div className="text-xs text-gray-400 font-normal">Plan / Actual</div>
                           </th>
                         ))}
-                        <th className="text-center p-2 border font-medium text-xs">Total Plan</th>
-                        <th className="text-center p-2 border font-medium text-xs">Total Actual</th>
+                        <th className="text-center p-2 border font-medium text-xs">Total Plan Akum.</th>
+                        <th className="text-center p-2 border font-medium text-xs">Total Actual Akum.</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -528,14 +629,14 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                             const pa = p.activities.find(a => a.activityId === act.id);
                             return (
                               <td key={pi} className="p-2 border">
-                                <div className="flex gap-1">
+                                <div className="flex gap-1.5">
                                   <Input
                                     type="number"
                                     min="0"
                                     max="100"
                                     value={pa?.plan ?? 0}
                                     onChange={(e) => handleProgressChange(pi, act.id, 'plan', e.target.value)}
-                                    className="w-14 h-7 text-xs text-center text-blue-600"
+                                    className="w-20 h-9 text-sm font-medium text-center text-blue-600"
                                     title="Plan %"
                                   />
                                   <Input
@@ -544,7 +645,7 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                                     max="100"
                                     value={pa?.actual ?? ''}
                                     onChange={(e) => handleProgressChange(pi, act.id, 'actual', e.target.value)}
-                                    className="w-14 h-7 text-xs text-center text-green-600"
+                                    className="w-20 h-9 text-sm font-medium text-center text-green-600"
                                     placeholder="-"
                                     title="Actual %"
                                   />
