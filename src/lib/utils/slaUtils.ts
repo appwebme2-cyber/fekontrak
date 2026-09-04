@@ -6,6 +6,7 @@ export const SLA_STAGES = [
   { kode: 'BA_COMMISSIONING',       label: 'BA Commissioning',       masuk: 'tglMasukBaCommissioning',       selesai: 'tglSelesaiBaCommissioning' },
   { kode: 'BA_PENERIMAAN_MATERIAL', label: 'BA Penerimaan Material', masuk: 'tglMasukBaPenerimaanMaterial', selesai: 'tglSelesaiBaPenerimaanMaterial' },
   { kode: 'LKP',                    label: 'LKP',                    masuk: 'tglMasukLkp',                  selesai: 'tglSelesaiLkp' },
+  { kode: 'PERHITUNGAN',            label: 'Perhitungan Tagihan',    masuk: 'tglMasukPerhitungan',          selesai: 'tglSelesaiPerhitungan' },
   { kode: 'BASTP',                  label: 'BASTP',                  masuk: 'tglMasukBast',                 selesai: 'tglSelesaiBast' },
   { kode: 'BAKP',                   label: 'BAKP/BAPP',              masuk: 'tglMasukBakp',                 selesai: 'tglSelesaiBakp' },
   { kode: 'IVENDOR',                label: 'Submit i-Vendor',        masuk: 'tglMasukIvendor',              selesai: 'tglSelesaiIvendor' },

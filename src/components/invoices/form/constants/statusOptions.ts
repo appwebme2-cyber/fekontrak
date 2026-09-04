@@ -1,4 +1,4 @@
-import { CheckCircle, FileCheck, Send, Users, Shield, Eye, CreditCard, ClipboardList, Layers, Wrench, PackageCheck } from 'lucide-react';
+import { CheckCircle, FileCheck, Send, Users, Shield, Eye, CreditCard, ClipboardList, Layers, Wrench, PackageCheck, Calculator } from 'lucide-react';
 
 export const statusOptions = [
   {
@@ -33,52 +33,59 @@ export const statusOptions = [
     step: 4,
   },
   {
+    value: 'Perhitungan Tagihan',
+    label: 'Perhitungan Tagihan',
+    color: 'bg-lime-100 text-lime-800 border-lime-300',
+    icon: Calculator,
+    step: 5,
+  },
+  {
     value: 'BASTP',
     label: 'BASTP',
     color: 'bg-orange-100 text-orange-800 border-orange-300',
     icon: FileCheck,
-    step: 5,
+    step: 6,
   },
   {
     value: 'BAKP/BAPP',
     label: 'BAKP / BAPP',
     color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
     icon: Send,
-    step: 6,
+    step: 7,
   },
   {
     value: 'Submit i-Vendor',
     label: 'Submit i-Vendor',
     color: 'bg-blue-100 text-blue-800 border-blue-300',
     icon: Users,
-    step: 7,
+    step: 8,
   },
   {
     value: 'SA',
     label: 'SA',
     color: 'bg-indigo-100 text-indigo-800 border-indigo-300',
     icon: Shield,
-    step: 8,
+    step: 9,
   },
   {
     value: 'PA',
     label: 'PA',
     color: 'bg-purple-100 text-purple-800 border-purple-300',
     icon: Eye,
-    step: 9,
+    step: 10,
   },
   {
     value: 'Verification',
     label: 'Verification',
     color: 'bg-pink-100 text-pink-800 border-pink-300',
     icon: CheckCircle,
-    step: 10,
+    step: 11,
   },
   {
     value: 'Payment/Selesai',
     label: 'Payment / Selesai',
     color: 'bg-green-100 text-green-800 border-green-300',
     icon: CreditCard,
-    step: 11,
+    step: 12,
   },
 ];

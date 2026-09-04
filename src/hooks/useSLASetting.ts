@@ -9,13 +9,14 @@ const urutanTahap: any = {
   BA_COMMISSIONING:       2,
   BA_PENERIMAAN_MATERIAL: 3,
   LKP:                    4,
-  BASTP:                  5,
-  BAKP:                   6,
-  IVENDOR:                7,
-  SA:                     8,
-  PA:                     9,
-  VERIFIKASI:             10,
-  PAYMENT:                11,
+  PERHITUNGAN:            5,
+  BASTP:                  6,
+  BAKP:                   7,
+  IVENDOR:                8,
+  SA:                     9,
+  PA:                     10,
+  VERIFIKASI:             11,
+  PAYMENT:                12,
 };
 
 // ===================== GET =====================

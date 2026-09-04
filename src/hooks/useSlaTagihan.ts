@@ -14,6 +14,8 @@ export interface SlaTagihanData {
   tglSelesaiBaPenerimaanMaterial: string | null;
   tglMasukLkp: string | null;
   tglSelesaiLkp: string | null;
+  tglMasukPerhitungan: string | null;
+  tglSelesaiPerhitungan: string | null;
   tglMasukBast: string | null;
   tglSelesaiBast: string | null;
   tglMasukBakp: string | null;

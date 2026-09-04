@@ -101,7 +101,7 @@ export interface Tagihan {
   tipe_kontrak: 'Lumpsum' | 'Unit Price' | 'TSA';
   termin?: string;
   nilai_tagihan: number;
-  status_tagihan: 'BA Joint Inspection' | 'BA Commissioning' | 'BA Penerimaan Material' | 'LKP' | 'BASTP' | 'BAKP/BAPP' | 'Submit i-Vendor' | 'SA' | 'PA' | 'Verification' | 'Payment/Selesai' | string;
+  status_tagihan: 'BA Joint Inspection' | 'BA Commissioning' | 'BA Penerimaan Material' | 'LKP' | 'Perhitungan Tagihan' | 'BASTP' | 'BAKP/BAPP' | 'Submit i-Vendor' | 'SA' | 'PA' | 'Verification' | 'Payment/Selesai' | string;
   memo_required?: boolean;
   tanggal_pengiriman_memo?: string;
   dokumen_memo?: string;

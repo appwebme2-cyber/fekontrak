@@ -64,7 +64,7 @@ export const InvoiceFormHorizontalTimeline = ({
           ></div>
           
           {/* Timeline Items */}
-          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-2">
+          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
             {statusOptions.map((status) => {
               const isSelected = formData.status_tagihan === status.value;
               const isCompleted = progressData.currentStep > 0 && status.step <= progressData.currentStep;
