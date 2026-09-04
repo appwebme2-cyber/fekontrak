@@ -55,7 +55,7 @@ export const InvoiceFormDialog = ({
   return (
     <ConfirmableDialog open={open} onOpenChange={onOpenChange}>
       <ConfirmableDialogContent 
-        className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto"
+        className="sm:max-w-[1200px] max-h-[90vh] overflow-y-auto"
         hasUnsavedChanges={hasUnsavedChanges}
         onConfirmClose={() => onOpenChange(false)}
       >
