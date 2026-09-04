@@ -2,7 +2,7 @@
 import { Progress } from '@/components/ui/progress';
 import { Kontrak } from '@/types/database';
 import { useProgressCalculations } from '../hooks/useProgressCalculations';
-import { getEffectiveTanggalSelesai } from '@/utils/contractDateUtils';
+import { getEffectiveTanggalMulai, getEffectiveTanggalSelesai } from '@/utils/contractDateUtils';
 
 interface ActiveContractContentProps {
   contract: Kontrak;
@@ -10,10 +10,13 @@ interface ActiveContractContentProps {
 
 export function ActiveContractContent({ contract }: ActiveContractContentProps) {
   const { calculateDurationProgress } = useProgressCalculations();
+  const effectiveTanggalMulai = getEffectiveTanggalMulai(contract);
   const effectiveTanggalSelesai = getEffectiveTanggalSelesai(contract);
+  const isMulaiFromAmendment = !!(contract.has_amendment && contract.tanggal_mulai_baru);
+  const isSelesaiFromAmendment = !!(contract.has_amendment && contract.tanggal_selesai_baru);
 
-  const durationInfo = contract.tanggal_mulai && effectiveTanggalSelesai
-    ? calculateDurationProgress(contract.tanggal_mulai, effectiveTanggalSelesai)
+  const durationInfo = effectiveTanggalMulai && effectiveTanggalSelesai
+    ? calculateDurationProgress(effectiveTanggalMulai, effectiveTanggalSelesai)
     : null;
 
   return (
@@ -23,15 +26,18 @@ export function ActiveContractContent({ contract }: ActiveContractContentProps) 
         <div>
           <p className="text-gray-600 mb-1">Tanggal Mulai</p>
           <p className="font-medium">
-            {contract.tanggal_mulai ? new Date(contract.tanggal_mulai).toLocaleDateString('id-ID') : '-'}
+            {effectiveTanggalMulai ? new Date(effectiveTanggalMulai).toLocaleDateString('id-ID') : '-'}
           </p>
+          {isMulaiFromAmendment && (
+            <p className="text-xs text-purple-600 mt-0.5">Dari amandemen</p>
+          )}
         </div>
         <div>
           <p className="text-gray-600 mb-1">Tanggal Selesai</p>
           <p className="font-medium">
             {effectiveTanggalSelesai ? new Date(effectiveTanggalSelesai).toLocaleDateString('id-ID') : '-'}
           </p>
-          {contract.has_amendment && contract.tanggal_selesai_baru && (
+          {isSelesaiFromAmendment && (
             <p className="text-xs text-purple-600 mt-0.5">Dari amandemen</p>
           )}
         </div>
@@ -52,8 +58,10 @@ export function ActiveContractContent({ contract }: ActiveContractContentProps) 
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-gray-700">Progress Durasi Pekerjaan</span>
-            <span className="text-sm text-gray-600">
-              Sisa {durationInfo.remainingDays} hari
+            <span className={`text-sm ${durationInfo.lateDays > 0 ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
+              {durationInfo.lateDays > 0
+                ? `Terlambat ${durationInfo.lateDays} hari`
+                : `Sisa ${durationInfo.remainingDays} hari`}
             </span>
           </div>
           <Progress value={Math.min(durationInfo.progress, 100)} className="h-2" />

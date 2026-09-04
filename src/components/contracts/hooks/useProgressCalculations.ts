@@ -35,19 +35,22 @@ export function useProgressCalculations() {
 
   // Calculate contract duration progress for active/completed contracts
   const calculateDurationProgress = (startDate: string | null, endDate: string | null) => {
-    if (!startDate || !endDate) return { progress: 0, remainingDays: 0, totalDays: 0 };
-    
+    if (!startDate || !endDate) return { progress: 0, remainingDays: 0, lateDays: 0, totalDays: 0 };
+
     const start = new Date(startDate);
     const end = new Date(endDate);
     const current = new Date();
-    
+
     const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-    const elapsedDays = Math.ceil((current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const elapsedDays = Math.max(0, Math.ceil((current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
     const remainingDays = Math.max(0, totalDays - elapsedDays);
-    
+    // Dihitung terpisah dari remainingDays (yang di-clamp ke 0) supaya jumlah hari
+    // keterlambatan tidak hilang saat kontrak sudah lewat tanggal selesai.
+    const lateDays = Math.max(0, elapsedDays - totalDays);
+
     const progress = Math.min(Math.max((elapsedDays / totalDays) * 100, 0), 100);
-    
-    return { progress, remainingDays, totalDays };
+
+    return { progress, remainingDays, lateDays, totalDays };
   };
 
   return {

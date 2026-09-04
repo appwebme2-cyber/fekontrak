@@ -1,5 +1,5 @@
 import { Kontrak } from '@/types/database';
-import { getEffectiveTanggalSelesai } from '@/utils/contractDateUtils';
+import { getEffectiveTanggalMulai, getEffectiveTanggalSelesai } from '@/utils/contractDateUtils';
 
 export interface ProgressStatusConfig {
   behindThreshold: number;
@@ -280,7 +280,7 @@ const expectedProgress = (contract: Kontrak): number | null => {
   const plan = Number(contract.progress_plan);
   if (Number.isFinite(plan) && plan > 0) return plan;
 
-  const start = parseTime(contract.tanggal_mulai);
+  const start = parseTime(getEffectiveTanggalMulai(contract));
   const end = parseTime(getEffectiveTanggalSelesai(contract));
   if (start === null || end === null) return null;
   const total = end - start;

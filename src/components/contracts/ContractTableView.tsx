@@ -6,7 +6,7 @@ import { Kontrak } from '@/types/database';
 import { useVendors } from '@/hooks/useVendors';
 import { formatCurrency } from '@/lib/utils/formatters';
 import { formatDate } from '@/lib/utils/formatters';
-import { getEffectiveTanggalSelesai } from '@/utils/contractDateUtils';
+import { getEffectiveTanggalMulai, getEffectiveTanggalSelesai } from '@/utils/contractDateUtils';
 
 interface ContractTableViewProps {
   contracts: Kontrak[];
@@ -83,7 +83,7 @@ export function ContractTableView({
               </TableCell>
               <TableCell>
                 <span className="text-sm">
-                  {formatDate(contract.tanggal_mulai)}
+                  {formatDate(getEffectiveTanggalMulai(contract))}
                 </span>
               </TableCell>
               <TableCell>
