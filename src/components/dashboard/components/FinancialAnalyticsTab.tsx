@@ -7,9 +7,11 @@ import { TrendingUp, Coins, AlertTriangle, Target, Eye } from 'lucide-react';
 import { AppleBudgetChart } from './AppleBudgetChart';
 import { useNavigate } from 'react-router-dom';
 import { navigateToContract } from '@/utils/navigationUtils';
+import { getEffectiveContractValue, DashboardMetricInvoice } from '@/lib/utils/dashboardMetrics';
 
 interface FinancialAnalyticsTabProps {
   contracts: Kontrak[];
+  invoices: DashboardMetricInvoice[];
   metrics: {
     totalBudget: number;
     budgetUtilization: number;
@@ -22,19 +24,19 @@ interface FinancialAnalyticsTabProps {
   onContractClick?: (contractId: string) => void;
 }
 
-export const FinancialAnalyticsTab = ({ contracts, metrics, onContractClick }: FinancialAnalyticsTabProps) => {
+export const FinancialAnalyticsTab = ({ contracts, invoices, metrics, onContractClick }: FinancialAnalyticsTabProps) => {
   const navigate = useNavigate();
-  // Contract value distribution by work direction
+  // Contract value distribution by work direction (pakai nilai efektif — nilai amandemen kalau ada)
   const workDirectionData = useMemo(() => {
     const distribution = contracts.reduce((acc, contract) => {
       const direction = contract.direksi_pekerjaan || 'Unknown';
-      const value = Number(contract.nilai_awal) || 0;
+      const value = getEffectiveContractValue(contract);
       acc[direction] = (acc[direction] || 0) + value;
       return acc;
     }, {} as Record<string, number>);
 
     const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
-    
+
     return Object.entries(distribution).map(([name, value], index) => ({
       name,
       value: Math.round(value / 1000000), // In millions
@@ -42,31 +44,46 @@ export const FinancialAnalyticsTab = ({ contracts, metrics, onContractClick }: F
     }));
   }, [contracts]);
 
-  // Quarterly cash flow projection
+  // Realisasi kas per kuartal (4 kuartal terakhir, dinamis mengikuti tanggal hari ini) — dari tagihan riil,
+  // bukan formula perkiraan. "Anggaran" adalah pembagian rata Total Budget per kuartal (asumsi transparan).
   const quarterlyData = useMemo(() => {
-    const quarters = ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'];
-    
-    return quarters.map((quarter, index) => {
-      const quarterlyBudget = metrics.totalBudget / 4;
-      const progressFactor = 0.7 + (index * 0.1); // Increasing progress over quarters
-      const projected = quarterlyBudget * progressFactor;
-      
+    const now = new Date();
+    const quarterlyBudget = metrics.totalBudget / 4;
+    const quarters: { label: string; year: number; q: number }[] = [];
+    for (let i = 3; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i * 3, 1);
+      const q = Math.floor(d.getMonth() / 3) + 1;
+      quarters.push({ label: `Q${q} ${d.getFullYear()}`, year: d.getFullYear(), q });
+    }
+
+    return quarters.map(({ label, year, q }) => {
+      const startMonth = (q - 1) * 3;
+      const start = new Date(year, startMonth, 1);
+      const end = new Date(year, startMonth + 3, 1);
+      const realisasi = invoices
+        .filter(inv => {
+          if (!inv.tanggal_tagihan) return false;
+          const d = new Date(inv.tanggal_tagihan);
+          return d >= start && d < end;
+        })
+        .reduce((sum, inv) => sum + (Number(inv.nilai_tagihan) || 0), 0);
+
       return {
-        quarter,
-        projected: Math.round(projected / 1000000),
-        actual: Math.round((projected * 0.85) / 1000000), // 85% realization rate
+        quarter: label,
+        projected: Math.round(quarterlyBudget / 1000000),
+        actual: Math.round(realisasi / 1000000),
       };
     });
-  }, [metrics]);
+  }, [metrics.totalBudget, invoices]);
 
-  // Top 5 contracts by value
+  // Top 5 contracts by value (nilai efektif)
   const topContractsByValue = useMemo(() => {
-    return contracts
-      .sort((a, b) => (Number(b.nilai_awal) || 0) - (Number(a.nilai_awal) || 0))
+    return [...contracts]
+      .sort((a, b) => getEffectiveContractValue(b) - getEffectiveContractValue(a))
       .slice(0, 5)
       .map(contract => ({
         name: contract.judul_kontrak.length > 30 ? `${contract.judul_kontrak.substring(0, 30)}...` : contract.judul_kontrak,
-        value: Math.round((Number(contract.nilai_awal) || 0) / 1000000),
+        value: Math.round(getEffectiveContractValue(contract) / 1000000),
         progress: Number(contract.progress_actual) || 0,
         id: contract.id_kontrak
       }));
@@ -125,7 +142,7 @@ export const FinancialAnalyticsTab = ({ contracts, metrics, onContractClick }: F
               <TrendingUp className="h-8 w-8 opacity-80" />
             </div>
             <div className="mt-2 text-xs opacity-75">
-              Rata-rata performa kontrak
+              Rata-rata Actual/Plan progress
             </div>
           </CardContent>
         </Card>
@@ -147,7 +164,7 @@ export const FinancialAnalyticsTab = ({ contracts, metrics, onContractClick }: F
       </div>
 
       {/* Apple-style Budget vs Realization Chart */}
-      <AppleBudgetChart contracts={contracts} />
+      <AppleBudgetChart contracts={contracts} invoices={invoices} />
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -179,11 +196,13 @@ export const FinancialAnalyticsTab = ({ contracts, metrics, onContractClick }: F
           </CardContent>
         </Card>
 
-        {/* Quarterly Cash Flow Projection */}
+        {/* Realisasi Kas per Kuartal */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Quarterly Cash Flow Projection</CardTitle>
-            <p className="text-sm text-gray-600">Proyeksi arus kas triwulanan (dalam juta Rupiah)</p>
+            <CardTitle className="text-lg">Realisasi Kas per Kuartal</CardTitle>
+            <p className="text-sm text-gray-600">
+              Anggaran (Total Budget dibagi rata 4 kuartal) vs realisasi tagihan riil, 4 kuartal terakhir (dalam juta Rupiah)
+            </p>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -192,8 +211,8 @@ export const FinancialAnalyticsTab = ({ contracts, metrics, onContractClick }: F
                 <XAxis dataKey="quarter" />
                 <YAxis />
                 <Tooltip formatter={(value) => [`Rp ${value}M`, '']} />
-                <Bar dataKey="projected" fill="#3b82f6" name="Projected" />
-                <Bar dataKey="actual" fill="#22c55e" name="Actual" />
+                <Bar dataKey="projected" fill="#3b82f6" name="Anggaran" />
+                <Bar dataKey="actual" fill="#22c55e" name="Realisasi" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

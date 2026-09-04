@@ -9,20 +9,22 @@ import { useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Filter, RotateCcw } from 'lucide-react';
+import { getUniqueDisciplines } from '@/utils/filterUtils';
 
 const Dashboard = () => {
-  const { 
-    metrics: optimizedMetrics, 
-    contractDetails, 
-    isLoading, 
-    error, 
+  const {
+    metrics: optimizedMetrics,
+    contractDetails,
+    isLoading,
+    error,
   } = useSuperOptimizedDashboard();
-  
+
   const { userProfile } = useAuth();
   const navigate = useNavigate();
 
-  // Direksi filter state
+  // Filter Direksi & Disiplin — satu filter ini berlaku untuk seluruh tab dashboard di bawahnya
   const [direksiFilter, setDireksiFilter] = useState('all');
+  const [disiplinFilter, setDisiplinFilter] = useState('all');
 
   const metrics = {
     totalContracts: optimizedMetrics.totalContracts,
@@ -31,17 +33,19 @@ const Dashboard = () => {
     pendingContracts: optimizedMetrics.preKomContracts,
   };
 
-  // Extract unique direksi values
+  // Extract unique direksi & disiplin values
   const workDirections = [...new Set(
     contractDetails
       .map(c => c.direksi_pekerjaan)
       .filter(Boolean) as string[]
   )].sort();
+  const disciplines = getUniqueDisciplines(contractDetails);
 
-  // Filter contracts by direksi
-  const filteredContracts = direksiFilter === 'all'
-    ? contractDetails
-    : contractDetails.filter(c => c.direksi_pekerjaan === direksiFilter);
+  // Filter contracts by direksi & disiplin
+  const filteredContracts = contractDetails.filter(c =>
+    (direksiFilter === 'all' || c.direksi_pekerjaan === direksiFilter) &&
+    (disiplinFilter === 'all' || c.disiplin === disiplinFilter)
+  );
 
   const handleCardClick = (contractId: string) => {
     navigate(`/contracts/${contractId}`);
@@ -93,19 +97,36 @@ const Dashboard = () => {
             ))}
           </SelectContent>
         </Select>
-        {direksiFilter !== 'all' && (
-          <Button variant="ghost" size="sm" onClick={() => setDireksiFilter('all')} className="gap-1">
+        <Select value={disiplinFilter} onValueChange={setDisiplinFilter}>
+          <SelectTrigger className="w-full sm:w-56">
+            <SelectValue placeholder="Pilih Disiplin" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Disiplin</SelectItem>
+            {disciplines.map((d) => (
+              <SelectItem key={d} value={d}>{d}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {(direksiFilter !== 'all' || disiplinFilter !== 'all') && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { setDireksiFilter('all'); setDisiplinFilter('all'); }}
+            className="gap-1"
+          >
             <RotateCcw className="h-3 w-3" />
             Reset
           </Button>
         )}
       </div>
 
-      {/* Interactive Dashboard with filtered data */}
+      {/* Interactive Dashboard with filtered data — satu filter ini berlaku untuk semua tab & card */}
       <OptimizedInteractiveDashboard
         onContractClick={handleCardClick}
         filteredContracts={filteredContracts}
         direksiFilter={direksiFilter}
+        disiplinFilter={disiplinFilter}
       />
     </div>
   );

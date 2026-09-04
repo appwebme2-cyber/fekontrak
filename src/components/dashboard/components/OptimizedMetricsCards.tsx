@@ -1,10 +1,10 @@
 import React, { memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { BarChart3, Clock, TrendingUp, Target, Percent, AlertTriangle } from 'lucide-react';
-import { DashboardMetrics } from '@/hooks/useOptimizedDashboardData';
+import { DashboardMetricsResult } from '@/lib/utils/dashboardMetrics';
 
 interface OptimizedMetricsCardsProps {
-  metrics: DashboardMetrics;
+  metrics: DashboardMetricsResult;
   onCardClick: (type: string) => void;
 }
 

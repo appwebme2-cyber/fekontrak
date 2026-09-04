@@ -85,6 +85,8 @@ export const useContracts = () => {
         tanggal_kom: c.tanggalKom,
         tanggal_lkp: c.tanggalLkp,
         nilai_awal: c.nilaiAwal,
+        has_amendment: c.hasAmendment ?? false,
+        nilai_kontrak_baru: c.nilaiKontrakBaru ?? null,
         durasi_kontrak_hari: c.durasiKontrakHari,
         progress_plan: c.progressPlan,
         progress_actual: c.progressActual,

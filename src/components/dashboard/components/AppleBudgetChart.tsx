@@ -2,20 +2,19 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Kontrak } from '@/types/database';
-import { format, subMonths, eachMonthOfInterval, startOfMonth, endOfMonth } from 'date-fns';
+import { format, subMonths, eachMonthOfInterval } from 'date-fns';
 import { id } from 'date-fns/locale';
+import { DashboardMetricInvoice } from '@/lib/utils/dashboardMetrics';
 
 interface AppleBudgetChartProps {
   contracts: Kontrak[];
+  invoices: DashboardMetricInvoice[];
 }
 
-export const AppleBudgetChart = ({ contracts }: AppleBudgetChartProps) => {
+export const AppleBudgetChart = ({ contracts, invoices }: AppleBudgetChartProps) => {
   const [selectedPeriod, setSelectedPeriod] = useState('1Y');
-  const [workDirectionFilter, setWorkDirectionFilter] = useState('all');
-  const [disciplineFilter, setDisciplineFilter] = useState('all');
 
   const periods = [
     { value: '3M', label: '3M' },
@@ -25,31 +24,11 @@ export const AppleBudgetChart = ({ contracts }: AppleBudgetChartProps) => {
     { value: 'All', label: 'All' }
   ];
 
-  // Get unique work directions and disciplines
-  const workDirections = useMemo(() => {
-    const directions = contracts.map(c => c.direksi_pekerjaan).filter(Boolean);
-    return [...new Set(directions)];
-  }, [contracts]);
-
-  const disciplines = useMemo(() => {
-    const discs = contracts.map(c => c.disiplin).filter(Boolean);
-    return [...new Set(discs)];
-  }, [contracts]);
-
-  // Filter contracts
-  const filteredContracts = useMemo(() => {
-    return contracts.filter(contract => {
-      const matchesWorkDirection = workDirectionFilter === 'all' || contract.direksi_pekerjaan === workDirectionFilter;
-      const matchesDiscipline = disciplineFilter === 'all' || contract.disiplin === disciplineFilter;
-      return matchesWorkDirection && matchesDiscipline;
-    });
-  }, [contracts, workDirectionFilter, disciplineFilter]);
-
-  // Generate chart data
+  // Generate chart data — Realization dihitung dari total tagihan riil per bulan, bukan simulasi
   const chartData = useMemo(() => {
     const now = new Date();
     let startDate: Date;
-    
+
     switch (selectedPeriod) {
       case '3M':
         startDate = subMonths(now, 3);
@@ -64,45 +43,52 @@ export const AppleBudgetChart = ({ contracts }: AppleBudgetChartProps) => {
         startDate = subMonths(now, 24);
         break;
       default: // 'All'
-        startDate = new Date(2024, 0, 1);
+        startDate = invoices.reduce((earliest, inv) => {
+          if (!inv.tanggal_tagihan) return earliest;
+          const d = new Date(inv.tanggal_tagihan);
+          return d < earliest ? d : earliest;
+        }, now);
     }
 
     const intervals = eachMonthOfInterval({ start: startDate, end: now });
-    const totalBudget = filteredContracts.reduce((sum, c) => sum + (Number(c.nilai_awal) || 0), 0);
+    const totalBudget = contracts.reduce((sum, c) => sum + (Number(c.nilai_awal) || 0), 0);
     const monthlyBudget = totalBudget / 12;
 
-    return intervals.map((date, index) => {
-      const monthName = format(date, 'MMM', { locale: id });
-      
-      // Calculate budget (steady allocation)
+    return intervals.map((date) => {
+      const monthName = format(date, 'MMM yyyy', { locale: id });
+
+      // Anggaran: alokasi rata per bulan (asumsi transparan, bukan klaim aktual)
       const budget = monthlyBudget / 1000000; // Convert to millions
-      
-      // Calculate realization based on contract progress and seasonal factors
-      const seasonalFactor = 0.6 + (Math.sin((index + 1) * Math.PI / 6) * 0.4); // Seasonal variation
-      const avgProgress = filteredContracts.length > 0 
-        ? filteredContracts.reduce((sum, c) => sum + (Number(c.progress_actual) || 0), 0) / filteredContracts.length
-        : 0;
-      
-      const realization = (budget * seasonalFactor * (avgProgress / 100)) + (Math.random() * 200 - 100); // Add some variation
-      
-      // Calculate target (90% of budget)
+
+      // Realisasi: total tagihan riil yang jatuh di bulan ini
+      const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+      const realization = invoices
+        .filter(inv => {
+          if (!inv.tanggal_tagihan) return false;
+          const d = new Date(inv.tanggal_tagihan);
+          return d >= monthStart && d < monthEnd;
+        })
+        .reduce((sum, inv) => sum + (Number(inv.nilai_tagihan) || 0), 0) / 1000000;
+
+      // Target: 90% dari anggaran bulan itu
       const target = budget * 0.9;
 
       return {
         month: monthName,
         budget: Math.round(budget),
-        realization: Math.max(0, Math.round(realization)),
+        realization: Math.round(realization),
         target: Math.round(target),
         fullDate: date
       };
     });
-  }, [filteredContracts, selectedPeriod]);
+  }, [contracts, invoices, selectedPeriod]);
 
   // Calculate current metrics
   const currentData = chartData[chartData.length - 1];
   const previousData = chartData[chartData.length - 2];
-  const realizationChange = currentData && previousData 
-    ? ((currentData.realization - previousData.realization) / previousData.realization) * 100 
+  const realizationChange = currentData && previousData && previousData.realization > 0
+    ? ((currentData.realization - previousData.realization) / previousData.realization) * 100
     : 0;
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -113,7 +99,7 @@ export const AppleBudgetChart = ({ contracts }: AppleBudgetChartProps) => {
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-4 text-sm mb-1">
               <div className="flex items-center gap-2">
-                <div 
+                <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: entry.color }}
                 />
@@ -142,15 +128,15 @@ export const AppleBudgetChart = ({ contracts }: AppleBudgetChartProps) => {
                 Rp {currentData?.realization || 0}M
               </span>
               <span className={`text-sm px-3 py-1.5 rounded-full font-semibold ${
-                realizationChange >= 0 
-                  ? 'text-emerald-700 bg-emerald-100' 
+                realizationChange >= 0
+                  ? 'text-emerald-700 bg-emerald-100'
                   : 'text-red-700 bg-red-100'
               }`}>
                 {realizationChange >= 0 ? '+' : ''}{realizationChange.toFixed(1)}%
               </span>
             </div>
           </div>
-          
+
           {/* Apple-style Period Selector */}
           <div className="flex items-center gap-1 p-1.5 bg-gray-100/80 rounded-xl w-fit backdrop-blur-sm">
             {periods.map((period) => (
@@ -170,39 +156,8 @@ export const AppleBudgetChart = ({ contracts }: AppleBudgetChartProps) => {
             ))}
           </div>
         </div>
-        
-        {/* Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-          <Select value={workDirectionFilter} onValueChange={setWorkDirectionFilter}>
-            <SelectTrigger className="w-full border-gray-200/50 bg-white/80 backdrop-blur-sm">
-              <SelectValue placeholder="Direksi Pekerjaan" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Direksi</SelectItem>
-              {workDirections.map((direction) => (
-                <SelectItem key={direction} value={direction}>
-                  {direction}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={disciplineFilter} onValueChange={setDisciplineFilter}>
-            <SelectTrigger className="w-full border-gray-200/50 bg-white/80 backdrop-blur-sm">
-              <SelectValue placeholder="Disiplin" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Disiplin</SelectItem>
-              {disciplines.map((discipline) => (
-                <SelectItem key={discipline} value={discipline}>
-                  {discipline}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </CardHeader>
-      
+
       <CardContent>
         <div className="h-96 p-4">
           <ResponsiveContainer width="100%" height="100%">
@@ -222,16 +177,16 @@ export const AppleBudgetChart = ({ contracts }: AppleBudgetChartProps) => {
                   <stop offset="100%" stopColor="#22c55e" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
-              
+
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.6} />
-              <XAxis 
-                dataKey="month" 
+              <XAxis
+                dataKey="month"
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 12, fill: '#64748b', fontWeight: 500 }}
                 dy={10}
               />
-              <YAxis 
+              <YAxis
                 axisLine={false}
                 tickLine={false}
                 tick={{ fontSize: 12, fill: '#64748b', fontWeight: 500 }}
@@ -239,7 +194,7 @@ export const AppleBudgetChart = ({ contracts }: AppleBudgetChartProps) => {
                 dx={-10}
               />
               <Tooltip content={<CustomTooltip />} />
-              
+
               {/* Budget Area */}
               <Area
                 type="monotone"
@@ -251,7 +206,7 @@ export const AppleBudgetChart = ({ contracts }: AppleBudgetChartProps) => {
                 activeDot={{ r: 7, stroke: '#3b82f6', strokeWidth: 3, fill: '#ffffff' }}
                 name="Budget"
               />
-              
+
               {/* Target Area */}
               <Area
                 type="monotone"
@@ -264,7 +219,7 @@ export const AppleBudgetChart = ({ contracts }: AppleBudgetChartProps) => {
                 activeDot={{ r: 7, stroke: '#f59e0b', strokeWidth: 3, fill: '#ffffff' }}
                 name="Target"
               />
-              
+
               {/* Realization Area */}
               <Area
                 type="monotone"
@@ -279,7 +234,7 @@ export const AppleBudgetChart = ({ contracts }: AppleBudgetChartProps) => {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        
+
         {/* Enhanced Legend */}
         <div className="flex items-center justify-center gap-8 mt-6 pt-6 border-t border-gray-100">
           <div className="flex items-center gap-3">

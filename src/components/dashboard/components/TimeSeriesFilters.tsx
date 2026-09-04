@@ -8,14 +8,8 @@ interface TimeSeriesFiltersProps {
   onPeriodChange: (period: string) => void;
   selectedChartType: string;
   onChartTypeChange: (type: string) => void;
-  workDirectionFilter: string;
-  onWorkDirectionChange: (direction: string) => void;
-  disciplineFilter: string;
-  onDisciplineChange: (discipline: string) => void;
   statusFilter: string;
   onStatusChange: (status: string) => void;
-  workDirections: string[];
-  disciplines: string[];
 }
 
 export const TimeSeriesFilters = ({
@@ -23,14 +17,8 @@ export const TimeSeriesFilters = ({
   onPeriodChange,
   selectedChartType,
   onChartTypeChange,
-  workDirectionFilter,
-  onWorkDirectionChange,
-  disciplineFilter,
-  onDisciplineChange,
   statusFilter,
   onStatusChange,
-  workDirections,
-  disciplines
 }: TimeSeriesFiltersProps) => {
   const periods = [
     { value: '1D', label: '1D' },
@@ -77,7 +65,7 @@ export const TimeSeriesFilters = ({
       </div>
 
       {/* Filter Controls */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Select value={selectedChartType} onValueChange={onChartTypeChange}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Pilih Metrik" />
@@ -86,34 +74,6 @@ export const TimeSeriesFilters = ({
             {chartTypes.map((type) => (
               <SelectItem key={type.value} value={type.value}>
                 {type.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={workDirectionFilter} onValueChange={onWorkDirectionChange}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Direksi Pekerjaan" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua Direksi</SelectItem>
-            {workDirections.map((direction) => (
-              <SelectItem key={direction} value={direction}>
-                {direction}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={disciplineFilter} onValueChange={onDisciplineChange}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Disiplin" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua Disiplin</SelectItem>
-            {disciplines.map((discipline) => (
-              <SelectItem key={discipline} value={discipline}>
-                {discipline}
               </SelectItem>
             ))}
           </SelectContent>

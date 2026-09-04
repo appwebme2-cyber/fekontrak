@@ -6,6 +6,7 @@ import { BarChart3, Coins, TrendingUp, AlertTriangle, Clock } from 'lucide-react
 import { OptimizedMetricsCards } from './components/OptimizedMetricsCards';
 import { OptimizedContractListSkeleton } from '@/components/contracts/OptimizedLoadingStates';
 import { useSuperOptimizedDashboard, SuperOptimizedContract } from '@/hooks/useSuperOptimizedDashboard';
+import { computeDashboardMetrics } from '@/lib/utils/dashboardMetrics';
 import { Kontrak } from '@/types/database';
 import { getProgressEligibleContracts } from '@/utils/contractEligibilityUtils';
 
@@ -19,36 +20,35 @@ interface OptimizedInteractiveDashboardProps {
   onContractClick?: (contractId: string) => void;
   filteredContracts?: SuperOptimizedContract[];
   direksiFilter?: string;
+  disiplinFilter?: string;
 }
 
 export const OptimizedInteractiveDashboard = ({
   onContractClick,
   filteredContracts: externalContracts,
   direksiFilter,
+  disiplinFilter,
 }: OptimizedInteractiveDashboardProps) => {
   const [activeTab, setActiveTab] = useState('ringkasan');
   const navigate = useNavigate();
-  const { metrics: rawMetrics, contractDetails, isLoading } = useSuperOptimizedDashboard();
+  const { contractDetails, invoiceDetails, isLoading } = useSuperOptimizedDashboard();
 
   // Use externally filtered contracts if provided, otherwise use all
   const contracts = externalContracts ?? contractDetails;
 
-  // Recalculate metrics from filtered contracts
-  const metrics = useMemo(() => {
-    if (!externalContracts) return rawMetrics;
-    const active = contracts.filter(c => c.status_kontrak === 'Active' || c.status_kontrak === 'Aktif').length;
-    const completed = contracts.filter(c => c.status_kontrak === 'Completed' || c.status_kontrak === 'Selesai').length;
-    const preKom = contracts.filter(c => c.status_kontrak === 'Pre-KOM').length;
-    const totalBudget = contracts.reduce((s, c) => s + (Number(c.nilai_awal) || 0), 0);
-    return {
-      ...rawMetrics,
-      totalContracts: contracts.length,
-      activeContracts: active,
-      completedContracts: completed,
-      preKomContracts: preKom,
-      totalBudget,
-    };
-  }, [contracts, externalContracts, rawMetrics]);
+  // Semua metrik (termasuk Budget Utilization, Performance Index, Amendments, Hampir Berakhir)
+  // dihitung ulang dari `contracts` yang sudah difilter — supaya seluruh card & tab ikut filter
+  // Direksi/Disiplin di halaman, bukan cuma sebagian seperti sebelumnya.
+  const metrics = useMemo(
+    () => computeDashboardMetrics(contracts, invoiceDetails),
+    [contracts, invoiceDetails]
+  );
+
+  // Tagihan yang scope-nya ikut kontrak yang sedang difilter — dipakai chart Keuangan
+  const scopedInvoices = useMemo(() => {
+    const contractIds = new Set(contracts.map(c => c.id_kontrak));
+    return invoiceDetails.filter(i => contractIds.has(i.id_kontrak));
+  }, [contracts, invoiceDetails]);
 
   // Progress status data
   const progressStatusData = useMemo(() => {
@@ -86,24 +86,24 @@ export const OptimizedInteractiveDashboard = ({
   };
 
   const handleCardClick = (type: string) => {
-    const direksiParam = direksiFilter && direksiFilter !== 'all'
-      ? `&direksi=${encodeURIComponent(direksiFilter)}`
-      : '';
+    const extraParams =
+      (direksiFilter && direksiFilter !== 'all' ? `&direksi=${encodeURIComponent(direksiFilter)}` : '') +
+      (disiplinFilter && disiplinFilter !== 'all' ? `&disiplin=${encodeURIComponent(disiplinFilter)}` : '');
     switch (type) {
       case 'total':
-        navigate(direksiParam ? `/contracts?${direksiParam.slice(1)}` : '/contracts');
+        navigate(extraParams ? `/contracts?${extraParams.slice(1)}` : '/contracts');
         break;
       case 'pre-kom':
-        navigate(`/contracts?status=Pre-KOM${direksiParam}`);
+        navigate(`/contracts?status=Pre-KOM${extraParams}`);
         break;
       case 'active':
-        navigate(`/contracts?status=Aktif${direksiParam}`);
+        navigate(`/contracts?status=Active${extraParams}`);
         break;
       case 'completed':
-        navigate(`/contracts?status=Selesai${direksiParam}`);
+        navigate(`/contracts?status=Completed${extraParams}`);
         break;
       case 'nearing-end':
-        navigate(`/contracts?status=Aktif${direksiParam}`);
+        navigate(`/contracts?status=Active${extraParams}`);
         break;
       default:
         break;
@@ -189,6 +189,7 @@ export const OptimizedInteractiveDashboard = ({
             {contracts.length > 0 && (
               <FinancialAnalyticsTab
                 contracts={contracts as Kontrak[]}
+                invoices={scopedInvoices}
                 metrics={financialMetrics}
                 onContractClick={onContractClick}
               />

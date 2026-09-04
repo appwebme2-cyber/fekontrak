@@ -12,8 +12,6 @@ interface EnhancedTimeSeriesChartProps {
   contracts: Kontrak[];
   selectedPeriod: string;
   chartType: 'value' | 'progress' | 'count';
-  workDirectionFilter?: string;
-  disciplineFilter?: string;
   statusFilter?: string;
   onDataPointClick?: (filters: any) => void;
 }
@@ -22,40 +20,26 @@ export const EnhancedTimeSeriesChart = ({
   contracts,
   selectedPeriod,
   chartType,
-  workDirectionFilter = 'all',
-  disciplineFilter = 'all',
   statusFilter = 'all',
   onDataPointClick
 }: EnhancedTimeSeriesChartProps) => {
   const navigate = useNavigate();
-  // Filter contracts based on selected filters
+  // Filter contracts based on selected status
   const filteredContracts = useMemo(() => {
-    const filtered = contracts.filter(contract => {
-      const matchesWorkDirection = workDirectionFilter === 'all' || contract.direksi_pekerjaan === workDirectionFilter;
-      const matchesDiscipline = disciplineFilter === 'all' || contract.disiplin === disciplineFilter;
-      
-      // Normalize status to handle both English and Indonesian variants
-      const normalizeStatus = (status: string) => {
-        switch (status) {
-          case 'Aktif': return 'Active';
-          case 'Selesai': return 'Completed';
-          default: return status;
-        }
-      };
-      
-      const normalizedContractStatus = normalizeStatus(contract.status_kontrak);
-      const normalizedFilterStatus = normalizeStatus(statusFilter);
-      const matchesStatus = statusFilter === 'all' || normalizedContractStatus === normalizedFilterStatus;
-      
-      return matchesWorkDirection && matchesDiscipline && matchesStatus;
-    });
-    
-    console.log('Time Series - Total contracts:', contracts.length);
-    console.log('Time Series - Filtered contracts:', filtered.length);
-    console.log('Time Series - Filters applied:', { workDirectionFilter, disciplineFilter, statusFilter });
-    
-    return filtered;
-  }, [contracts, workDirectionFilter, disciplineFilter, statusFilter]);
+    if (statusFilter === 'all') return contracts;
+
+    // Normalize status to handle both English and Indonesian variants
+    const normalizeStatus = (status: string) => {
+      switch (status) {
+        case 'Aktif': return 'Active';
+        case 'Selesai': return 'Completed';
+        default: return status;
+      }
+    };
+
+    const normalizedFilterStatus = normalizeStatus(statusFilter);
+    return contracts.filter(contract => normalizeStatus(contract.status_kontrak) === normalizedFilterStatus);
+  }, [contracts, statusFilter]);
 
   // Generate time series data based on selected period
   const timeSeriesData = useMemo(() => {
@@ -102,12 +86,6 @@ export const EnhancedTimeSeriesChart = ({
       const relevantContracts = filteredContracts.filter(contract => {
         // Use tanggal_kom as the primary date field, fallback to created_at if available
         const contractDate = new Date(contract.tanggal_kom || contract.created_at || contract.tanggal_terima_dokumen || '2024-01-01');
-        
-        // For debugging, let's log contracts without valid dates
-        if (!contract.tanggal_kom && !contract.created_at && !contract.tanggal_terima_dokumen) {
-          console.log('Contract without date:', contract.id_kontrak, contract.judul_kontrak);
-        }
-        
         return contractDate <= date;
       });
 
@@ -132,11 +110,10 @@ export const EnhancedTimeSeriesChart = ({
           break;
       }
 
-      // For the latest date, show the actual filtered count for debugging
+      // Untuk tanggal terakhir, pastikan angka persis sama dengan jumlah kontrak terfilter saat ini
       const isLatestDate = date === intervals[intervals.length - 1];
       if (isLatestDate && chartType === 'count') {
-        console.log('Latest date contract count:', value, 'Expected:', filteredContracts.length);
-        value = filteredContracts.length; // Use filtered count for latest date
+        value = filteredContracts.length;
       }
 
       return {
@@ -167,16 +144,12 @@ export const EnhancedTimeSeriesChart = ({
   const handleDataPointClick = (data: any) => {
     if (onDataPointClick) {
       onDataPointClick({
-        workDirection: workDirectionFilter !== 'all' ? workDirectionFilter : undefined,
-        discipline: disciplineFilter !== 'all' ? disciplineFilter : undefined,
         status: statusFilter !== 'all' ? statusFilter : undefined,
         period: data.fullDate
       });
     } else {
-      // Default behavior: navigate to contracts with current filters
+      // Default behavior: navigate to contracts with current status filter
       navigateToContractsWithFilter(navigate, {
-        workDirection: workDirectionFilter !== 'all' ? workDirectionFilter : undefined,
-        discipline: disciplineFilter !== 'all' ? disciplineFilter : undefined,
         status: statusFilter !== 'all' ? statusFilter : undefined
       });
     }

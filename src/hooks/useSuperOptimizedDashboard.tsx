@@ -1,8 +1,29 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useVendors } from './useVendors';
+import { computeDashboardMetrics, DashboardMetricInvoice } from '@/lib/utils/dashboardMetrics';
 
 const API_URL = "https://bekontrak-production.up.railway.app/api";
+
+export interface SuperOptimizedContract {
+  id_kontrak: string;
+  judul_kontrak: string;
+  status_kontrak: string;
+  nilai_awal: number | null;
+  has_amendment: boolean;
+  nilai_kontrak_baru: number | null;
+  progress_actual: number | null;
+  progress_plan: number | null;
+  tanggal_selesai: string | null;
+  direksi_pekerjaan: string | null;
+  disiplin: string | null;
+  id_vendor: string | null;
+  tipe_kontrak: string;
+  tanggal_terima_dokumen: string | null;
+  tanggal_kom: string | null;
+  sla_kom_hari: number | null;
+  vendor: { id_vendor: string; nama_vendor: string; status_vendor?: string } | null;
+}
 
 export const useSuperOptimizedDashboard = () => {
 
@@ -48,56 +69,6 @@ export const useSuperOptimizedDashboard = () => {
     return new Map(vendors.map(v => [v.id_vendor, v]));
   }, [vendors]);
 
-  // ================= METRICS =================
-  const metrics = useMemo(() => {
-
-    const totalContracts = contracts.length;
-
-    const activeContracts = contracts.filter((c: any) => c.statusKontrak === 'Aktif').length;
-    const completedContracts = contracts.filter((c: any) => c.statusKontrak === 'Selesai').length;
-    const preKomContracts = contracts.filter((c: any) => c.statusKontrak === 'Pre-KOM').length;
-
-    const totalBudget = contracts.reduce((sum: number, c: any) =>
-      sum + (Number(c.nilaiAwal) || 0), 0);
-
-    const budgetUtilization = invoices.reduce((sum: number, i: any) =>
-      sum + (Number(i.nilaiTagihan) || 0), 0);
-
-    const budgetUtilizationRate =
-      totalBudget > 0 ? (budgetUtilization / totalBudget) * 100 : 0;
-
-    const avgPerformanceIndex =
-      contracts.length > 0
-        ? contracts.reduce((sum: number, c: any) =>
-            sum + (Number(c.progressActual) || 0), 0) / contracts.length
-        : 0;
-
-    const contractsNearingEnd = contracts.filter((c: any) => {
-      if (!c.tanggalSelesai) return false;
-
-      const endDate = new Date(c.tanggalSelesai);
-      const now = new Date();
-      const diff = (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
-
-      return diff <= 30;
-    }).length;
-
-    return {
-      totalContracts,
-      activeContracts,
-      completedContracts,
-      preKomContracts,
-      totalBudget,
-      budgetUtilization,
-      budgetUtilizationRate,
-      avgPerformanceIndex,
-      contractsNearingEnd,
-      amendmentCount: 0,
-      totalAmendmentValue: 0,
-    };
-
-  }, [contracts, invoices]);
-
   // ================= CONTRACT DETAILS =================
   const contractDetails = useMemo(() => {
     return contracts.map((c: any) => {
@@ -108,6 +79,8 @@ export const useSuperOptimizedDashboard = () => {
         judul_kontrak: c.judulKontrak,
         status_kontrak: c.statusKontrak,
         nilai_awal: c.nilaiAwal,
+        has_amendment: c.hasAmendment ?? false,
+        nilai_kontrak_baru: c.nilaiKontrakBaru ?? null,
         progress_actual: c.progressActual,
         progress_plan: c.progressPlan,
         tanggal_selesai: c.tanggalSelesai,
@@ -129,11 +102,27 @@ export const useSuperOptimizedDashboard = () => {
     });
   }, [contracts, vendorMap]);
 
+  // ================= INVOICE DETAILS (untuk agregasi realisasi anggaran) =================
+  const invoiceDetails: DashboardMetricInvoice[] = useMemo(() => {
+    return invoices.map((i: any) => ({
+      id_kontrak: i.idKontrak,
+      nilai_tagihan: i.nilaiTagihan,
+      tanggal_tagihan: i.tanggalTagihan,
+    }));
+  }, [invoices]);
+
+  // ================= METRICS =================
+  const metrics = useMemo(
+    () => computeDashboardMetrics(contractDetails, invoiceDetails),
+    [contractDetails, invoiceDetails]
+  );
+
   const dataConsistency = contractDetails.length === metrics.totalContracts;
 
   return {
     metrics,
     contractDetails,
+    invoiceDetails,
     isLoading: contractsLoading || invoicesLoading || vendorsLoading,
     dataConsistency,
   };
