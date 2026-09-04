@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Kontrak } from '@/types/database';
@@ -7,12 +8,38 @@ interface ContractStatusByDirectionChartProps {
   contracts: Kontrak[];
 }
 
+// Samakan label status di chart (Bahasa Indonesia) dengan nilai status_kontrak
+// yang sudah dinormalisasi di halaman Daftar Kontrak (NewContracts.tsx)
+const STATUS_PARAM_MAP: Record<string, string> = {
+  'Pre-KOM': 'Pre-KOM',
+  'Aktif': 'Active',
+  'Selesai': 'Completed',
+};
+
 export const ContractStatusByDirectionChart = ({
   contracts
 }: ContractStatusByDirectionChartProps) => {
+  const navigate = useNavigate();
+
   // Define complete work directions and disciplines from project requirements
   const workDirections = ['MA5', 'MA6', 'MA7', 'Workshop'];
   const disciplines = ['Instrumentasi', 'Electrical', 'Rotating', 'Stationary', 'Alat Berat', 'Tools'];
+
+  // Klik batang "Direksi Pekerjaan" → buka Daftar Kontrak dengan filter status + direksi
+  const handleDirectionBarClick = (statusLabel: string) => (data: any) => {
+    const direction = data?.direction ?? data?.payload?.direction;
+    if (!direction || direction === 'Data Tidak Lengkap') return;
+    const status = STATUS_PARAM_MAP[statusLabel] ?? statusLabel;
+    navigate(`/contracts?status=${encodeURIComponent(status)}&direksi=${encodeURIComponent(direction)}`);
+  };
+
+  // Klik batang "Disiplin" → buka Daftar Kontrak dengan filter status + disiplin
+  const handleDisciplineBarClick = (statusLabel: string) => (data: any) => {
+    const discipline = data?.discipline ?? data?.payload?.discipline;
+    if (!discipline || discipline === 'Data Tidak Lengkap') return;
+    const status = STATUS_PARAM_MAP[statusLabel] ?? statusLabel;
+    navigate(`/contracts?status=${encodeURIComponent(status)}&disiplin=${encodeURIComponent(discipline)}`);
+  };
 
   // Process data for the work direction chart
   const directionChartData = React.useMemo(() => {
@@ -107,6 +134,9 @@ export const ContractStatusByDirectionChart = ({
           <p className="text-sm text-muted-foreground">
             Total {contracts.length} kontrak dari 4 area: MA5, MA6, MA7, dan Workshop
           </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Klik salah satu bagian batang untuk melihat daftar kontraknya
+          </p>
         </CardHeader>
         <CardContent>
           <div className="h-80">
@@ -121,41 +151,47 @@ export const ContractStatusByDirectionChart = ({
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="direction" 
+                <XAxis
+                  dataKey="direction"
                   angle={-45}
                   textAnchor="end"
                   height={80}
                   fontSize={12}
                 />
                 <YAxis />
-                <Tooltip 
+                <Tooltip
                   labelStyle={{ color: '#374151' }}
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: '1px solid #e5e7eb',
                     borderRadius: '6px'
                   }}
                   formatter={(value, name) => [value, name]}
                 />
                 <Legend />
-                <Bar 
-                  dataKey="Pre-KOM" 
-                  stackId="a" 
-                  fill="#f59e0b" 
+                <Bar
+                  dataKey="Pre-KOM"
+                  stackId="a"
+                  fill="#f59e0b"
                   name="Pre-KOM"
+                  onClick={handleDirectionBarClick('Pre-KOM')}
+                  style={{ cursor: 'pointer' }}
                 />
-                <Bar 
-                  dataKey="Aktif" 
-                  stackId="a" 
-                  fill="#22c55e" 
+                <Bar
+                  dataKey="Aktif"
+                  stackId="a"
+                  fill="#22c55e"
                   name="Aktif"
+                  onClick={handleDirectionBarClick('Aktif')}
+                  style={{ cursor: 'pointer' }}
                 />
-                <Bar 
-                  dataKey="Selesai" 
-                  stackId="a" 
-                  fill="#3b82f6" 
+                <Bar
+                  dataKey="Selesai"
+                  stackId="a"
+                  fill="#3b82f6"
                   name="Selesai"
+                  onClick={handleDirectionBarClick('Selesai')}
+                  style={{ cursor: 'pointer' }}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -172,6 +208,9 @@ export const ContractStatusByDirectionChart = ({
           <p className="text-sm text-muted-foreground">
             Distribusi kontrak berdasarkan 6 disiplin: Instrumentasi, Electrical, Rotating, Stationary, Alat Berat, dan Tools
           </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Klik salah satu bagian batang untuk melihat daftar kontraknya
+          </p>
         </CardHeader>
         <CardContent>
           <div className="h-80">
@@ -186,41 +225,47 @@ export const ContractStatusByDirectionChart = ({
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="discipline" 
+                <XAxis
+                  dataKey="discipline"
                   angle={-45}
                   textAnchor="end"
                   height={80}
                   fontSize={12}
                 />
                 <YAxis />
-                <Tooltip 
+                <Tooltip
                   labelStyle={{ color: '#374151' }}
-                  contentStyle={{ 
-                    backgroundColor: 'white', 
+                  contentStyle={{
+                    backgroundColor: 'white',
                     border: '1px solid #e5e7eb',
                     borderRadius: '6px'
                   }}
                   formatter={(value, name) => [value, name]}
                 />
                 <Legend />
-                <Bar 
-                  dataKey="Pre-KOM" 
-                  stackId="a" 
-                  fill="#f59e0b" 
+                <Bar
+                  dataKey="Pre-KOM"
+                  stackId="a"
+                  fill="#f59e0b"
                   name="Pre-KOM"
+                  onClick={handleDisciplineBarClick('Pre-KOM')}
+                  style={{ cursor: 'pointer' }}
                 />
-                <Bar 
-                  dataKey="Aktif" 
-                  stackId="a" 
-                  fill="#22c55e" 
+                <Bar
+                  dataKey="Aktif"
+                  stackId="a"
+                  fill="#22c55e"
                   name="Aktif"
+                  onClick={handleDisciplineBarClick('Aktif')}
+                  style={{ cursor: 'pointer' }}
                 />
-                <Bar 
-                  dataKey="Selesai" 
-                  stackId="a" 
-                  fill="#3b82f6" 
+                <Bar
+                  dataKey="Selesai"
+                  stackId="a"
+                  fill="#3b82f6"
                   name="Selesai"
+                  onClick={handleDisciplineBarClick('Selesai')}
+                  style={{ cursor: 'pointer' }}
                 />
               </BarChart>
             </ResponsiveContainer>

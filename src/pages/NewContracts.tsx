@@ -37,6 +37,7 @@ const NewContracts = () => {
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterDireksi, setFilterDireksi] = useState<string>('all');
+  const [filterDisiplin, setFilterDisiplin] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedKontrak, setSelectedKontrak] = useState<Kontrak | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -46,6 +47,8 @@ const NewContracts = () => {
     if (status) setFilterStatus(status);
     const direksi = searchParams.get('direksi');
     if (direksi) setFilterDireksi(direksi);
+    const disiplin = searchParams.get('disiplin');
+    if (disiplin) setFilterDisiplin(disiplin);
   }, [searchParams]);
 
   const { contracts: kontraks = [], isLoading } = useContracts();
@@ -73,8 +76,9 @@ const NewContracts = () => {
     const matchesType = filterType === 'all' || kontrak.tipe_kontrak === filterType;
     const matchesStatus = filterStatus === 'all' || normalizeStatus(kontrak.status_kontrak) === filterStatus;
     const matchesDireksi = filterDireksi === 'all' || kontrak.direksi_pekerjaan === filterDireksi;
+    const matchesDisiplin = filterDisiplin === 'all' || kontrak.disiplin === filterDisiplin;
 
-    return matchesSearch && matchesType && matchesStatus && matchesDireksi;
+    return matchesSearch && matchesType && matchesStatus && matchesDireksi && matchesDisiplin;
   });
 
   const getStatusColor = (status: string) => {
@@ -340,6 +344,30 @@ const NewContracts = () => {
               </SelectContent>
             </Select>
           </div>
+
+          {(filterDireksi !== 'all' || filterDisiplin !== 'all') && (
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <span className="text-sm text-gray-500">Filter aktif dari dashboard:</span>
+              {filterDireksi !== 'all' && (
+                <Badge
+                  variant="secondary"
+                  className="gap-1 cursor-pointer hover:bg-gray-200"
+                  onClick={() => setFilterDireksi('all')}
+                >
+                  Direksi: {filterDireksi} ×
+                </Badge>
+              )}
+              {filterDisiplin !== 'all' && (
+                <Badge
+                  variant="secondary"
+                  className="gap-1 cursor-pointer hover:bg-gray-200"
+                  onClick={() => setFilterDisiplin('all')}
+                >
+                  Disiplin: {filterDisiplin} ×
+                </Badge>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
