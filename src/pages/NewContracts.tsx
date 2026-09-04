@@ -38,6 +38,7 @@ const NewContracts = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterDireksi, setFilterDireksi] = useState<string>('all');
   const [filterDisiplin, setFilterDisiplin] = useState<string>('all');
+  const [filterAmandemen, setFilterAmandemen] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedKontrak, setSelectedKontrak] = useState<Kontrak | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -49,6 +50,8 @@ const NewContracts = () => {
     if (direksi) setFilterDireksi(direksi);
     const disiplin = searchParams.get('disiplin');
     if (disiplin) setFilterDisiplin(disiplin);
+    const amandemen = searchParams.get('amandemen');
+    if (amandemen) setFilterAmandemen(amandemen);
   }, [searchParams]);
 
   const { contracts: kontraks = [], isLoading } = useContracts();
@@ -77,8 +80,11 @@ const NewContracts = () => {
     const matchesStatus = filterStatus === 'all' || normalizeStatus(kontrak.status_kontrak) === filterStatus;
     const matchesDireksi = filterDireksi === 'all' || kontrak.direksi_pekerjaan === filterDireksi;
     const matchesDisiplin = filterDisiplin === 'all' || kontrak.disiplin === filterDisiplin;
+    const matchesAmandemen = filterAmandemen === 'all' ||
+      (filterAmandemen === 'with' && kontrak.has_amendment) ||
+      (filterAmandemen === 'without' && !kontrak.has_amendment);
 
-    return matchesSearch && matchesType && matchesStatus && matchesDireksi && matchesDisiplin;
+    return matchesSearch && matchesType && matchesStatus && matchesDireksi && matchesDisiplin && matchesAmandemen;
   });
 
   const getStatusColor = (status: string) => {
@@ -345,7 +351,7 @@ const NewContracts = () => {
             </Select>
           </div>
 
-          {(filterDireksi !== 'all' || filterDisiplin !== 'all') && (
+          {(filterDireksi !== 'all' || filterDisiplin !== 'all' || filterAmandemen !== 'all') && (
             <div className="flex flex-wrap items-center gap-2 mt-3">
               <span className="text-sm text-gray-500">Filter aktif dari dashboard:</span>
               {filterDireksi !== 'all' && (
@@ -364,6 +370,15 @@ const NewContracts = () => {
                   onClick={() => setFilterDisiplin('all')}
                 >
                   Disiplin: {filterDisiplin} ×
+                </Badge>
+              )}
+              {filterAmandemen !== 'all' && (
+                <Badge
+                  variant="secondary"
+                  className="gap-1 cursor-pointer hover:bg-gray-200"
+                  onClick={() => setFilterAmandemen('all')}
+                >
+                  Amandemen: {filterAmandemen === 'with' ? 'Memiliki Amandemen' : 'Tanpa Amandemen'} ×
                 </Badge>
               )}
             </div>

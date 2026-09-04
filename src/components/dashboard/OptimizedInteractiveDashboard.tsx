@@ -79,16 +79,47 @@ export const OptimizedInteractiveDashboard = ({
     ].filter(i => i.value > 0);
   }, [contracts]);
 
-  const handleChartClick = (data: any) => {
+  // Query string ?direksi=...&disiplin=... yang sedang aktif di halaman dashboard,
+  // dipakai supaya klik card/chart membawa filter yang sama ke Daftar Kontrak
+  const buildExtraParams = () =>
+    (direksiFilter && direksiFilter !== 'all' ? `&direksi=${encodeURIComponent(direksiFilter)}` : '') +
+    (disiplinFilter && disiplinFilter !== 'all' ? `&disiplin=${encodeURIComponent(disiplinFilter)}` : '');
+
+  // Label status Indonesia (dipakai chart/pie) → nilai status_kontrak yang dinormalisasi
+  // di Daftar Kontrak (sama seperti klik bar chart Direksi/Disiplin)
+  const STATUS_PARAM_MAP: Record<string, string> = {
+    'Pre-KOM': 'Pre-KOM',
+    'Aktif': 'Active',
+    'Selesai': 'Completed',
+  };
+
+  const handleChartClick = (data: any, chartType?: string) => {
+    const extraParams = buildExtraParams();
+
+    if (chartType === 'status' && data?.name) {
+      const status = STATUS_PARAM_MAP[data.name] ?? data.name;
+      navigate(`/contracts?status=${encodeURIComponent(status)}${extraParams}`);
+      return;
+    }
+
+    if (chartType === 'amendment' && data?.name) {
+      const amandemen = data.name === 'Dengan Amandemen' ? 'with' : 'without';
+      navigate(`/contracts?amandemen=${amandemen}${extraParams}`);
+      return;
+    }
+
+    if (chartType === 'progress') {
+      setActiveTab('progress');
+      return;
+    }
+
     if (data?.contractId && onContractClick) {
       onContractClick(data.contractId);
     }
   };
 
   const handleCardClick = (type: string) => {
-    const extraParams =
-      (direksiFilter && direksiFilter !== 'all' ? `&direksi=${encodeURIComponent(direksiFilter)}` : '') +
-      (disiplinFilter && disiplinFilter !== 'all' ? `&disiplin=${encodeURIComponent(disiplinFilter)}` : '');
+    const extraParams = buildExtraParams();
     switch (type) {
       case 'total':
         navigate(extraParams ? `/contracts?${extraParams.slice(1)}` : '/contracts');
@@ -104,6 +135,12 @@ export const OptimizedInteractiveDashboard = ({
         break;
       case 'nearing-end':
         navigate(`/contracts?status=Active${extraParams}`);
+        break;
+      case 'budget-utilization':
+        setActiveTab('keuangan');
+        break;
+      case 'performance-index':
+        setActiveTab('progress');
         break;
       default:
         break;
