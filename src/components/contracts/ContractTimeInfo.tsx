@@ -44,7 +44,8 @@ export const ContractTimeInfo = ({ contract, fieldText }: ContractTimeInfoProps)
     const endDate = new Date(effectiveTanggalSelesai);
     const currentDate = new Date();
 
-    const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    // +1 supaya konsisten dengan MPL: tanggal mulai dihitung sebagai hari ke-1
+    const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     const elapsedDaysRaw = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     const elapsedDays = Math.max(0, elapsedDaysRaw);
     const daysRemaining = Math.max(0, totalDays - elapsedDays);
