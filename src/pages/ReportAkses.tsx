@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ShieldCheck, Check, X, Search, Download } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ShieldCheck, Check, X, Search, Download, History, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUserManagement } from '@/components/user-management/hooks/useUserManagement';
+import { useLogAkses, type LogAksesItem } from '@/hooks/useLogAkses';
 import {
   useRolePermissionsConfig,
   resolveConfigurableRole,
@@ -13,6 +15,29 @@ import {
   PERMISSION_LABELS,
   type RolePermissionFlags,
 } from '@/hooks/useRolePermissionsConfig';
+
+const LOG_MENU_OPTIONS = [
+  'Kontrak', 'Tagihan', 'Vendor', 'User Purchase (PADI)', 'Approval Dokumen',
+  'Amandemen', 'Progress Lumpsum', 'Progress Unit Price', 'Monitoring LTSA',
+  'Laporan Harian', 'Konfigurasi Sistem', 'SLA Setting', 'Log Akses', 'Auth',
+];
+
+const LOG_ACTIVITY_OPTIONS = ['Login', 'Logout', 'Lihat', 'Tambah', 'Ubah', 'Hapus'];
+
+const ACTIVITY_BADGE_COLOR: Record<string, string> = {
+  Login: 'bg-green-100 text-green-800 border-green-200',
+  Logout: 'bg-gray-100 text-gray-700 border-gray-200',
+  Lihat: 'bg-slate-100 text-slate-700 border-slate-200',
+  Tambah: 'bg-blue-100 text-blue-800 border-blue-200',
+  Ubah: 'bg-amber-100 text-amber-800 border-amber-200',
+  Hapus: 'bg-red-100 text-red-800 border-red-200',
+};
+
+const formatLogTime = (iso: string) =>
+  new Date(iso).toLocaleString('id-ID', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
 
 const ADMIN_FLAGS: RolePermissionFlags = {
   canCreate: true,
@@ -81,6 +106,53 @@ const ReportAkses: React.FC = () => {
   const [search, setSearch] = useState('');
   const { users, loading } = useUserManagement();
   const { matrix, labels, isLoading: matrixLoading } = useRolePermissionsConfig();
+
+  // ===== Log Aktivitas Pengguna =====
+  const [logSearch, setLogSearch] = useState('');
+  const [logMenu, setLogMenu] = useState<string>('all');
+  const [logActivity, setLogActivity] = useState<string>('all');
+  const [logDari, setLogDari] = useState('');
+  const [logSampai, setLogSampai] = useState('');
+  const [logPage, setLogPage] = useState(1);
+  const logPageSize = 50;
+
+  const { data: logData, isLoading: logLoading, isFetching: logFetching } = useLogAkses({
+    menu: logMenu === 'all' ? undefined : logMenu,
+    activity: logActivity === 'all' ? undefined : logActivity,
+    dari: logDari || undefined,
+    sampai: logSampai || undefined,
+    page: logPage,
+    pageSize: logPageSize,
+  });
+
+  const logItems = logData?.items ?? [];
+  const logFiltered = logItems.filter((l: LogAksesItem) => {
+    const q = logSearch.toLowerCase();
+    return !q || l.namaUser.toLowerCase().includes(q) || l.role.toLowerCase().includes(q);
+  });
+  const logTotalPages = logData ? Math.max(1, Math.ceil(logData.total / logPageSize)) : 1;
+
+  const resetLogFiltersAndGo = (updater: () => void) => {
+    updater();
+    setLogPage(1);
+  };
+
+  const exportLogCsv = () => {
+    const headers = ['Waktu', 'Nama User', 'Role', 'Menu', 'Aktivitas', 'Detail', 'IP Address'];
+    const rows = logFiltered.map((l) => [
+      formatLogTime(l.createdAt), l.namaUser, l.role, l.menu, l.activity, l.detail || '', l.ipAddress || '',
+    ]);
+    const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const csv = [headers, ...rows].map((r) => r.map(escape).join(',')).join('\n');
+    const bom = '﻿';
+    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `log-akses-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const filtered = users.filter((u) => {
     const q = search.toLowerCase();
@@ -297,6 +369,152 @@ const ReportAkses: React.FC = () => {
                 })}
               </TableBody>
             </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Log aktivitas riil: siapa akses, akses apa, kapan */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <History className="h-5 w-5 text-blue-600" />
+            <CardTitle className="text-base">Log Aktivitas Pengguna</CardTitle>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Riwayat login, logout, dan aksi (tambah/ubah/hapus/lihat) tiap akun, lengkap dengan waktunya
+          </p>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="px-6 pb-4 flex items-center gap-2 flex-wrap">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Cari nama / role..."
+                value={logSearch}
+                onChange={(e) => setLogSearch(e.target.value)}
+                className="pl-8 w-56"
+              />
+            </div>
+            <Select value={logMenu} onValueChange={(v) => resetLogFiltersAndGo(() => setLogMenu(v))}>
+              <SelectTrigger className="w-44"><SelectValue placeholder="Semua menu" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua menu</SelectItem>
+                {LOG_MENU_OPTIONS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={logActivity} onValueChange={(v) => resetLogFiltersAndGo(() => setLogActivity(v))}>
+              <SelectTrigger className="w-40"><SelectValue placeholder="Semua aktivitas" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua aktivitas</SelectItem>
+                {LOG_ACTIVITY_OPTIONS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Input
+              type="date"
+              value={logDari}
+              onChange={(e) => resetLogFiltersAndGo(() => setLogDari(e.target.value))}
+              className="w-40"
+              aria-label="Dari tanggal"
+            />
+            <span className="text-sm text-muted-foreground">s/d</span>
+            <Input
+              type="date"
+              value={logSampai}
+              onChange={(e) => resetLogFiltersAndGo(() => setLogSampai(e.target.value))}
+              className="w-40"
+              aria-label="Sampai tanggal"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={exportLogCsv}
+              disabled={logLoading || !logFiltered.length}
+              className="flex items-center gap-1.5 whitespace-nowrap ml-auto"
+            >
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-40">Waktu</TableHead>
+                  <TableHead className="min-w-40">Nama User</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Menu</TableHead>
+                  <TableHead>Aktivitas</TableHead>
+                  <TableHead className="min-w-56">Detail</TableHead>
+                  <TableHead>IP Address</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {logLoading && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      Memuat log...
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!logLoading && !logFiltered.length && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      Tidak ada aktivitas ditemukan
+                    </TableCell>
+                  </TableRow>
+                )}
+                {logFiltered.map((l) => (
+                  <TableRow key={l.id}>
+                    <TableCell className="text-sm whitespace-nowrap">{formatLogTime(l.createdAt)}</TableCell>
+                    <TableCell className="font-medium whitespace-nowrap">{l.namaUser}</TableCell>
+                    <TableCell>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${ROLE_BADGE_COLOR[l.role] ?? ROLE_BADGE_COLOR.guest}`}>
+                        {l.role}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-sm">{l.menu}</TableCell>
+                    <TableCell>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${ACTIVITY_BADGE_COLOR[l.activity] ?? ACTIVITY_BADGE_COLOR.Lihat}`}>
+                        {l.activity}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{l.detail || '-'}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{l.ipAddress || '-'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="flex items-center justify-between px-6 py-4 border-t">
+            <span className="text-sm text-muted-foreground">
+              {logData ? `Total ${logData.total} aktivitas` : ''}
+              {logFetching && !logLoading ? ' · memuat...' : ''}
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setLogPage((p) => Math.max(1, p - 1))}
+                disabled={logPage <= 1 || logLoading}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Sebelumnya
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Halaman {logPage} / {logTotalPages}
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setLogPage((p) => Math.min(logTotalPages, p + 1))}
+                disabled={logPage >= logTotalPages || logLoading}
+              >
+                Berikutnya
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
