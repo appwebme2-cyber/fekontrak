@@ -107,8 +107,8 @@ export const useCreateTagihan = () => {
       queryClient.invalidateQueries({ queryKey: ['tagihans'] });
       toast({ title: "Berhasil", description: "Tagihan berhasil ditambahkan" });
     },
-    onError: () => {
-      toast({ title: "Error", description: "Gagal menambahkan tagihan", variant: "destructive" });
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message || "Gagal menambahkan tagihan", variant: "destructive" });
     }
   });
 };
@@ -154,8 +154,8 @@ export const useUpdateTagihan = () => {
       queryClient.invalidateQueries({ queryKey: ['tagihans'] });
       toast({ title: "Berhasil", description: "Tagihan berhasil diperbarui" });
     },
-    onError: () => {
-      toast({ title: "Error", description: "Gagal memperbarui tagihan", variant: "destructive" });
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message || "Gagal memperbarui tagihan", variant: "destructive" });
     }
   });
 };
