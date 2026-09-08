@@ -172,14 +172,17 @@ export const useDeleteTagihan = () => {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (!res.ok) throw new Error("Gagal hapus tagihan");
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.message || `Gagal hapus tagihan (HTTP ${res.status})`);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tagihans'] });
       toast({ title: "Berhasil", description: "Tagihan berhasil dihapus" });
     },
-    onError: () => {
-      toast({ title: "Error", description: "Gagal menghapus tagihan", variant: "destructive" });
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message || "Gagal menghapus tagihan", variant: "destructive" });
     }
   });
 };
