@@ -12,7 +12,7 @@ export function AmendmentFilter({ amendmentFilter, setAmendmentFilter }: Amendme
         <SelectValue placeholder="Filter Amandemen" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">Semua Amandemen</SelectItem>
+        <SelectItem value="all">Amandemen</SelectItem>
         <SelectItem value="with-amendment">Memiliki Amandemen</SelectItem>
         <SelectItem value="without-amendment">Tanpa Amandemen</SelectItem>
       </SelectContent>
