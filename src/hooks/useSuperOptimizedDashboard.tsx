@@ -30,8 +30,16 @@ export const useSuperOptimizedDashboard = () => {
   const { vendors, isLoading: vendorsLoading } = useVendors();
 
   // ================= CONTRACTS =================
+  // Query key SENGAJA dibedakan dari ['contracts'] yang dipakai useContracts.tsx /
+  // useDashboardData.tsx. Hook-hook itu memetakan hasil fetch ke field snake_case
+  // (direksi_pekerjaan, status_kontrak, dst), sedangkan di sini datanya dipakai
+  // mentah (camelCase) lalu dipetakan sendiri di contractDetails di bawah. Kalau
+  // key-nya sama, React Query saling menimpa cache dengan bentuk data yang beda,
+  // dan contractDetails jadi baca field yang salah (mis. c.direksiPekerjaan jadi
+  // undefined kalau cache-nya kebetulan hasil tulisan useContracts) -> semua
+  // kontrak keliru masuk kategori "Data Tidak Lengkap" di chart dashboard.
   const { data: contracts = [], isLoading: contractsLoading } = useQuery({
-    queryKey: ['contracts'],
+    queryKey: ['contracts-dashboard-raw'],
     queryFn: async () => {
       const token = localStorage.getItem("token");
 
@@ -47,8 +55,10 @@ export const useSuperOptimizedDashboard = () => {
   });
 
   // ================= TAGIHAN =================
+  // Sama alasannya dengan query contracts di atas: key dibedakan dari ['tagihans']
+  // (useTagihans.tsx) supaya cache tidak saling menimpa dengan bentuk data yang beda.
   const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
-    queryKey: ['tagihans'],
+    queryKey: ['tagihans-dashboard-raw'],
     queryFn: async () => {
       const token = localStorage.getItem("token");
 
