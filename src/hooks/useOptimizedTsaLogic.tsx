@@ -6,16 +6,17 @@ import { useContracts } from '@/hooks/useContracts';
 import { Kontrak } from '@/types/database';
 import { getUniqueWorkDirections, normalizeWorkDirection } from '@/utils/filterUtils';
 import { usePagination } from '@/hooks/usePagination';
+import { usePersistedState } from '@/hooks/usePersistedState';
 
 export const useOptimizedTsaLogic = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [workDirectionFilter, setWorkDirectionFilter] = useState('all');
-  const [amendmentFilter, setAmendmentFilter] = useState('all');
-  const [programKerjaFilter, setProgramKerjaFilter] = useState('all');
-  const [plannerFilter, setPlannerFilter] = useState('all');
-  const [disiplinFilter, setDisiplinFilter] = useState('all');
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [searchTerm, setSearchTerm] = usePersistedState('kontrak-tsa:search', '');
+  const [statusFilter, setStatusFilter] = usePersistedState('kontrak-tsa:status', 'all');
+  const [workDirectionFilter, setWorkDirectionFilter] = usePersistedState('kontrak-tsa:direksi', 'all');
+  const [amendmentFilter, setAmendmentFilter] = usePersistedState('kontrak-tsa:amandemen', 'all');
+  const [programKerjaFilter, setProgramKerjaFilter] = usePersistedState('kontrak-tsa:program', 'all');
+  const [plannerFilter, setPlannerFilter] = usePersistedState('kontrak-tsa:planner', 'all');
+  const [disiplinFilter, setDisiplinFilter] = usePersistedState('kontrak-tsa:disiplin', 'all');
+  const [viewMode, setViewMode] = usePersistedState<'card' | 'list'>('kontrak-tsa:view', 'card');
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<Kontrak | null>(null);
   const [deleteContract, setDeleteContract] = useState<Kontrak | null>(null);

@@ -6,16 +6,17 @@ import { useContracts } from '@/hooks/useContracts';
 import { Kontrak } from '@/types/database';
 import { getUniqueWorkDirections, normalizeWorkDirection } from '@/utils/filterUtils';
 import { usePagination } from '@/hooks/usePagination';
+import { usePersistedState } from '@/hooks/usePersistedState';
 
 export const useOptimizedUnitPriceLogic = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [workDirectionFilter, setWorkDirectionFilter] = useState('all');
-  const [amendmentFilter, setAmendmentFilter] = useState('all');
-  const [programKerjaFilter, setProgramKerjaFilter] = useState('all');
-  const [plannerFilter, setPlannerFilter] = useState('all');
-  const [disiplinFilter, setDisiplinFilter] = useState('all');
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [searchTerm, setSearchTerm] = usePersistedState('kontrak-unit-price:search', '');
+  const [statusFilter, setStatusFilter] = usePersistedState('kontrak-unit-price:status', 'all');
+  const [workDirectionFilter, setWorkDirectionFilter] = usePersistedState('kontrak-unit-price:direksi', 'all');
+  const [amendmentFilter, setAmendmentFilter] = usePersistedState('kontrak-unit-price:amandemen', 'all');
+  const [programKerjaFilter, setProgramKerjaFilter] = usePersistedState('kontrak-unit-price:program', 'all');
+  const [plannerFilter, setPlannerFilter] = usePersistedState('kontrak-unit-price:planner', 'all');
+  const [disiplinFilter, setDisiplinFilter] = usePersistedState('kontrak-unit-price:disiplin', 'all');
+  const [viewMode, setViewMode] = usePersistedState<'card' | 'list'>('kontrak-unit-price:view', 'card');
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<Kontrak | null>(null);
   const [deleteContract, setDeleteContract] = useState<Kontrak | null>(null);

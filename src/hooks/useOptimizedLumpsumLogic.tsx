@@ -6,16 +6,17 @@ import { useContracts } from '@/hooks/useContracts';
 import { Kontrak } from '@/types/database';
 import { getUniqueWorkDirections, normalizeWorkDirection } from '@/utils/filterUtils';
 import { usePagination } from '@/hooks/usePagination';
+import { usePersistedState } from '@/hooks/usePersistedState';
 
 export const useOptimizedLumpsumLogic = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [workDirectionFilter, setWorkDirectionFilter] = useState('all');
-  const [amendmentFilter, setAmendmentFilter] = useState('all');
-  const [programKerjaFilter, setProgramKerjaFilter] = useState('all');
-  const [plannerFilter, setPlannerFilter] = useState('all');
-  const [disiplinFilter, setDisiplinFilter] = useState('all');
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [searchTerm, setSearchTerm] = usePersistedState('kontrak-lumpsum:search', '');
+  const [statusFilter, setStatusFilter] = usePersistedState('kontrak-lumpsum:status', 'all');
+  const [workDirectionFilter, setWorkDirectionFilter] = usePersistedState('kontrak-lumpsum:direksi', 'all');
+  const [amendmentFilter, setAmendmentFilter] = usePersistedState('kontrak-lumpsum:amandemen', 'all');
+  const [programKerjaFilter, setProgramKerjaFilter] = usePersistedState('kontrak-lumpsum:program', 'all');
+  const [plannerFilter, setPlannerFilter] = usePersistedState('kontrak-lumpsum:planner', 'all');
+  const [disiplinFilter, setDisiplinFilter] = usePersistedState('kontrak-lumpsum:disiplin', 'all');
+  const [viewMode, setViewMode] = usePersistedState<'card' | 'list'>('kontrak-lumpsum:view', 'card');
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [editingContract, setEditingContract] = useState<Kontrak | null>(null);
   const [deleteContract, setDeleteContract] = useState<Kontrak | null>(null);
