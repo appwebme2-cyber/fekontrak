@@ -132,10 +132,12 @@ export const useOptimizedLumpsumLogic = () => {
 
   const handleFormSubmit = async (data: any) => {
     try {
-      const contractData = {
-        ...data,
-        tipe_kontrak: 'Lumpsum'
-      };
+      // Kontrak baru dari halaman ini selalu Lumpsum. Tapi kalau lagi edit
+      // kontrak yang sudah ada, hormati tipe yang dipilih user di form (biar
+      // bisa dipindah ke tipe lain, mis. Lumpsum -> Unit Price).
+      const contractData = editingContract
+        ? data
+        : { ...data, tipe_kontrak: 'Lumpsum' };
 
       if (editingContract) {
         await updateContract.mutateAsync(contractData);

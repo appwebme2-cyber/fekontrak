@@ -137,10 +137,12 @@ export const useOptimizedUnitPriceLogic = () => {
 
   const handleFormSubmit = async (data: any) => {
     try {
-      const contractData = {
-        ...data,
-        tipe_kontrak: 'Unit Price'
-      };
+      // Kontrak baru dari halaman ini selalu Unit Price. Tapi kalau lagi edit
+      // kontrak yang sudah ada, hormati tipe yang dipilih user di form (biar
+      // bisa dipindah ke tipe lain, mis. Unit Price -> TSA).
+      const contractData = editingContract
+        ? data
+        : { ...data, tipe_kontrak: 'Unit Price' };
 
       if (editingContract) {
         await updateContract.mutateAsync(contractData);
