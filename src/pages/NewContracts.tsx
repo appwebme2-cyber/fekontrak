@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { VendorCombobox } from '@/components/contracts/VendorCombobox';
 import { formatCurrency } from '@/lib/utils/formatters';
 import { 
   Plus, 
@@ -162,18 +163,11 @@ const NewContracts = () => {
 
           <div>
             <Label htmlFor="id_vendor">Vendor *</Label>
-            <Select value={formData.id_vendor} onValueChange={(value) => setFormData({...formData, id_vendor: value})}>
-              <SelectTrigger>
-                <SelectValue placeholder="Pilih Vendor" />
-              </SelectTrigger>
-              <SelectContent>
-                {vendors.map((vendor) => (
-                  <SelectItem key={vendor.id_vendor} value={vendor.id_vendor}>
-                    {vendor.nama_vendor}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <VendorCombobox
+              vendors={vendors}
+              value={formData.id_vendor}
+              onValueChange={(value) => setFormData({...formData, id_vendor: value})}
+            />
           </div>
 
           <div>
