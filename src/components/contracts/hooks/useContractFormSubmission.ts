@@ -16,13 +16,16 @@ export const useContractFormSubmission = ({
   
   const processDocuments = useCallback((documents: any[]) => {
     if (!documents || documents.length === 0) return [];
-    
+
     return documents.map(doc => ({
       id: doc.id,
+      doc_type: doc.doc_type || '',
+      doc_label: doc.doc_label || '',
       name: doc.name,
       size: doc.size,
       type: doc.type,
       url: doc.url || null, // Include file data if available
+      path: doc.path || null,
       upload_date: doc.upload_date || new Date().toISOString()
     }));
   }, []);
