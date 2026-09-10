@@ -36,6 +36,10 @@ export const ContractTimeInfo = ({ contract, fieldText }: ContractTimeInfoProps)
   };
   const mplDays = computeMpl();
 
+  // Kontrak yang sudah ditandai "Selesai" tidak perlu lagi dihitung keterlambatannya -
+  // progress durasi cuma relevan buat kontrak yang masih berjalan.
+  const isCompleted = contract.status_kontrak === 'Selesai';
+
   const calculateDurationProgress = () => {
     if (!effectiveTanggalMulai || !effectiveTanggalSelesai)
       return { progress: 0, daysRemaining: 0, daysLate: 0, totalDays: 0, elapsedDays: 0 };
@@ -46,6 +50,11 @@ export const ContractTimeInfo = ({ contract, fieldText }: ContractTimeInfoProps)
 
     // +1 supaya konsisten dengan MPL: tanggal mulai dihitung sebagai hari ke-1
     const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    if (isCompleted) {
+      return { progress: 100, daysRemaining: 0, daysLate: 0, totalDays, elapsedDays: totalDays };
+    }
+
     const elapsedDaysRaw = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     const elapsedDays = Math.max(0, elapsedDaysRaw);
     const daysRemaining = Math.max(0, totalDays - elapsedDays);
@@ -58,8 +67,8 @@ export const ContractTimeInfo = ({ contract, fieldText }: ContractTimeInfoProps)
   };
 
   const { progress, daysRemaining, daysLate, totalDays, elapsedDays } = calculateDurationProgress();
-  const isOverdue = daysLate > 0;
-  const isCritical = progress >= 80;
+  const isOverdue = !isCompleted && daysLate > 0;
+  const isCritical = !isCompleted && progress >= 80;
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -81,9 +90,11 @@ export const ContractTimeInfo = ({ contract, fieldText }: ContractTimeInfoProps)
             isCritical ? 'text-orange-600' :
             'text-green-600'
           }`}>
-            {isOverdue
-              ? `Terlambat ${daysLate} hari`
-              : `Sisa ${daysRemaining} hari`}
+            {isCompleted
+              ? 'Kontrak selesai'
+              : isOverdue
+                ? `Terlambat ${daysLate} hari`
+                : `Sisa ${daysRemaining} hari`}
           </span>
           <span className="text-gray-500">{Math.round(progress)}% selesai</span>
         </div>
