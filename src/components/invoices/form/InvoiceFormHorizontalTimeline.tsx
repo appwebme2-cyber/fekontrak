@@ -63,8 +63,8 @@ export const InvoiceFormHorizontalTimeline = ({
             style={{ width: `calc(${progressData.progress}% - 64px)` }}
           ></div>
           
-          {/* Timeline Items */}
-          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-3">
+          {/* Timeline Items — 7 kolom supaya 13 tahap rapi jadi 2 baris (7 + 6) di layar lebar */}
+          <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
             {statusOptions.map((status) => {
               const isSelected = formData.status_tagihan === status.value;
               const isCompleted = progressData.currentStep > 0 && status.step <= progressData.currentStep;

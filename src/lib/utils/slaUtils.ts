@@ -1,7 +1,8 @@
 import { SlaTagihanData } from '@/hooks/useSlaTagihan';
 
-// Definisi 11 tahap: kode_tahap, label tampilan, dan nama field di SlaTagihanData
+// Definisi 13 tahap: kode_tahap, label tampilan, dan nama field di SlaTagihanData
 export const SLA_STAGES = [
+  { kode: 'PROGRESS_EKSEKUSI',      label: 'Progress Eksekusi',      masuk: 'tglMasukProgressEksekusi',     selesai: 'tglSelesaiProgressEksekusi' },
   { kode: 'BA_JOINT_INSPECTION',    label: 'BA Joint Inspection',    masuk: 'tglMasukBaJointInspection',    selesai: 'tglSelesaiBaJointInspection' },
   { kode: 'BA_COMMISSIONING',       label: 'BA Commissioning',       masuk: 'tglMasukBaCommissioning',       selesai: 'tglSelesaiBaCommissioning' },
   { kode: 'BA_PENERIMAAN_MATERIAL', label: 'BA Penerimaan Material', masuk: 'tglMasukBaPenerimaanMaterial', selesai: 'tglSelesaiBaPenerimaanMaterial' },

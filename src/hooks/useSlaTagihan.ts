@@ -6,6 +6,8 @@ export interface SlaTagihanData {
   id: number;
   idKontrak: string;
   idTagihan: string | null;
+  tglMasukProgressEksekusi: string | null;
+  tglSelesaiProgressEksekusi: string | null;
   tglMasukBaJointInspection: string | null;
   tglSelesaiBaJointInspection: string | null;
   tglMasukBaCommissioning: string | null;
