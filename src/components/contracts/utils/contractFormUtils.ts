@@ -111,13 +111,26 @@ const parseDocuments = (raw: any): any[] => {
   } else {
     return [];
   }
-  // Dokumen lama (upload sebelum GuidedDocumentSection) tidak punya doc_type/doc_label.
-  // Tambahkan field kosong agar GuidedDocumentSection bisa menampilkan & mengeditnya.
-  return docs.map(d => ({
-    doc_type: '',
-    doc_label: '',
-    ...d,
-  }));
+  // Dokumen lama (upload sebelum GuidedDocumentSection, atau hasil import SQL manual)
+  // sering tidak punya doc_type/doc_label, dan kadang tidak punya id sama sekali.
+  // React butuh key yang unik per baris (dipakai juga sebagai identitas saat edit/hapus) -
+  // kalau beberapa dokumen sama-sama tanpa id (semuanya jadi undefined), baris-baris itu
+  // akan saling tabrakan waktu salah satunya di-klik/diubah. Jamin tiap dokumen punya id
+  // unik di sini, sekali untuk selamanya (id yang sudah unik dari server tetap dipakai).
+  const seenIds = new Set<string>();
+  return docs.map((d, idx) => {
+    let id = d?.id != null ? String(d.id) : '';
+    if (!id || seenIds.has(id)) {
+      id = `legacy-${idx}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+    seenIds.add(id);
+    return {
+      doc_type: '',
+      doc_label: '',
+      ...d,
+      id,
+    };
+  });
 };
 
 export const createFormDataFromContract = (contract: Kontrak): ContractFormData => {
