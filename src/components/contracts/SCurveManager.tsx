@@ -232,13 +232,29 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
     setIsEditing(true);
   };
 
-  // Update plan/actual per activity per period
+  // Data tersimpan tetap dalam bentuk PERSENTASE (0-100) supaya kompatibel dengan
+  // data lama & perhitungan chart/weighted progress yang sudah ada. Tapi user
+  // mengisi/lihat dalam POIN BOBOT (poin = persen * bobot / 100) supaya tidak perlu
+  // hitung persentase manual tiap kali transfer angka dari LKP - cukup ketik poin
+  // bobot yang dicapai di periode itu.
+  const pointsFromPct = (pct: number | null | undefined, bobot: number): number => {
+    if (pct === null || pct === undefined) return 0;
+    return parseFloat(((pct * bobot) / 100).toFixed(4));
+  };
+  const pctFromPoints = (pointsStr: string, bobot: number): number => {
+    const points = parseFloat(pointsStr);
+    if (isNaN(points) || bobot <= 0) return 0;
+    return (points / bobot) * 100;
+  };
+
+  // Update plan/actual per activity per period (value yang masuk = poin bobot)
   const handleProgressChange = (
     periodIndex: number,
     activityId: string,
     type: 'plan' | 'actual',
     value: string
   ) => {
+    const bobot = activities.find(a => a.id === activityId)?.bobot ?? 0;
     setPeriods(prev => prev.map((p, i) => {
       if (i !== periodIndex) return p;
       return {
@@ -247,7 +263,7 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
           if (pa.activityId !== activityId) return pa;
           return {
             ...pa,
-            [type]: value === '' ? (type === 'actual' ? null : 0) : parseFloat(value)
+            [type]: value === '' ? (type === 'actual' ? null : 0) : pctFromPoints(value, bobot)
           };
         })
       };
@@ -322,18 +338,19 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
     e.target.value = '';
   };
 
-  // Download template progress (plan/actual per periode) berisi aktivitas & periode yang sudah ada
+  // Download template progress (plan/actual per periode) berisi aktivitas & periode yang sudah ada.
+  // Nilai plan/actual ditulis dalam POIN BOBOT (bukan %) - sama seperti input di layar.
   const handleDownloadProgressTemplate = () => {
     const header = [
       'Nama Aktivitas',
-      ...periods.flatMap(p => [`${p.periode} - Plan (%)`, `${p.periode} - Actual (%)`]),
+      ...periods.flatMap(p => [`${p.periode} - Plan (poin)`, `${p.periode} - Actual (poin)`]),
     ];
     const rows = sortedActivities.map(act => {
       const row: (string | number)[] = [act.nama];
       periods.forEach(p => {
         const pa = p.activities.find(a => a.activityId === act.id);
-        row.push(pa?.plan ?? 0);
-        row.push(pa?.actual ?? '');
+        row.push(pointsFromPct(pa?.plan ?? 0, act.bobot));
+        row.push(pa?.actual != null ? pointsFromPct(pa.actual, act.bobot) : '');
       });
       return row;
     });
@@ -388,12 +405,13 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
               if (!act) return pa;
               const row = rowByActivityName.get(act.nama.trim().toLowerCase());
               if (!row) return pa;
+              // Nilai di Excel = poin bobot, konversi balik ke persentase untuk disimpan
               const planVal = parseNum(row[colInfo.planCol]);
               const actualVal = parseNum(row[colInfo.actualCol]);
               return {
                 ...pa,
-                plan: planVal !== null ? planVal : pa.plan,
-                actual: actualVal !== null ? actualVal : pa.actual,
+                plan: planVal !== null ? pctFromPoints(String(planVal), act.bobot) : pa.plan,
+                actual: actualVal !== null ? pctFromPoints(String(actualVal), act.bobot) : pa.actual,
               };
             }),
           };
@@ -608,7 +626,7 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                                 ×
                               </button>
                             </div>
-                            <div className="text-xs text-gray-400 font-normal">Plan / Actual</div>
+                            <div className="text-xs text-gray-400 font-normal">Plan / Actual (poin bobot)</div>
                           </th>
                         ))}
                         <th className="text-center p-2 border font-medium text-xs">Total Plan Akum.</th>
@@ -633,21 +651,23 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                                   <Input
                                     type="number"
                                     min="0"
-                                    max="100"
-                                    value={pa?.plan ?? 0}
+                                    max={act.bobot}
+                                    step="0.01"
+                                    value={pointsFromPct(pa?.plan, act.bobot)}
                                     onChange={(e) => handleProgressChange(pi, act.id, 'plan', e.target.value)}
                                     className="w-20 h-9 text-sm font-medium text-center text-blue-600"
-                                    title="Plan %"
+                                    title={`Plan (poin bobot, maks ${Number(act.bobot).toFixed(3)})`}
                                   />
                                   <Input
                                     type="number"
                                     min="0"
-                                    max="100"
-                                    value={pa?.actual ?? ''}
+                                    max={act.bobot}
+                                    step="0.01"
+                                    value={pa?.actual != null ? pointsFromPct(pa.actual, act.bobot) : ''}
                                     onChange={(e) => handleProgressChange(pi, act.id, 'actual', e.target.value)}
                                     className="w-20 h-9 text-sm font-medium text-center text-green-600"
                                     placeholder="-"
-                                    title="Actual %"
+                                    title={`Actual (poin bobot, maks ${Number(act.bobot).toFixed(3)})`}
                                   />
                                 </div>
                               </td>
@@ -694,7 +714,9 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                     </tbody>
                   </table>
                   <p className="text-xs text-gray-400 mt-2">
-                    💡 Kolom biru = Plan %, Kolom hijau = Actual % (progress aktivitas pada periode tersebut)
+                    💡 Kolom biru = Plan, kolom hijau = Actual — diisi dalam <strong>poin bobot</strong> yang dicapai
+                    aktivitas itu pada periode tersebut (bukan persentase). Total poin tiap aktivitas di semua
+                    periode maksimal sebesar bobotnya (kolom "Bobot").
                   </p>
                 </div>
               )}
