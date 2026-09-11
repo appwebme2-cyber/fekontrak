@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ShieldCheck, Check, X, Search, Download, History, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUserManagement } from '@/components/user-management/hooks/useUserManagement';
-import { useLogAkses, type LogAksesItem } from '@/hooks/useLogAkses';
+import { useLogAkses, type LogAksesItem, type LogAksesResponse } from '@/hooks/useLogAkses';
+import { useToast } from '@/hooks/use-toast';
 import {
   useRolePermissionsConfig,
   resolveConfigurableRole,
@@ -103,6 +104,7 @@ const MenuList = ({ labels }: { labels: string[] }) => {
 };
 
 const ReportAkses: React.FC = () => {
+  const { toast } = useToast();
   const [search, setSearch] = useState('');
   const { users, loading } = useUserManagement();
   const { matrix, labels, isLoading: matrixLoading } = useRolePermissionsConfig();
@@ -137,21 +139,53 @@ const ReportAkses: React.FC = () => {
     setLogPage(1);
   };
 
-  const exportLogCsv = () => {
-    const headers = ['Waktu', 'Nama User', 'Role', 'Menu', 'Aktivitas', 'Detail', 'IP Address'];
-    const rows = logFiltered.map((l) => [
-      formatLogTime(l.createdAt), l.namaUser, l.role, l.menu, l.activity, l.detail || '', l.ipAddress || '',
-    ]);
-    const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
-    const csv = [headers, ...rows].map((r) => r.map(escape).join(',')).join('\n');
-    const bom = '﻿';
-    const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `log-akses-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const [logExporting, setLogExporting] = useState(false);
+
+  // Export harus ambil SEMUA baris yang cocok filter saat ini, bukan cuma
+  // halaman yang lagi tampil (yang dibatasi logPageSize=50 buat paginasi).
+  const exportLogCsv = async () => {
+    if (!logData) return;
+    setLogExporting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const params = new URLSearchParams();
+      if (logMenu !== 'all') params.append('menu', logMenu);
+      if (logActivity !== 'all') params.append('activity', logActivity);
+      if (logDari) params.append('dari', logDari);
+      if (logSampai) params.append('sampai', logSampai);
+      params.append('page', '1');
+      params.append('pageSize', String(Math.max(logData.total, 1)));
+
+      const res = await fetch(`https://bekontrak-production.up.railway.app/api/LogAkses?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Gagal ambil semua log untuk export');
+      const allData: LogAksesResponse = await res.json();
+
+      const allItems = allData.items.filter((l) => {
+        const q = logSearch.toLowerCase();
+        return !q || l.namaUser.toLowerCase().includes(q) || l.role.toLowerCase().includes(q);
+      });
+
+      const headers = ['Waktu', 'Nama User', 'Role', 'Menu', 'Aktivitas', 'Detail', 'IP Address'];
+      const rows = allItems.map((l) => [
+        formatLogTime(l.createdAt), l.namaUser, l.role, l.menu, l.activity, l.detail || '', l.ipAddress || '',
+      ]);
+      const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
+      const csv = [headers, ...rows].map((r) => r.map(escape).join(',')).join('\n');
+      const bom = '﻿';
+      const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `log-akses-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Gagal export log akses', variant: 'destructive' });
+    } finally {
+      setLogExporting(false);
+    }
   };
 
   const filtered = users.filter((u) => {
@@ -428,11 +462,11 @@ const ReportAkses: React.FC = () => {
               size="sm"
               variant="outline"
               onClick={exportLogCsv}
-              disabled={logLoading || !logFiltered.length}
+              disabled={logLoading || logExporting || !logData?.total}
               className="flex items-center gap-1.5 whitespace-nowrap ml-auto"
             >
               <Download className="h-4 w-4" />
-              Export CSV
+              {logExporting ? 'Mengambil semua data...' : `Export CSV${logData?.total ? ` (${logData.total})` : ''}`}
             </Button>
           </div>
 
