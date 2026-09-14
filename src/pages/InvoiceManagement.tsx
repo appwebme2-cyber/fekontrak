@@ -30,6 +30,7 @@ const InvoiceManagement = () => {
     searchTerm, setSearchTerm,
     filterTipe, setFilterTipe,
     filterDireksiPekerjaan, setFilterDireksiPekerjaan,
+    filterStatus, setFilterStatus,
     isCreateDialogOpen, setIsCreateDialogOpen,
     isEditDialogOpen, setIsEditDialogOpen,
     selectedInvoice,
@@ -92,6 +93,8 @@ const InvoiceManagement = () => {
         setFilterTipe={setFilterTipe}
         filterDireksiPekerjaan={filterDireksiPekerjaan}
         setFilterDireksiPekerjaan={setFilterDireksiPekerjaan}
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
         kontraks={kontraks}
         direksiPekerjaanOptions={direksiPekerjaanOptions}
         onResetFilters={resetFilters}

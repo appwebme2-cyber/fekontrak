@@ -12,6 +12,7 @@ export const useInvoiceManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTipe, setFilterTipe] = useState<string>('all');
   const [filterDireksiPekerjaan, setFilterDireksiPekerjaan] = useState<string>('all');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -50,7 +51,10 @@ export const useInvoiceManagement = () => {
       filterDireksiPekerjaan === 'all' ||
       normalizedContractDirection === filterDireksiPekerjaan;
 
-    return matchesSearch && matchesTipe && matchesDireksiPekerjaan;
+    const matchesStatus =
+      filterStatus === 'all' || tagihan?.status_tagihan === filterStatus;
+
+    return matchesSearch && matchesTipe && matchesDireksiPekerjaan && matchesStatus;
   });
 
   // ================= STATISTICS =================
@@ -157,6 +161,7 @@ export const useInvoiceManagement = () => {
     setSearchTerm('');
     setFilterTipe('all');
     setFilterDireksiPekerjaan('all');
+    setFilterStatus('all');
   };
 
   return {
@@ -167,6 +172,8 @@ export const useInvoiceManagement = () => {
     setFilterTipe,
     filterDireksiPekerjaan,
     setFilterDireksiPekerjaan,
+    filterStatus,
+    setFilterStatus,
     isCreateDialogOpen,
     setIsCreateDialogOpen,
     isEditDialogOpen,

@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, Filter } from 'lucide-react';
 import { getUniqueWorkDirections } from '@/utils/filterUtils';
 import { InvoiceViewToggle } from './InvoiceViewToggle';
+import { statusOptions } from './form/constants/statusOptions';
 
 interface InvoiceFiltersProps {
   searchTerm: string;
@@ -14,6 +15,8 @@ interface InvoiceFiltersProps {
   setFilterTipe: (value: string) => void;
   filterDireksiPekerjaan: string;
   setFilterDireksiPekerjaan: (value: string) => void;
+  filterStatus: string;
+  setFilterStatus: (value: string) => void;
   kontraks: any[];
   direksiPekerjaanOptions?: string[];
   onResetFilters: () => void;
@@ -28,6 +31,8 @@ export const InvoiceFilters = ({
   setFilterTipe,
   filterDireksiPekerjaan,
   setFilterDireksiPekerjaan,
+  filterStatus,
+  setFilterStatus,
   kontraks = [],
   onResetFilters,
   viewMode,
@@ -55,7 +60,7 @@ export const InvoiceFilters = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Pencarian */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -94,6 +99,21 @@ export const InvoiceFilters = ({
                     {direksi}
                   </SelectItem>
                 ))}
+            </SelectContent>
+          </Select>
+
+          {/* Filter Status Tagihan */}
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger>
+              <SelectValue placeholder="Status Tagihan" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Status</SelectItem>
+              {statusOptions.map((status) => (
+                <SelectItem key={status.value} value={status.value}>
+                  {status.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
