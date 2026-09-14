@@ -796,10 +796,38 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                           className="w-10 h-8 text-center text-xs font-bold border border-gray-300 rounded bg-gray-100 text-gray-600 focus:outline-none focus:border-blue-400"
                           title="Nomor urut (ubah untuk reorder)"
                         />
-                        <div className="w-12 h-8 bg-blue-100 rounded flex items-center justify-center">
-                          <span className="text-blue-700 text-xs font-bold">{Number(a.bobot).toFixed(3)}%</span>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.001"
+                            value={a.bobot}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value);
+                              setActivities(prev => prev.map(x =>
+                                x.id === a.id ? { ...x, bobot: isNaN(val) ? 0 : val } : x
+                              ));
+                              setIsEditing(true);
+                            }}
+                            className="w-20 h-8 text-center text-xs font-bold border border-blue-200 rounded bg-blue-50 text-blue-700 focus:outline-none focus:border-blue-400"
+                            title="Bobot (%)"
+                          />
+                          <span className="text-blue-700 text-xs font-bold">%</span>
                         </div>
-                        <span className="font-medium">{a.nama}</span>
+                        <input
+                          type="text"
+                          value={a.nama}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setActivities(prev => prev.map(x =>
+                              x.id === a.id ? { ...x, nama: val } : x
+                            ));
+                            setIsEditing(true);
+                          }}
+                          className="flex-1 min-w-[200px] font-medium border border-transparent hover:border-gray-300 focus:border-blue-400 rounded px-2 py-1 focus:outline-none"
+                          title="Nama aktivitas"
+                        />
                       </div>
                       <Button
                         variant="ghost" size="sm"
