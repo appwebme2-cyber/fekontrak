@@ -14,13 +14,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
+    // Selalu default ke light, terlepas dari preferensi dark mode OS/browser.
+    // User tetap bisa pilih dark manual lewat tombol toggle - pilihan itu yang disimpan.
     const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) {
+    if (savedTheme === 'dark' || savedTheme === 'light') {
       setTheme(savedTheme);
-    } else {
-      // Check system preference
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      setTheme(systemTheme);
     }
   }, []);
 
