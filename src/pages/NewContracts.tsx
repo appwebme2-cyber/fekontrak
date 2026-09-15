@@ -124,9 +124,9 @@ const NewContracts = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      
+
       try {
-        const submitData = {
+        const editedFields = {
           ...formData,
           nilai_awal: formData.nilai_awal ? Number(formData.nilai_awal) : null,
           estimasi_tanggal_kom: formData.estimasi_tanggal_kom || null,
@@ -134,14 +134,20 @@ const NewContracts = () => {
         };
 
         if (kontrak) {
+          // Form ini cuma punya sebagian field (Judul, Vendor, Tipe, Status, SPB,
+          // SLA KOM, Tanggal KOM, Nilai Awal). Sebar dulu data kontrak yang ASLI
+          // supaya field lain (direksi_pekerjaan, contract_documents, progress,
+          // disiplin, dst) tidak ikut ditimpa jadi kosong saat update - baru
+          // timpa dengan field yang memang diedit di form ini.
           await updateKontrak.mutateAsync({
+            ...kontrak,
+            ...editedFields,
             id_kontrak: kontrak.id_kontrak,
-            ...submitData
           });
         } else {
-          await createKontrak.mutateAsync(submitData);
+          await createKontrak.mutateAsync(editedFields);
         }
-        
+
         onClose();
       } catch (error) {
         console.error('Error saving contract:', error);
