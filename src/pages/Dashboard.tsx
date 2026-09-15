@@ -41,9 +41,11 @@ const Dashboard = () => {
   )].sort();
   const disciplines = getUniqueDisciplines(contractDetails);
 
-  // Filter contracts by direksi & disiplin
+  // Filter contracts by direksi & disiplin. Kontrak tanpa direksi_pekerjaan
+  // (kosong/null) tetap ditampilkan di semua filter direksi - supaya data yang
+  // ke-kosongkan (mis. gara-gara bug edit) tidak "hilang" dari dashboard.
   const filteredContracts = contractDetails.filter(c =>
-    (direksiFilter === 'all' || c.direksi_pekerjaan === direksiFilter) &&
+    (direksiFilter === 'all' || c.direksi_pekerjaan === direksiFilter || !c.direksi_pekerjaan) &&
     (disiplinFilter === 'all' || c.disiplin === disiplinFilter)
   );
 

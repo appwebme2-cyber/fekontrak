@@ -79,7 +79,9 @@ const NewContracts = () => {
       (kontrak.vendor?.nama_vendor || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || kontrak.tipe_kontrak === filterType;
     const matchesStatus = filterStatus === 'all' || normalizeStatus(kontrak.status_kontrak) === filterStatus;
-    const matchesDireksi = filterDireksi === 'all' || kontrak.direksi_pekerjaan === filterDireksi;
+    // Kontrak tanpa direksi_pekerjaan (kosong/null) tetap ditampilkan di semua
+    // filter direksi - supaya data yang ke-kosongkan tidak "hilang" dari daftar.
+    const matchesDireksi = filterDireksi === 'all' || kontrak.direksi_pekerjaan === filterDireksi || !kontrak.direksi_pekerjaan;
     const matchesDisiplin = filterDisiplin === 'all' || kontrak.disiplin === filterDisiplin;
     const matchesAmandemen = filterAmandemen === 'all' ||
       (filterAmandemen === 'with' && kontrak.has_amendment) ||

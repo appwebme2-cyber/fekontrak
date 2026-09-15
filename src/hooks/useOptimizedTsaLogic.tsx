@@ -59,8 +59,11 @@ export const useOptimizedTsaLogic = () => {
         (amendmentFilter === 'without-amendment' && !contract.has_amendment);
 
       const normalizedDir = normalizeWorkDirection(contract.direksi_pekerjaan || '');
+      // Kontrak tanpa direksi_pekerjaan (kosong/null) tetap ditampilkan di semua
+      // filter direksi - supaya data yang ke-kosongkan (mis. gara-gara bug edit)
+      // tidak "hilang" dari daftar, tapi tetap kelihatan dan bisa dilengkapi lagi.
       const matchesWorkDirection =
-        workDirectionFilter === 'all' || normalizedDir === workDirectionFilter;
+        workDirectionFilter === 'all' || normalizedDir === workDirectionFilter || !normalizedDir;
 
       const matchesProgramKerja =
         programKerjaFilter === 'all' || contract.id_program_kerja === programKerjaFilter;
@@ -100,8 +103,11 @@ export const useOptimizedTsaLogic = () => {
         (amendmentFilter === 'without-amendment' && !contract.has_amendment);
 
       const normalizedDir = normalizeWorkDirection(contract.direksi_pekerjaan || '');
+      // Kontrak tanpa direksi_pekerjaan (kosong/null) tetap ditampilkan di semua
+      // filter direksi - supaya data yang ke-kosongkan (mis. gara-gara bug edit)
+      // tidak "hilang" dari daftar, tapi tetap kelihatan dan bisa dilengkapi lagi.
       const matchesWorkDirection =
-        workDirectionFilter === 'all' || normalizedDir === workDirectionFilter;
+        workDirectionFilter === 'all' || normalizedDir === workDirectionFilter || !normalizedDir;
 
       const matchesProgramKerja =
         programKerjaFilter === 'all' || contract.id_program_kerja === programKerjaFilter;
