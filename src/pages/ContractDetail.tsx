@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -15,73 +15,6 @@ import { ContractDetailDialogs } from "@/components/contracts/ContractDetailDial
 import { InvoiceFormDialog } from '@/components/invoices/InvoiceFormDialog';
 import { tagihanDocumentsToJson } from '@/lib/utils/databaseTypes';
 import { TagihanDocument } from '@/lib/utils/typeUtils';
-import { Kontrak } from '@/types/database';
-
-// Map camelCase backend response → snake_case frontend
-const mapContract = (data: any): Kontrak => ({
-  id_kontrak: data.idKontrak,
-  id_vendor: data.idVendor,
-  judul_kontrak: data.judulKontrak,
-  no_dokumen_kontrak: data.noDokumenKontrak,
-  no_po_pr: data.noPoPr,
-  direksi_pekerjaan: data.direksiPekerjaan,
-  tipe_kontrak: data.tipeKontrak,
-  status_kontrak: data.statusKontrak,
-  tanggal_spb_diterima: data.tanggalSpbDiterima,
-  tanggal_terima_dokumen: data.tanggalTerimaDokumen,
-  tanggal_maksimal_kom: data.tanggalMaksimalKom,
-  tanggal_mulai: data.tanggalMulai,
-  tanggal_selesai: data.tanggalSelesai,
-  sla_kom_hari: data.slaKomHari,
-  estimasi_tanggal_kom: data.estimasiTanggalKom,
-  tanggal_kom: data.tanggalKom,
-  kom_terlambat: data.komTerlambat,
-  nilai_awal: data.nilaiAwal,
-  durasi_kontrak_hari: data.durasiKontrakHari,
-  progress_plan: data.progressPlan,
-  progress_actual: data.progressActual,
-  aktivitas_saat_ini: data.aktivitasSaatIni,
-  kendala: data.kendala,
-  disiplin: data.disiplin,
-  tkdn_percentage: data.tkdnPercentage,
-  kbo_bagian: data.kboBagian,
-  id_program_kerja: data.programKerja,
-  id_planner: data.planner,
-  tanggal_lkp: data.tanggalLkp,
-  tanggal_mpl: data.tanggalMpl,
-  tanggal_mpa: data.tanggalMpa,
-  masa_pemeliharaan_hari: data.masaPemeliharaanHari,
-  has_amendment: data.hasAmendment,
-  no_amandemen: data.noAmandemen,
-  tanggal_amandemen: data.tanggalAmandemen,
-  jenis_amandemen: data.jenisAmandemen,
-  nilai_kontrak_baru: data.nilaiKontrakBaru,
-  durasi_amandemen: data.durasiAmandemen,
-  tanggal_mulai_baru: data.tanggalMulaiBaru,
-  tanggal_selesai_baru: data.tanggalSelesaiBaru,
-  alasan_perubahan: data.alasanPerubahan,
-  contract_documents: data.contractDocuments
-    ? (typeof data.contractDocuments === 'string'
-        ? JSON.parse(data.contractDocuments)
-        : data.contractDocuments)
-    : [],
-  amendment_documents: data.amendmentDocuments
-    ? (typeof data.amendmentDocuments === 'string'
-        ? JSON.parse(data.amendmentDocuments)
-        : data.amendmentDocuments)
-    : [],
-  created_at: data.createdAt,
-  updated_at: data.updatedAt,
-  vendor: data.vendor ? {
-    id_vendor: data.vendor.idVendor,
-    nama_vendor: data.vendor.namaVendor,
-    alamat: data.vendor.alamat,
-    npwp: data.vendor.npwp,
-    pic_nama: data.vendor.picNama,
-    pic_kontak: data.vendor.picKontak,
-    status_vendor: data.vendor.statusVendor || 'Active',
-  } : null,
-});
 
 const ContractDetail = () => {
   const navigate = useNavigate();
@@ -89,27 +22,23 @@ const ContractDetail = () => {
   const { vendors } = useVendors();
   const { toast } = useToast();
   const { canEdit, canDelete, canCreate } = usePermissions();
-  const { deleteContract, updateContract } = useContracts();
+  const { contracts, isLoading: contractsLoading, error, deleteContract, updateContract } = useContracts();
   const createTagihan = useCreateTagihan();
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
 
-  const { data: contract, isLoading, error, refetch } = useQuery({
-    queryKey: ['contract', id],
-    queryFn: async () => {
-      if (!id) return null;
-      const res = await fetch(`https://bekontrak-production.up.railway.app/api/Contracts/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
-      if (!res.ok) throw new Error("Gagal ambil detail kontrak");
-      const data = await res.json();
-      return mapContract(data);
-    },
-    enabled: !!id,
-    refetchOnWindowFocus: true,
-  });
+  // Ambil kontrak dari cache daftar kontrak yang sama (useContracts), bukan
+  // fetch/mapping terpisah - supaya data yang tampil di sini (termasuk yang
+  // dipakai form edit) selalu identik dengan yang di halaman daftar/card.
+  // Sebelumnya dua sumber ini bisa berbeda kalau salah satu mapping-nya beda,
+  // bikin form edit dari halaman detail kelihatan kosong padahal datanya ada.
+  const contract = useMemo(
+    () => contracts.find(c => c.id_kontrak === id) ?? null,
+    [contracts, id]
+  );
+  const isLoading = contractsLoading;
 
   const { data: totalTagihan = 0 } = useQuery({
     queryKey: ['totalTagihan', id],
@@ -168,7 +97,6 @@ const ContractDetail = () => {
       await updateContract.mutateAsync({ ...data, id_kontrak: contract.id_kontrak });
       toast({ title: "Berhasil", description: "Kontrak berhasil diperbarui" });
       setShowEditDialog(false);
-      refetch();
     } catch (error) {
       console.error('Error updating contract:', error);
     }
@@ -205,7 +133,6 @@ const ContractDetail = () => {
       await createTagihan.mutateAsync(processedData);
       toast({ title: "Berhasil", description: "Tagihan berhasil ditambahkan" });
       setShowInvoiceDialog(false);
-      refetch();
     } catch (error) {
       console.error('❌ Error creating invoice:', error);
       throw error;
