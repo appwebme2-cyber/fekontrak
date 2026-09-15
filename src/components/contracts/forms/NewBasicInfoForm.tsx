@@ -97,10 +97,10 @@ export const NewBasicInfoForm = ({ formData, setFormData }: NewBasicInfoFormProp
               <SelectValue placeholder="Pilih status kontrak" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Pre-KOM">Pre-KOM</SelectItem>
-              <SelectItem value="Aktif">Aktif</SelectItem>
-              <SelectItem value="Selesai">Selesai</SelectItem>
-              <SelectItem value="Terminated">Terminated</SelectItem>
+              <SelectItem value="Pre-KOM" title="Kontrak yang telah terbit SP3MK atau SPB tapi belum KOM">Pre-KOM</SelectItem>
+              <SelectItem value="Aktif" title="Kontrak yang telah KOM, sudah ada tanggal MPL, MPA, & MPP, sampai seluruh tagihan selesai terbayarkan">Aktif</SelectItem>
+              <SelectItem value="Selesai" title="Kontrak yang seluruh tagihannya telah selesai dibayarkan. Kalau pekerjaan sudah 100% tapi tagihan belum selesai, status tetap Aktif sampai semua tagihan lunas">Selesai</SelectItem>
+              <SelectItem value="Terminated" title="Kontrak diputus">Terminated</SelectItem>
             </SelectContent>
           </Select>
         </div>
