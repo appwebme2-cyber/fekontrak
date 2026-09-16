@@ -271,9 +271,19 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    saveSCurve.mutate({ activities, periods });
-    setIsEditing(false);
+  const handleSave = async () => {
+    // Tunggu mutation benar-benar selesai sebelum matikan flag isEditing.
+    // Kalau di-set false lebih dulu (sebelum request kelar), peringatan
+    // "unsaved changes" (beforeunload) jadi nonaktif padahal simpannya
+    // belum tentu berhasil - dan kalau gagal, data hasil isian user bisa
+    // tertimpa balik oleh data lama dari server begitu query di-refetch.
+    try {
+      await saveSCurve.mutateAsync({ activities, periods });
+      setIsEditing(false);
+    } catch {
+      // saveSCurve.onError sudah menampilkan toast; isEditing sengaja
+      // dibiarkan true supaya data isian tidak hilang / bisa dicoba simpan lagi.
+    }
   };
 
   const handleDownloadTemplate = () => {

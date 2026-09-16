@@ -145,11 +145,12 @@ export const useSCurve = (idKontrak?: string) => {
 
       const { plan, actual } = calcCumulativeProgress(newData);
       const token = localStorage.getItem("token");
-      await fetch(`${API_URL}/Contracts/${idKontrak}/progress`, {
+      const progressRes = await fetch(`${API_URL}/Contracts/${idKontrak}/progress`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ progressPlan: plan, progressActual: actual })
       });
+      if (!progressRes.ok) throw new Error("Gagal update ringkasan progress kontrak");
 
       return result;
     },
