@@ -112,7 +112,7 @@ export const ContractDetailHeader = ({
               </Badge>
             </div>
             
-            <h1 className="text-4xl font-bold mb-3 animate-slide-in-right leading-tight">
+            <h1 className="text-2xl font-bold mb-3 animate-slide-in-right leading-tight">
               {fieldText(contract.judul_kontrak)}
             </h1>
             
@@ -135,7 +135,7 @@ export const ContractDetailHeader = ({
                 <Coins className="h-6 w-6 text-green-300" />
                 <span className="text-blue-200 text-sm">{getValueLabel()}</span>
               </div>
-              <div className="text-3xl font-bold text-green-300">
+              <div className="text-xl font-bold text-green-300">
                 {formatCurrency(getDisplayValue())}
               </div>
               {contract.has_amendment && contract.nilai_kontrak_baru && contract.nilai_awal && (
@@ -150,7 +150,7 @@ export const ContractDetailHeader = ({
                 <Coins className="h-6 w-6 text-yellow-300" />
                 <span className="text-blue-200 text-sm">Total Tagihan</span>
               </div>
-              <div className="text-2xl font-bold text-yellow-300">
+              <div className="text-lg font-bold text-yellow-300">
                 {formatCurrency(totalTagihan)}
               </div>
             </div>
