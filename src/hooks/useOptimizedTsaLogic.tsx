@@ -59,11 +59,12 @@ export const useOptimizedTsaLogic = () => {
         (amendmentFilter === 'without-amendment' && !contract.has_amendment);
 
       const normalizedDir = normalizeWorkDirection(contract.direksi_pekerjaan || '');
-      // Kontrak tanpa direksi_pekerjaan (kosong/null) tetap ditampilkan di semua
-      // filter direksi - supaya data yang ke-kosongkan (mis. gara-gara bug edit)
-      // tidak "hilang" dari daftar, tapi tetap kelihatan dan bisa dilengkapi lagi.
+      // "__kosong__" = opsi filter khusus buat cari kontrak yang direksi_pekerjaan-nya
+      // belum diisi (mis. kena bug lama). Selain itu, exact match seperti biasa -
+      // supaya jumlah per-direksi tetap akurat, tidak ikut kecampur kontrak kosong.
       const matchesWorkDirection =
-        workDirectionFilter === 'all' || normalizedDir === workDirectionFilter || !normalizedDir;
+        workDirectionFilter === 'all' ||
+        (workDirectionFilter === '__kosong__' ? !normalizedDir : normalizedDir === workDirectionFilter);
 
       const matchesProgramKerja =
         programKerjaFilter === 'all' || contract.id_program_kerja === programKerjaFilter;
@@ -103,11 +104,12 @@ export const useOptimizedTsaLogic = () => {
         (amendmentFilter === 'without-amendment' && !contract.has_amendment);
 
       const normalizedDir = normalizeWorkDirection(contract.direksi_pekerjaan || '');
-      // Kontrak tanpa direksi_pekerjaan (kosong/null) tetap ditampilkan di semua
-      // filter direksi - supaya data yang ke-kosongkan (mis. gara-gara bug edit)
-      // tidak "hilang" dari daftar, tapi tetap kelihatan dan bisa dilengkapi lagi.
+      // "__kosong__" = opsi filter khusus buat cari kontrak yang direksi_pekerjaan-nya
+      // belum diisi (mis. kena bug lama). Selain itu, exact match seperti biasa -
+      // supaya jumlah per-direksi tetap akurat, tidak ikut kecampur kontrak kosong.
       const matchesWorkDirection =
-        workDirectionFilter === 'all' || normalizedDir === workDirectionFilter || !normalizedDir;
+        workDirectionFilter === 'all' ||
+        (workDirectionFilter === '__kosong__' ? !normalizedDir : normalizedDir === workDirectionFilter);
 
       const matchesProgramKerja =
         programKerjaFilter === 'all' || contract.id_program_kerja === programKerjaFilter;

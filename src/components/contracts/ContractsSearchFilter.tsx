@@ -80,6 +80,7 @@ export function ContractsSearchFilter({
             {workDirectionOptionsStatic.map(option => (
               <SelectItem key={option} value={option}>{option}</SelectItem>
             ))}
+            <SelectItem value="__kosong__">(Belum diisi)</SelectItem>
           </SelectContent>
         </Select>
         {setProgramKerjaFilter && (

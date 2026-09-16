@@ -40,14 +40,20 @@ const Dashboard = () => {
       .filter(Boolean) as string[]
   )].sort();
   const disciplines = getUniqueDisciplines(contractDetails);
+  const EMPTY_DIREKSI = '__kosong__';
+  const emptyDireksiCount = contractDetails.filter(c => !c.direksi_pekerjaan).length;
 
-  // Filter contracts by direksi & disiplin. Kontrak tanpa direksi_pekerjaan
-  // (kosong/null) tetap ditampilkan di semua filter direksi - supaya data yang
-  // ke-kosongkan (mis. gara-gara bug edit) tidak "hilang" dari dashboard.
-  const filteredContracts = contractDetails.filter(c =>
-    (direksiFilter === 'all' || c.direksi_pekerjaan === direksiFilter || !c.direksi_pekerjaan) &&
-    (disiplinFilter === 'all' || c.disiplin === disiplinFilter)
-  );
+  // Filter contracts by direksi & disiplin. "Semua Direksi" tetap exact match
+  // (supaya jumlah per-direksi akurat) - kontrak tanpa direksi_pekerjaan cuma
+  // muncul kalau opsi "(Belum diisi)" dipilih secara eksplisit, bukan otomatis
+  // nyampur ke semua filter (itu sebabnya jumlah tiap direksi sempat kelihatan
+  // lebih banyak dari seharusnya).
+  const filteredContracts = contractDetails.filter(c => {
+    const matchesDireksi =
+      direksiFilter === 'all' ||
+      (direksiFilter === EMPTY_DIREKSI ? !c.direksi_pekerjaan : c.direksi_pekerjaan === direksiFilter);
+    return matchesDireksi && (disiplinFilter === 'all' || c.disiplin === disiplinFilter);
+  });
 
   const handleCardClick = (contractId: string) => {
     navigate(`/contracts/${contractId}`);
@@ -97,6 +103,9 @@ const Dashboard = () => {
             {workDirections.map((d) => (
               <SelectItem key={d} value={d}>{d}</SelectItem>
             ))}
+            {emptyDireksiCount > 0 && (
+              <SelectItem value={EMPTY_DIREKSI}>(Belum diisi) — {emptyDireksiCount} kontrak</SelectItem>
+            )}
           </SelectContent>
         </Select>
         <Select value={disiplinFilter} onValueChange={setDisiplinFilter}>
