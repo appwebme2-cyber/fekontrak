@@ -6,8 +6,16 @@ const API_URL = "https://bekontrak-production.up.railway.app/api";
 export const useDashboardData = () => {
 
   // ================= CONTRACTS =================
+  // Query key SENGAJA dibedakan dari ['contracts'] (dipakai useContracts.tsx,
+  // ContractDetail.tsx, halaman daftar kontrak, dst). Hook ini memetakan
+  // hasil fetch ke bentuk RINGKAS (cuma sebagian field, TANPA contract_documents
+  // dkk) khusus buat hitung notifikasi/alert. Kalau key-nya sama, hook ini
+  // (yang otomatis jalan di background lewat komponen notifikasi global) bisa
+  // menimpa cache ['contracts'] dengan versi yang lebih ringkas itu kapan saja
+  // - bikin field seperti contract_documents tiba-tiba "hilang" di halaman
+  // detail kontrak tanpa user refresh apa pun.
   const { data: contracts = [], isLoading: contractsLoading } = useQuery({
-    queryKey: ['contracts'],
+    queryKey: ['contracts-alerts-raw'],
     queryFn: async () => {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/contracts`, {
@@ -37,8 +45,10 @@ export const useDashboardData = () => {
   });
 
   // ================= TAGIHAN =================
+  // Sama alasannya dengan query contracts di atas: key dibedakan dari
+  // ['tagihans'] (useTagihans.tsx) supaya cache tidak saling menimpa.
   const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
-    queryKey: ['tagihans'],
+    queryKey: ['tagihans-alerts-raw'],
     queryFn: async () => {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/tagihan`, {
