@@ -7,6 +7,23 @@ const API_URL = "https://bekontrak-production.up.railway.app/api";
 
 const today = () => new Date().toISOString().split('T')[0];
 
+// contract_documents/amendment_documents disimpan di backend sebagai JSON
+// string. Parse di sini supaya SEMUA pemakai useContracts() (list, detail,
+// form edit) konsisten menerima array asli, bukan teks mentah "[...]" yang
+// bikin .map()/.length dst di komponen lain error kalau dipakai langsung.
+const parseDocumentsField = (raw: any): any[] => {
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
 const buildPayload = (contract: any) => ({
   idVendor: contract.id_vendor || '',
   judulKontrak: contract.judul_kontrak || '',
@@ -105,8 +122,8 @@ export const useContracts = () => {
         tanggal_mpl: c.tanggalMpl,
         tanggal_mpa: c.tanggalMpa,
         masa_pemeliharaan_hari: c.masaPemeliharaanHari,
-        contract_documents: c.contractDocuments || null,
-        amendment_documents: c.amendmentDocuments || null,
+        contract_documents: parseDocumentsField(c.contractDocuments),
+        amendment_documents: parseDocumentsField(c.amendmentDocuments),
         created_at: c.createdAt,
         updated_at: c.updatedAt,
         vendor: c.vendor ? {
