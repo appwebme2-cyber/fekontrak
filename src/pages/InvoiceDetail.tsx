@@ -1,22 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { 
-  ArrowLeft, FileText, Calendar, Coins, Building, 
+import {
+  ArrowLeft, FileText, Calendar, Coins, Building,
   CheckCircle, Clock, AlertCircle, Mail, Upload, User,
-  MapPin, Phone, Eye, Download
+  MapPin, Phone, Eye, Download, ExternalLink, Pencil, Trash2
 } from 'lucide-react';
 import { InvoiceDocumentList } from '@/components/invoices/form/components/InvoiceDocumentList';
 import { TagihanDocument } from '@/lib/utils/typeUtils';
 import { jsonToTagihanDocuments } from '@/lib/utils/databaseTypes';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, parseISO } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 import { InvoiceSlaSection } from '@/components/invoices/InvoiceSlaSection';
+import { InvoiceFormDialog } from '@/components/invoices/InvoiceFormDialog';
+import { useUpdateTagihan, useDeleteTagihan } from '@/hooks/useTagihans';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const API_URL = "https://bekontrak-production.up.railway.app/api";
 
@@ -25,6 +33,14 @@ const getToken = () => localStorage.getItem("token");
 const InvoiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { canEdit, canDelete } = usePermissions();
+  const updateTagihan = useUpdateTagihan();
+  const deleteTagihan = useDeleteTagihan();
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Fetch tagihan detail dari backend
   const { data: invoice, isLoading } = useQuery({
@@ -139,6 +155,28 @@ const InvoiceDetail = () => {
     catch { return dateString; }
   };
 
+  const handleUpdateSubmit = async (data: any) => {
+    if (!invoice) return;
+    try {
+      await updateTagihan.mutateAsync({ id: invoice.id_tagihan, ...data });
+      queryClient.invalidateQueries({ queryKey: ['invoice', id] });
+      queryClient.invalidateQueries({ queryKey: ['contract-invoices', invoice.id_kontrak] });
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      console.error('Error updating invoice:', error);
+    }
+  };
+
+  const handleConfirmDelete = () => {
+    if (!invoice) return;
+    deleteTagihan.mutate(invoice.id_tagihan, {
+      onSuccess: () => {
+        setIsDeleteDialogOpen(false);
+        navigate('/invoices');
+      }
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -165,7 +203,7 @@ const InvoiceDetail = () => {
 
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate('/invoices')} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" /> Kembali
@@ -174,6 +212,38 @@ const InvoiceDetail = () => {
             <h1 className="text-2xl font-bold text-gray-900">Detail Tagihan Kontrak</h1>
             <p className="text-gray-600">{invoice.kontrak?.judul_kontrak}</p>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {invoice.id_kontrak && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate(`/contracts/${invoice.id_kontrak}`)}
+              className="flex items-center gap-2"
+            >
+              <ExternalLink className="h-4 w-4" /> Lihat Detail Kontrak
+            </Button>
+          )}
+          {canEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditDialogOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Pencil className="h-4 w-4" /> Edit
+            </Button>
+          )}
+          {canDelete && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" /> Hapus
+            </Button>
+          )}
         </div>
       </div>
 
@@ -370,6 +440,39 @@ const InvoiceDetail = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      {canEdit && (
+        <InvoiceFormDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          invoice={invoice as any}
+          onSubmit={handleUpdateSubmit}
+          isLoading={updateTagihan.isPending}
+        />
+      )}
+
+      {canDelete && (
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Hapus Tagihan?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Apakah Anda yakin ingin menghapus tagihan "{invoice.nomor_tagihan}"?
+                Aksi ini tidak dapat dibatalkan.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDelete}
+                className="bg-destructive hover:bg-destructive/90"
+              >
+                Hapus
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 };

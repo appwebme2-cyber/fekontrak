@@ -1,21 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { FileText, Calendar, Coins, CheckCircle, Clock, Plus, FileEdit, Download, ExternalLink, Mail } from 'lucide-react';
+import { FileText, Calendar, Coins, CheckCircle, Clock, Plus, FileEdit, Download, ExternalLink, Mail, Eye, Pencil, Trash2 } from 'lucide-react';
 import ContractDetailInfo from "./ContractDetailInfo";
 import ContractDocumentsCard from "./ContractDocumentsCard";
 import { ContractAmendments } from "./ContractAmendments";
 import { Kontrak } from "@/types/database";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { SCurveManager } from "./SCurveManager";
 import { DokumenUploadForm } from "./DokumenUploadForm";
 import { usePermissions } from '@/hooks/usePermissions';
 import { jsonToTagihanDocuments } from '@/lib/utils/databaseTypes';
 import { formatFileSize } from '@/lib/utils/formatters';
 import { openFileInTab, downloadFile as downloadFileSecure } from '@/lib/utils/fileTokenUtils';
+import { useUpdateTagihan, useDeleteTagihan } from '@/hooks/useTagihans';
+import { InvoiceFormDialog } from '@/components/invoices/InvoiceFormDialog';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 class SCurveBoundary extends React.Component<
   { children: React.ReactNode },
@@ -58,7 +65,14 @@ export const ContractDetailContent = ({
   billingPercentage,
   onAddTagihan,
 }: ContractDetailContentProps) => {
-  const { canCreate, isVendor } = usePermissions();
+  const { canCreate, canEdit, canDelete, isVendor } = usePermissions();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const updateTagihan = useUpdateTagihan();
+  const deleteTagihan = useDeleteTagihan();
+
+  const [editingTagihan, setEditingTagihan] = useState<any>(null);
+  const [deletingTagihan, setDeletingTagihan] = useState<any>(null);
 
   const { data: tagihans = [], isLoading: isLoadingTagihans } = useQuery({
     queryKey: ['contractTagihans', contract.id_kontrak],
@@ -110,6 +124,27 @@ export const ContractDetailContent = ({
       'Verification': 87.5, 'Payment/Selesai': 100
     };
     return progressMap[status] || 0;
+  };
+
+  const handleUpdateTagihanSubmit = async (data: any) => {
+    if (!editingTagihan) return;
+    try {
+      await updateTagihan.mutateAsync({ id: editingTagihan.id_tagihan, ...data });
+      queryClient.invalidateQueries({ queryKey: ['contractTagihans', contract.id_kontrak] });
+      setEditingTagihan(null);
+    } catch (error) {
+      console.error('Error updating tagihan:', error);
+    }
+  };
+
+  const handleConfirmDeleteTagihan = () => {
+    if (!deletingTagihan) return;
+    deleteTagihan.mutate(deletingTagihan.id_tagihan, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['contractTagihans', contract.id_kontrak] });
+        setDeletingTagihan(null);
+      }
+    });
   };
 
   // Jumlah tab: vendor 4 tab, lainnya 6 tab
@@ -238,7 +273,36 @@ export const ContractDetailContent = ({
                           <p className="text-sm text-gray-500">{tagihan.termin || `Termin ${index + 1}`}</p>
                         </div>
                       </div>
-                      {getStatusBadge(tagihan.status_tagihan)}
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(tagihan.status_tagihan)}
+                        <div className="flex items-center gap-1 ml-2">
+                          <Button
+                            variant="ghost" size="sm" className="h-8 w-8 p-0"
+                            title="Lihat Detail Tagihan"
+                            onClick={() => navigate(`/invoice-detail/${tagihan.id_tagihan}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          {canEdit && (
+                            <Button
+                              variant="ghost" size="sm" className="h-8 w-8 p-0"
+                              title="Edit Tagihan"
+                              onClick={() => setEditingTagihan(tagihan)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {canDelete && (
+                            <Button
+                              variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                              title="Hapus Tagihan"
+                              onClick={() => setDeletingTagihan(tagihan)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
                     </div>
                     <div className="grid md:grid-cols-3 gap-6">
                       <div className="space-y-3">
@@ -359,6 +423,39 @@ export const ContractDetailContent = ({
           </div>
         </TabsContent>
       </Tabs>
+
+      {canEdit && (
+        <InvoiceFormDialog
+          open={!!editingTagihan}
+          onOpenChange={(open) => !open && setEditingTagihan(null)}
+          invoice={editingTagihan}
+          onSubmit={handleUpdateTagihanSubmit}
+          isLoading={updateTagihan.isPending}
+        />
+      )}
+
+      {canDelete && (
+        <AlertDialog open={!!deletingTagihan} onOpenChange={(open) => !open && setDeletingTagihan(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Hapus Tagihan?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Apakah Anda yakin ingin menghapus tagihan "{deletingTagihan?.nomor_tagihan}"?
+                Aksi ini tidak dapat dibatalkan.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDeleteTagihan}
+                className="bg-destructive hover:bg-destructive/90"
+              >
+                Hapus
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </CardContent>
   );
 };
