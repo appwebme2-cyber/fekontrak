@@ -93,6 +93,7 @@ export const CONFIGURABLE_MENU_ITEMS: { key: string; label: string; group: strin
   { key: 'user-purchase', label: 'User Purchase (PADI)', group: 'Operations' },
   { key: 'approval', label: 'Approval Dokumen', group: 'Operations' },
   { key: 'laporan-harian', label: 'Laporan Harian', group: 'Operations' },
+  { key: 'material-requirement', label: 'Kebutuhan Material & Pekerjaan', group: 'Operations' },
 ];
 
 const STAFF_DEFAULT_FLAGS: RolePermissionFlags = {

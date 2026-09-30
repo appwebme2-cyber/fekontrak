@@ -24,6 +24,7 @@ import {
   PanelLeftOpen,
   ShoppingCart,
   GitBranch,
+  Calculator,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -104,6 +105,7 @@ const Layout = ({ children }: LayoutProps) => {
         { key: 'user-purchase', name: 'User Purchase (PADI)', href: '/user-purchase', icon: ShoppingCart },
         { key: 'approval', name: 'Approval Dokumen', href: '/approval', icon: ClipboardList },
         { key: 'laporan-harian', name: 'Laporan Harian', href: '/laporan-harian', icon: ClipboardList },
+        { key: 'material-requirement', name: 'Kebutuhan Material & Pekerjaan', href: '/material-requirement', icon: Calculator },
       ])
     },
     {

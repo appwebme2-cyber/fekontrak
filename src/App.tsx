@@ -51,6 +51,10 @@ import LaporanHarian from "@/pages/LaporanHarian";
 import Profile from "@/pages/Profile";
 import ReportAkses from "@/pages/ReportAkses";
 
+// Import material requirement pages
+import MaterialRequirementList from "@/pages/MaterialRequirementList";
+import MaterialRequirementDetail from "@/pages/MaterialRequirementDetail";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -96,6 +100,8 @@ const App = () => (
                         <Route path="/data-management" element={<DataManagement />} />
                         <Route path="/report-akses" element={<ReportAkses />} />
                         <Route path="/laporan-harian" element={<ModuleGuard moduleKey="laporan-harian"><LaporanHarian /></ModuleGuard>} />
+                        <Route path="/material-requirement" element={<ModuleGuard moduleKey="material-requirement"><MaterialRequirementList /></ModuleGuard>} />
+                        <Route path="/material-requirement/:id" element={<ModuleGuard moduleKey="material-requirement"><MaterialRequirementDetail /></ModuleGuard>} />
                         <Route path="/profile" element={<Profile />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
