@@ -71,7 +71,7 @@ export function DraftFormDialog({ open, onOpenChange, draft, onSubmit, isLoading
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
           <DialogTitle>{draft ? 'Edit Draft Kebutuhan' : 'Draft Kebutuhan Baru'}</DialogTitle>
         </DialogHeader>

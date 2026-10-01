@@ -39,9 +39,9 @@ export function KontrakCombobox({ contracts, value, onValueChange, placeholder =
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className="w-full justify-between font-normal"
+          className="w-full min-w-0 justify-between font-normal"
         >
-          <span className={cn('truncate', !selected && 'text-muted-foreground')}>
+          <span className={cn('min-w-0 flex-1 truncate text-left', !selected && 'text-muted-foreground')}>
             {selected ? selected.judul_kontrak : placeholder}
           </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
