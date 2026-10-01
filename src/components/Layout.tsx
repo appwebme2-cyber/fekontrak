@@ -10,8 +10,6 @@ import {
   LogOut,
   Menu,
   X,
-  Sun,
-  Moon,
   Bell,
   Building2,
   ChevronRight,
@@ -28,7 +26,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { useTheme } from '@/contexts/ThemeContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -65,7 +62,6 @@ const Layout = ({ children }: LayoutProps) => {
     }
   }, [location.pathname]);
   const { signOut, userProfile } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const { isAdmin, canViewMenu } = usePermissions();
 
   // useEffect(() => {
@@ -378,9 +374,6 @@ const Layout = ({ children }: LayoutProps) => {
             </nav>
 
             <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="sm" onClick={toggleTheme} className="p-2">
-                {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </Button>
               <RealTimeNotifications showConnectionStatus={false} />
               <Button variant="ghost" size="sm" onClick={() => setShowLogoutModal(true)} className="flex items-center space-x-2 p-2">
                 <LogOut className="h-5 w-5" />
