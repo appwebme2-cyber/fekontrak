@@ -93,14 +93,14 @@ export function LineItemFormDialog({ open, onOpenChange, jenis, rabItems, rabIte
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>
               {line ? 'Edit' : 'Tambah'} Baris {jenis === 'Pekerjaan' ? 'Pekerjaan' : 'Material (BOM)'}
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="min-w-0 space-y-4">
             <div>
               <Label>Kode Item RAB (opsional)</Label>
               <RabItemCombobox items={rabItems} value={form.id_rab_item} onValueChange={handleRabItemChange} isLoading={rabItemsLoading} />

@@ -76,7 +76,7 @@ export function DraftFormDialog({ open, onOpenChange, draft, onSubmit, isLoading
           <DialogTitle>{draft ? 'Edit Draft Kebutuhan' : 'Draft Kebutuhan Baru'}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="min-w-0 space-y-4">
           <div>
             <Label>Kontrak</Label>
             <KontrakCombobox
