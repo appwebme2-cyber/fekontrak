@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -18,9 +18,10 @@ interface RabItemComboboxProps {
   value: string;
   onValueChange: (item: RabItem | null) => void;
   placeholder?: string;
+  isLoading?: boolean;
 }
 
-export function RabItemCombobox({ items, value, onValueChange, placeholder = 'Pilih item RAB (opsional)' }: RabItemComboboxProps) {
+export function RabItemCombobox({ items, value, onValueChange, placeholder = 'Pilih item RAB (opsional)', isLoading }: RabItemComboboxProps) {
   const [open, setOpen] = useState(false);
   const selected = items.find((i) => i.id_rab_item === value);
 
@@ -35,16 +36,26 @@ export function RabItemCombobox({ items, value, onValueChange, placeholder = 'Pi
           className="w-full min-w-0 justify-between font-normal"
         >
           <span className={cn('min-w-0 flex-1 truncate text-left', !selected && 'text-muted-foreground')}>
-            {selected ? `${selected.kode_item} — ${selected.uraian_pekerjaan}` : placeholder}
+            {selected ? `${selected.kode_item} — ${selected.uraian_pekerjaan}` : isLoading ? 'Memuat item RAB...' : placeholder}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          {isLoading ? (
+            <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin opacity-50" />
+          ) : (
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
           <CommandInput placeholder="Cari kode / uraian item RAB..." />
           <CommandList>
-            <CommandEmpty>Item RAB tidak ditemukan</CommandEmpty>
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Memuat item RAB...
+              </div>
+            ) : (
+              <CommandEmpty>Item RAB tidak ditemukan</CommandEmpty>
+            )}
             <CommandGroup>
               <CommandItem
                 value="__none__"

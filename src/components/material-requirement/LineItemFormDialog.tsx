@@ -28,6 +28,7 @@ interface LineItemFormDialogProps {
   onOpenChange: (open: boolean) => void;
   jenis: LineJenis;
   rabItems: RabItem[];
+  rabItemsLoading?: boolean;
   line: MaterialRequirementLine | null;
   onSubmit: (data: Partial<MaterialRequirementLine>) => Promise<void>;
   isLoading?: boolean;
@@ -43,7 +44,7 @@ const emptyForm = {
   volume_klaim: '',
 };
 
-export function LineItemFormDialog({ open, onOpenChange, jenis, rabItems, line, onSubmit, isLoading }: LineItemFormDialogProps) {
+export function LineItemFormDialog({ open, onOpenChange, jenis, rabItems, rabItemsLoading, line, onSubmit, isLoading }: LineItemFormDialogProps) {
   const [form, setForm] = useState(emptyForm);
   const [calcOpen, setCalcOpen] = useState(false);
 
@@ -102,7 +103,7 @@ export function LineItemFormDialog({ open, onOpenChange, jenis, rabItems, line, 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label>Kode Item RAB (opsional)</Label>
-              <RabItemCombobox items={rabItems} value={form.id_rab_item} onValueChange={handleRabItemChange} />
+              <RabItemCombobox items={rabItems} value={form.id_rab_item} onValueChange={handleRabItemChange} isLoading={rabItemsLoading} />
             </div>
 
             <div>

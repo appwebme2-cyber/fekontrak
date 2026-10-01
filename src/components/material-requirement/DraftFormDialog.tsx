@@ -34,7 +34,7 @@ const emptyForm = {
 };
 
 export function DraftFormDialog({ open, onOpenChange, draft, onSubmit, isLoading }: DraftFormDialogProps) {
-  const { contracts } = useContracts();
+  const { contracts, isLoading: contractsLoading } = useContracts();
   const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
@@ -84,6 +84,7 @@ export function DraftFormDialog({ open, onOpenChange, draft, onSubmit, isLoading
               value={form.id_kontrak}
               onValueChange={(v) => setForm({ ...form, id_kontrak: v })}
               disabled={!!draft}
+              isLoading={contractsLoading}
             />
             {draft && <p className="text-xs text-muted-foreground mt-1">Kontrak tidak dapat diubah setelah draft dibuat.</p>}
           </div>

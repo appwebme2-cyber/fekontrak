@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -24,9 +24,10 @@ interface KontrakComboboxProps {
   onValueChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  isLoading?: boolean;
 }
 
-export function KontrakCombobox({ contracts, value, onValueChange, placeholder = 'Pilih Kontrak', disabled }: KontrakComboboxProps) {
+export function KontrakCombobox({ contracts, value, onValueChange, placeholder = 'Pilih Kontrak', disabled, isLoading }: KontrakComboboxProps) {
   const [open, setOpen] = useState(false);
   const selected = contracts.find((c) => c.id_kontrak === value);
 
@@ -42,16 +43,26 @@ export function KontrakCombobox({ contracts, value, onValueChange, placeholder =
           className="w-full min-w-0 justify-between font-normal"
         >
           <span className={cn('min-w-0 flex-1 truncate text-left', !selected && 'text-muted-foreground')}>
-            {selected ? selected.judul_kontrak : placeholder}
+            {selected ? selected.judul_kontrak : isLoading ? 'Memuat daftar kontrak...' : placeholder}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          {isLoading ? (
+            <Loader2 className="ml-2 h-4 w-4 shrink-0 animate-spin opacity-50" />
+          ) : (
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
           <CommandInput placeholder="Cari kontrak..." />
           <CommandList>
-            <CommandEmpty>Kontrak tidak ditemukan</CommandEmpty>
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Memuat daftar kontrak...
+              </div>
+            ) : (
+              <CommandEmpty>Kontrak tidak ditemukan</CommandEmpty>
+            )}
             <CommandGroup>
               {contracts.map((c) => (
                 <CommandItem

@@ -104,7 +104,7 @@ const MaterialRequirementDetail = () => {
   const { draft, isLoading, refresh, extractAi } = useMaterialRequirementDraft(id);
   const { updateDraft } = useMaterialRequirementDrafts();
   const { createLine, updateLine, deleteLine } = useMaterialRequirementLines(id || '');
-  const { rabItems } = useRabItems(draft?.id_kontrak);
+  const { rabItems, isLoading: rabItemsLoading } = useRabItems(draft?.id_kontrak);
   const { canEdit, canDelete, canCreate } = usePermissions();
 
   const [editDraftOpen, setEditDraftOpen] = useState(false);
@@ -394,6 +394,7 @@ const MaterialRequirementDetail = () => {
         onOpenChange={(open) => setLineDialog({ ...lineDialog, open })}
         jenis={lineDialog.jenis}
         rabItems={rabItems}
+        rabItemsLoading={rabItemsLoading}
         line={lineDialog.line}
         onSubmit={handleLineSubmit}
         isLoading={createLine.isPending || updateLine.isPending}
