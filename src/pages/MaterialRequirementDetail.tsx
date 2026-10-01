@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Pencil, Plus, Trash2, Settings2, FileText, Image as ImageIcon } from 'lucide-react';
-import { useMaterialRequirementDraft, useMaterialRequirementDrafts, MaterialRequirementDraft } from '@/hooks/useMaterialRequirementDrafts';
+import { ArrowLeft, Pencil, Plus, Trash2, Settings2, FileText, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { useMaterialRequirementDraft, useMaterialRequirementDrafts, MaterialRequirementDraft, AiExtractionResult } from '@/hooks/useMaterialRequirementDrafts';
 import { useMaterialRequirementLines, MaterialRequirementLine, LineJenis } from '@/hooks/useMaterialRequirementLines';
 import { useMaterialRequirementDocumentUpload } from '@/hooks/useMaterialRequirementDocumentUpload';
 import { useRabItems } from '@/hooks/useRabItems';
@@ -14,6 +14,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { DraftFormDialog } from '@/components/material-requirement/DraftFormDialog';
 import { LineItemFormDialog } from '@/components/material-requirement/LineItemFormDialog';
 import { RabItemManagerDialog } from '@/components/material-requirement/RabItemManagerDialog';
+import { AiExtractionReviewDialog } from '@/components/material-requirement/AiExtractionReviewDialog';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
 import { DocumentUploadArea } from '@/components/contracts/forms/components/DocumentUploadArea';
 import { DocumentList } from '@/components/contracts/forms/components/DocumentList';
@@ -100,7 +101,7 @@ const LineTable = ({
 const MaterialRequirementDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { draft, isLoading, refresh } = useMaterialRequirementDraft(id);
+  const { draft, isLoading, refresh, extractAi } = useMaterialRequirementDraft(id);
   const { updateDraft } = useMaterialRequirementDrafts();
   const { createLine, updateLine, deleteLine } = useMaterialRequirementLines(id || '');
   const { rabItems } = useRabItems(draft?.id_kontrak);
@@ -112,6 +113,9 @@ const MaterialRequirementDetail = () => {
     open: false, jenis: 'Pekerjaan', line: null,
   });
   const [deletingLine, setDeletingLine] = useState<MaterialRequirementLine | null>(null);
+  const [aiReviewOpen, setAiReviewOpen] = useState(false);
+  const [aiResult, setAiResult] = useState<AiExtractionResult | null>(null);
+  const [applyingAi, setApplyingAi] = useState(false);
 
   const { uploading, handleFileUpload, removeDocument } = useMaterialRequirementDocumentUpload({
     formData: {
@@ -182,6 +186,46 @@ const MaterialRequirementDetail = () => {
     setDeletingLine(null);
   };
 
+  const handleExtractAi = async () => {
+    const result = await extractAi.mutateAsync();
+    setAiResult(result);
+    setAiReviewOpen(true);
+  };
+
+  const handleApplyAiResult = async (data: {
+    problem?: string;
+    rekomendasi_solusi?: string;
+    tag_unit?: string;
+    lines: { jenis: 'Pekerjaan' | 'Material'; uraian_pekerjaan: string; satuan: string; volume_kalkulasi: number; catatan_kalkulasi?: string }[];
+  }) => {
+    setApplyingAi(true);
+    try {
+      if (data.problem !== undefined || data.rekomendasi_solusi !== undefined || data.tag_unit !== undefined) {
+        await updateDraft.mutateAsync({
+          id: draft.id_draft,
+          id_kontrak: draft.id_kontrak,
+          nomor_mrf: draft.nomor_mrf,
+          tag_unit: data.tag_unit || draft.tag_unit,
+          lokasi_area: draft.lokasi_area,
+          tanggal_rekomendasi: draft.tanggal_rekomendasi,
+          problem: data.problem ?? draft.problem,
+          rekomendasi_solusi: data.rekomendasi_solusi ?? draft.rekomendasi_solusi,
+          status: draft.status,
+          catatan: draft.catatan,
+          rekomendasi_documents: draft.rekomendasi_documents,
+          gambar_kerja_documents: draft.gambar_kerja_documents,
+        });
+      }
+      for (const line of data.lines) {
+        await createLine.mutateAsync(line);
+      }
+      setAiReviewOpen(false);
+      refresh();
+    } finally {
+      setApplyingAi(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
@@ -218,6 +262,21 @@ const MaterialRequirementDetail = () => {
           <CardContent><p className="text-sm whitespace-pre-wrap">{draft.rekomendasi_solusi || '-'}</p></CardContent>
         </Card>
       </div>
+
+      {canCreate && (
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExtractAi}
+            disabled={extractAi.isPending || (draft.rekomendasi_documents.length === 0 && draft.gambar_kerja_documents.length === 0)}
+            className="border-purple-300 text-purple-700 hover:bg-purple-50"
+          >
+            <Sparkles className="h-4 w-4 mr-1" />
+            {extractAi.isPending ? 'Memproses dokumen...' : 'Ekstrak Otomatis dengan AI (Beta)'}
+          </Button>
+        </div>
+      )}
 
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
@@ -353,6 +412,14 @@ const MaterialRequirementDetail = () => {
         onConfirm={confirmDeleteLine}
         title="Hapus Baris Kebutuhan?"
         description={`Apakah Anda yakin ingin menghapus baris '${deletingLine?.uraian_pekerjaan}'?`}
+      />
+
+      <AiExtractionReviewDialog
+        open={aiReviewOpen}
+        onOpenChange={setAiReviewOpen}
+        result={aiResult}
+        onApply={handleApplyAiResult}
+        isApplying={applyingAi}
       />
     </div>
   );

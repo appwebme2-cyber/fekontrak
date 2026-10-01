@@ -29,6 +29,21 @@ export interface MaterialRequirementDraft {
   lines: MaterialRequirementLine[];
 }
 
+export interface AiExtractedLine {
+  jenis: 'Pekerjaan' | 'Material';
+  uraian_pekerjaan: string;
+  satuan: string;
+  volume_kalkulasi: number;
+  catatan_kalkulasi?: string | null;
+}
+
+export interface AiExtractionResult {
+  problem?: string | null;
+  rekomendasi_solusi?: string | null;
+  tag_unit?: string | null;
+  lines: AiExtractedLine[];
+}
+
 const parseDocs = (raw: any): any[] => {
   if (Array.isArray(raw)) return raw;
   if (typeof raw === 'string' && raw.trim()) {
@@ -197,5 +212,32 @@ export const useMaterialRequirementDraft = (id?: string) => {
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['material-requirement-draft', id] });
 
-  return { draft, isLoading, error, refresh };
+  const extractAi = useMutation({
+    mutationFn: async (): Promise<AiExtractionResult> => {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/MaterialRequirementDrafts/${id}/extract-ai`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Gagal ekstrak dengan AI");
+      return {
+        problem: data.problem,
+        rekomendasi_solusi: data.rekomendasiSolusi,
+        tag_unit: data.tagUnit,
+        lines: (data.lines || []).map((l: any) => ({
+          jenis: l.jenis,
+          uraian_pekerjaan: l.uraianPekerjaan,
+          satuan: l.satuan,
+          volume_kalkulasi: l.volumeKalkulasi,
+          catatan_kalkulasi: l.catatanKalkulasi,
+        })),
+      };
+    },
+    onError: (error: any) => {
+      toast({ title: "Gagal Ekstrak AI", description: error.message || "Terjadi kesalahan saat memproses dokumen", variant: "destructive" });
+    }
+  });
+
+  return { draft, isLoading, error, refresh, extractAi };
 };
