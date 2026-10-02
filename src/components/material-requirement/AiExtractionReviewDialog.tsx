@@ -113,7 +113,7 @@ export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems,
       <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-600" /> Hasil Ekstraksi AI
+            <Sparkles className="h-5 w-5 text-purple-600" /> Hasil Auto Ekstrak & Generate AI
           </DialogTitle>
           <DialogDescription className="flex items-start gap-2 text-amber-700">
             <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
