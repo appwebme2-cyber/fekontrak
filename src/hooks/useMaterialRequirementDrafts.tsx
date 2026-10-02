@@ -31,6 +31,7 @@ export interface MaterialRequirementDraft {
 
 export interface AiExtractedLine {
   jenis: 'Pekerjaan' | 'Material';
+  kode_item?: string | null;
   uraian_pekerjaan: string;
   satuan: string;
   volume_kalkulasi: number;
@@ -227,6 +228,7 @@ export const useMaterialRequirementDraft = (id?: string) => {
         tag_unit: data.tagUnit,
         lines: (data.lines || []).map((l: any) => ({
           jenis: l.jenis,
+          kode_item: l.kodeItem,
           uraian_pekerjaan: l.uraianPekerjaan,
           satuan: l.satuan,
           volume_kalkulasi: l.volumeKalkulasi,

@@ -196,7 +196,7 @@ const MaterialRequirementDetail = () => {
     problem?: string;
     rekomendasi_solusi?: string;
     tag_unit?: string;
-    lines: { jenis: 'Pekerjaan' | 'Material'; uraian_pekerjaan: string; satuan: string; volume_kalkulasi: number; catatan_kalkulasi?: string }[];
+    lines: { jenis: 'Pekerjaan' | 'Material'; id_rab_item?: string; kode_item_snapshot?: string; uraian_pekerjaan: string; satuan: string; volume_kalkulasi: number; catatan_kalkulasi?: string }[];
   }) => {
     setApplyingAi(true);
     try {
@@ -419,6 +419,7 @@ const MaterialRequirementDetail = () => {
         open={aiReviewOpen}
         onOpenChange={setAiReviewOpen}
         result={aiResult}
+        rabItems={rabItems}
         onApply={handleApplyAiResult}
         isApplying={applyingAi}
       />
