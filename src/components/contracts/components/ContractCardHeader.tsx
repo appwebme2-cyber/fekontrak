@@ -48,41 +48,23 @@ export const ContractCardHeader = ({
 
   return (
     <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
-      {/* Badges at the top */}
-      <div className="flex flex-wrap gap-2 mb-3">
-        {getStatusBadge ? (
-          getStatusBadge(contract.status_kontrak)
-        ) : (
-          <Badge className={`${getStatusColor(contract.status_kontrak)} text-xs font-medium`}>
-            {contract.status_kontrak}
+      {/* Baris atas: badge di kiri, ikon aksi di kanan - judul di bawahnya pakai lebar penuh */}
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="flex flex-wrap gap-2 min-w-0">
+          {getStatusBadge ? (
+            getStatusBadge(contract.status_kontrak)
+          ) : (
+            <Badge className={`${getStatusColor(contract.status_kontrak)} text-xs font-medium`}>
+              {contract.status_kontrak}
+            </Badge>
+          )}
+          <Badge className={`${getTypeColor(contract.tipe_kontrak)} text-xs font-medium`}>
+            {contract.tipe_kontrak}
           </Badge>
-        )}
-        <Badge className={`${getTypeColor(contract.tipe_kontrak)} text-xs font-medium`}>
-          {contract.tipe_kontrak}
-        </Badge>
-        <ProgressStatusBadge contractId={contract.id_kontrak} className="bg-white/20 text-white" />
-      </div>
-
-      <div className="flex justify-between items-start">
-        <div className="flex-1 pr-4">
-          <h3 className="font-semibold text-lg mb-2 leading-tight">
-            {contract.judul_kontrak}
-          </h3>
-          
-          {getVendorName && (
-            <div className="text-sm opacity-90 mb-1">
-              Vendor: {getVendorName(contract.id_vendor)}
-            </div>
-          )}
-
-          {contract.direksi_pekerjaan && (
-            <div className="text-sm opacity-90">
-              Direksi Pekerjaan: {contract.direksi_pekerjaan}
-            </div>
-          )}
+          <ProgressStatusBadge contractId={contract.id_kontrak} className="bg-white/20 text-white" />
         </div>
-        
-        <div className="flex gap-2 flex-shrink-0">
+
+        <div className="flex gap-1 flex-shrink-0 -mt-1 -mr-1">
           <FavoriteButton
             contractId={contract.id_kontrak}
             className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg"
@@ -97,7 +79,7 @@ export const ContractCardHeader = ({
               <Edit className="h-4 w-4" />
             </button>
           )}
-          
+
           {isAdmin && onDelete && (
             <button
               onClick={onDelete}
@@ -107,7 +89,7 @@ export const ContractCardHeader = ({
               <Trash2 className="h-4 w-4" />
             </button>
           )}
-          
+
           <button
             onClick={onViewDetails}
             className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-colors"
@@ -116,6 +98,24 @@ export const ContractCardHeader = ({
             <ExternalLink className="h-4 w-4" />
           </button>
         </div>
+      </div>
+
+      <div>
+        <h3 className="font-semibold text-lg mb-2 leading-tight">
+          {contract.judul_kontrak}
+        </h3>
+
+        {getVendorName && (
+          <div className="text-sm opacity-90 mb-1">
+            Vendor: {getVendorName(contract.id_vendor)}
+          </div>
+        )}
+
+        {contract.direksi_pekerjaan && (
+          <div className="text-sm opacity-90">
+            Direksi Pekerjaan: {contract.direksi_pekerjaan}
+          </div>
+        )}
       </div>
     </div>
   );
