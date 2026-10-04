@@ -6,17 +6,18 @@ import { calculateDaysRemaining, calculateTotalDays } from "../utils/contractUti
 interface ContractDurationProgressProps {
   startDate: string;
   endDate: string;
+  isDone?: boolean;
 }
 
-export const ContractDurationProgress = ({ startDate, endDate }: ContractDurationProgressProps) => {
+export const ContractDurationProgress = ({ startDate, endDate, isDone = false }: ContractDurationProgressProps) => {
   const daysRemaining = calculateDaysRemaining(endDate);
   const totalDays = calculateTotalDays(startDate, endDate);
   const daysElapsed = totalDays - daysRemaining;
   const timeProgress = totalDays > 0 ? (daysElapsed / totalDays) * 100 : 0;
-  
-  // Check if contract is in critical time (last 20%)
-  const isCritical = timeProgress >= 80;
-  const isOverdue = daysRemaining < 0;
+
+  // Kontrak yang sudah selesai tidak ditandai kritis/terlambat lagi
+  const isCritical = !isDone && timeProgress >= 80;
+  const isOverdue = !isDone && daysRemaining < 0;
 
   return (
     <div className="space-y-2">
@@ -40,6 +41,9 @@ export const ContractDurationProgress = ({ startDate, endDate }: ContractDuratio
           style={{ width: `${Math.min(100, timeProgress)}%` }}
         />
       </div>
+      {isDone && (
+        <div className="text-green-600 dark:text-green-400 text-sm font-semibold">Done</div>
+      )}
       {(isCritical || isOverdue) && (
         <div className="flex items-center gap-2 text-red-600 dark:text-red-400 text-sm">
           <AlertTriangle className="h-4 w-4" />

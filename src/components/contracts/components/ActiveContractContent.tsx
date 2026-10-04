@@ -19,6 +19,14 @@ export function ActiveContractContent({ contract }: ActiveContractContentProps) 
     ? calculateDurationProgress(effectiveTanggalMulai, effectiveTanggalSelesai)
     : null;
 
+  // Kontrak yang sudah selesai (status Selesai, atau progress aktual sudah 100%) tidak
+  // perlu lagi menampilkan keterlambatan/sisa hari - cukup label "Done".
+  const isDone =
+    contract.status_kontrak === 'Selesai' ||
+    contract.status_kontrak === 'Completed' ||
+    ((contract.tipe_kontrak === 'Lumpsum' || contract.tipe_kontrak === 'Unit Price') &&
+      (contract.progress_actual || 0) >= 100);
+
   return (
     <div className="space-y-3">
       {/* Periode Kontrak */}
@@ -58,10 +66,15 @@ export function ActiveContractContent({ contract }: ActiveContractContentProps) 
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-gray-700">Progress Durasi Pekerjaan</span>
-            <span className={`text-sm ${durationInfo.lateDays > 0 ? 'text-red-600 font-medium' : 'text-gray-600'}`}>
-              {durationInfo.lateDays > 0
-                ? `Terlambat ${durationInfo.lateDays} hari`
-                : `Sisa ${durationInfo.remainingDays} hari`}
+            <span className={`text-sm ${
+              isDone ? 'text-green-600 font-semibold' :
+              durationInfo.lateDays > 0 ? 'text-red-600 font-medium' : 'text-gray-600'
+            }`}>
+              {isDone
+                ? 'Done'
+                : durationInfo.lateDays > 0
+                  ? `Terlambat ${durationInfo.lateDays} hari`
+                  : `Sisa ${durationInfo.remainingDays} hari`}
             </span>
           </div>
           <Progress value={Math.min(durationInfo.progress, 100)} className="h-2" />

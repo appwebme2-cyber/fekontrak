@@ -206,9 +206,10 @@ export const ContractCard = ({
           </div>
         )}
 
-        <ContractDurationProgress 
-          startDate={contract.start_date} 
-          endDate={contract.end_date} 
+        <ContractDurationProgress
+          startDate={contract.start_date}
+          endDate={contract.end_date}
+          isDone={contract.status === 'Selesai' || contract.status === 'Completed' || (contract.progress || 0) >= 100}
         />
 
         <ContractWorkProgress 
