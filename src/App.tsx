@@ -51,6 +51,8 @@ import LaporanHarian from "@/pages/LaporanHarian";
 import Profile from "@/pages/Profile";
 import ReportAkses from "@/pages/ReportAkses";
 
+import Favorites from "@/pages/Favorites";
+
 // Import material requirement pages
 import MaterialRequirementList from "@/pages/MaterialRequirementList";
 import MaterialRequirementDetail from "@/pages/MaterialRequirementDetail";
@@ -77,7 +79,8 @@ const App = () => (
                       <Routes>
                         <Route path="/" element={<Navigate to="/dashboard" replace />} />
                         <Route path="/dashboard" element={<ModuleGuard moduleKey="dashboard"><Dashboard /></ModuleGuard>} />
-                        <Route path="/kontrak-lumpsum" element={<ModuleGuard moduleKey="kontrak-lumpsum"><KontrakLumpsum /></ModuleGuard>} />
+                        <Route path="/favorites" element={<Favorites />} />
+                        <Route path="/kontrak-lumpsum"element={<ModuleGuard moduleKey="kontrak-lumpsum"><KontrakLumpsum /></ModuleGuard>} />
                         <Route path="/kontrak-unit-price" element={<ModuleGuard moduleKey="kontrak-unit-price"><KontrakUnitPrice /></ModuleGuard>} />
                         <Route path="/kontrak-tsa-ltsa" element={<ModuleGuard moduleKey="kontrak-tsa-ltsa"><KontrakTsaLtsa /></ModuleGuard>} />
                         <Route path="/amandemen" element={<ModuleGuard moduleKey="amandemen"><Amandemen /></ModuleGuard>} />

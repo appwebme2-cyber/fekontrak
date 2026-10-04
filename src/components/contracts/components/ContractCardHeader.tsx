@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { ExternalLink, Edit, Trash2 } from 'lucide-react';
 import { Kontrak } from '@/types/database';
 import { ProgressStatusBadge } from '@/components/shared/ProgressStatusBadge';
+import { FavoriteButton } from '@/components/contracts/FavoriteButton';
 
 interface ContractCardHeaderProps {
   contract: Kontrak;
@@ -82,6 +83,11 @@ export const ContractCardHeader = ({
         </div>
         
         <div className="flex gap-2 flex-shrink-0">
+          <FavoriteButton
+            contractId={contract.id_kontrak}
+            className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg"
+          />
+
           {isAdmin && onEdit && (
             <button
               onClick={onEdit}

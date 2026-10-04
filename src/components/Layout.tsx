@@ -23,6 +23,7 @@ import {
   ShoppingCart,
   GitBranch,
   Calculator,
+  Star,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -87,12 +88,16 @@ const Layout = ({ children }: LayoutProps) => {
     },
     {
       title: 'Contract Management',
-      items: filterByMenuKey([
-        { key: 'kontrak-lumpsum', name: 'Kontrak Lumpsum', href: '/kontrak-lumpsum', icon: FileText },
-        { key: 'kontrak-unit-price', name: 'Kontrak Unit Price', href: '/kontrak-unit-price', icon: ClipboardList },
-        { key: 'kontrak-tsa-ltsa', name: 'Kontrak TSA/LTSA', href: '/kontrak-tsa-ltsa', icon: TrendingUp },
-        { key: 'amandemen', name: 'Amandemen', href: '/amandemen', icon: GitBranch },
-      ])
+      items: [
+        // Favorit bersifat personal per user, jadi tidak diatur lewat matriks hak akses menu
+        { name: 'Favorit', href: '/favorites', icon: Star },
+        ...filterByMenuKey([
+          { key: 'kontrak-lumpsum', name: 'Kontrak Lumpsum', href: '/kontrak-lumpsum', icon: FileText },
+          { key: 'kontrak-unit-price', name: 'Kontrak Unit Price', href: '/kontrak-unit-price', icon: ClipboardList },
+          { key: 'kontrak-tsa-ltsa', name: 'Kontrak TSA/LTSA', href: '/kontrak-tsa-ltsa', icon: TrendingUp },
+          { key: 'amandemen', name: 'Amandemen', href: '/amandemen', icon: GitBranch },
+        ]),
+      ]
     },
     {
       title: 'Operations',

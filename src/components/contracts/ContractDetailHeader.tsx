@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, Edit, Trash2, Building2, Calendar, Coins } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Kontrak } from "@/types/database";
+import { FavoriteButton } from "@/components/contracts/FavoriteButton";
 
 interface ContractDetailHeaderProps {
   contract: Kontrak;
@@ -78,28 +79,35 @@ export const ContractDetailHeader = ({
             Kembali ke Kontrak {contract.tipe_kontrak}
           </Button>
 
-          {canEdit && (
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105 shadow-lg"
-                onClick={onEdit}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Kontrak
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-red-500/20 hover:bg-red-500/30 text-white border-red-300/20 backdrop-blur-sm transition-all duration-300 hover:scale-105 shadow-lg"
-                onClick={onDelete}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Hapus
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-3">
+            <FavoriteButton
+              contractId={contract.id_kontrak}
+              withLabel
+              className="h-9 px-3 rounded-md text-sm font-medium bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm hover:scale-105 shadow-lg"
+            />
+            {canEdit && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105 shadow-lg"
+                  onClick={onEdit}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Kontrak
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-red-500/20 hover:bg-red-500/30 text-white border-red-300/20 backdrop-blur-sm transition-all duration-300 hover:scale-105 shadow-lg"
+                  onClick={onDelete}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Hapus
+                </Button>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
