@@ -148,9 +148,29 @@ interface KonfigurasiItem {
   updated_at?: string;
 }
 
+/**
+ * Menu yang sudah ada sebelum matriks mulai mencatat `knownMenus`. Matriks tersimpan
+ * yang belum punya catatan ini dianggap hanya mengenal menu-menu di bawah, sehingga
+ * menu baru (mis. material-requirement) otomatis ikut tampil sesuai default role.
+ */
+const LEGACY_KNOWN_MENU_KEYS = [
+  'dashboard',
+  'contract-performance',
+  'kontrak-lumpsum',
+  'kontrak-unit-price',
+  'kontrak-tsa-ltsa',
+  'amandemen',
+  'invoices',
+  'user-purchase',
+  'approval',
+  'laporan-harian',
+];
+
 interface PersistedRoleConfig {
   matrix: Partial<RolePermissionMatrix>;
   labels: Partial<RoleLabels>;
+  /** Daftar menu yang sudah ada saat admin terakhir menyimpan pengaturan role. */
+  knownMenus?: string[];
 }
 
 /**
@@ -160,8 +180,8 @@ interface PersistedRoleConfig {
  */
 const normalizePersisted = (parsed: unknown): PersistedRoleConfig => {
   if (parsed && typeof parsed === 'object' && 'matrix' in (parsed as Record<string, unknown>)) {
-    const obj = parsed as { matrix?: Partial<RolePermissionMatrix>; labels?: Partial<RoleLabels> };
-    return { matrix: obj.matrix ?? {}, labels: obj.labels ?? {} };
+    const obj = parsed as { matrix?: Partial<RolePermissionMatrix>; labels?: Partial<RoleLabels>; knownMenus?: string[] };
+    return { matrix: obj.matrix ?? {}, labels: obj.labels ?? {}, knownMenus: obj.knownMenus };
   }
   return { matrix: (parsed as Partial<RolePermissionMatrix>) ?? {}, labels: {} };
 };
@@ -176,10 +196,22 @@ const readLocalOverride = (): PersistedRoleConfig | null => {
 };
 
 /** Deep-merge per role+field, supaya data lama (sebelum field baru ditambahkan) tidak rusak. */
-const mergeWithDefaults = (saved: Partial<RolePermissionMatrix>): RolePermissionMatrix => {
+const mergeWithDefaults = (
+  saved: Partial<RolePermissionMatrix>,
+  knownMenus?: string[]
+): RolePermissionMatrix => {
   const roles = Object.keys(DEFAULT_ROLE_PERMISSIONS) as ConfigurableRole[];
+  const known = new Set(knownMenus ?? LEGACY_KNOWN_MENU_KEYS);
   return roles.reduce((acc, role) => {
-    acc[role] = { ...DEFAULT_ROLE_PERMISSIONS[role], ...(saved[role] ?? {}) };
+    const merged = { ...DEFAULT_ROLE_PERMISSIONS[role], ...(saved[role] ?? {}) };
+    // visibleMenus tersimpan menimpa default secara utuh, jadi menu yang baru ditambahkan
+    // setelah admin terakhir menyimpan tidak akan pernah muncul. Tambahkan menu yang belum
+    // dikenal matriks tersimpan sesuai default role-nya; begitu admin menyimpan ulang,
+    // pilihannya (termasuk menyembunyikan menu itu) dihormati.
+    const newlyAdded = DEFAULT_ROLE_PERMISSIONS[role].visibleMenus.filter(
+      (key) => !known.has(key) && !merged.visibleMenus.includes(key)
+    );
+    acc[role] = { ...merged, visibleMenus: [...merged.visibleMenus, ...newlyAdded] };
     return acc;
   }, {} as RolePermissionMatrix);
 };
@@ -213,7 +245,7 @@ export const useRolePermissionsConfig = () => {
   }, [remoteConfig]);
 
   const matrix = useMemo<RolePermissionMatrix>(
-    () => mergeWithDefaults(persisted?.matrix ?? {}),
+    () => mergeWithDefaults(persisted?.matrix ?? {}, persisted?.knownMenus),
     [persisted]
   );
 
@@ -240,7 +272,11 @@ export const useUpdateRolePermissions = () => {
   );
 
   const save = async (matrix: RolePermissionMatrix, labels: RoleLabels) => {
-    const value = JSON.stringify({ matrix, labels } satisfies PersistedRoleConfig);
+    const value = JSON.stringify({
+      matrix,
+      labels,
+      knownMenus: CONFIGURABLE_MENU_ITEMS.map((m) => m.key),
+    } satisfies PersistedRoleConfig);
 
     if (remoteConfig) {
       await updateKonfigurasi.mutateAsync({ id: remoteConfig.id_setting, nilai_setting: value });
