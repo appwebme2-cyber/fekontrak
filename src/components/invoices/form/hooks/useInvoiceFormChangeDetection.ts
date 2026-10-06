@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Tagihan } from '@/types/database';
+import { parseDocuments, toDateInput } from './useInvoiceForm';
 
 interface InvoiceFormData {
   id_kontrak: string;
@@ -27,15 +28,15 @@ const getInitialFormData = (invoice: Tagihan | null): InvoiceFormData => {
     return {
       id_kontrak: invoice.id_kontrak || '',
       nomor_tagihan: invoice.nomor_tagihan || '',
-      tanggal_tagihan: invoice.tanggal_tagihan || '',
+      tanggal_tagihan: toDateInput(invoice.tanggal_tagihan),
       direksi_pekerjaan: '', // Will be set from contract data
       termin: invoice.termin || '',
       nilai_tagihan: invoice.nilai_tagihan?.toString() || '',
       status_tagihan: invoice.status_tagihan || '',
       memo_required: invoice.memo_required || false,
-      tanggal_pengiriman_memo: invoice.tanggal_pengiriman_memo || '',
+      tanggal_pengiriman_memo: toDateInput(invoice.tanggal_pengiriman_memo),
       dokumen_memo: invoice.dokumen_memo || '',
-      dokumen_tagihan: Array.isArray(invoice.dokumen_tagihan) ? invoice.dokumen_tagihan : [],
+      dokumen_tagihan: parseDocuments(invoice.dokumen_tagihan),
       catatan: invoice.catatan || ''
     };
   }

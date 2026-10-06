@@ -36,6 +36,25 @@ const initialFormData: FormData = {
   catatan: ''
 };
 
+// Backend menyimpan dokumen_tagihan sebagai teks JSON, jadi bisa datang sebagai string
+// (dari list tagihan / tab tagihan kontrak) atau sudah berupa array. Kalau tidak
+// di-parse, dokumen yang sudah ada terbaca kosong dan hilang saat form disimpan.
+export const parseDocuments = (raw: unknown): any[] => {
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+// Input type="date" hanya menerima yyyy-MM-dd; backend mengirim ISO lengkap dengan jam.
+export const toDateInput = (value?: string | null): string => (value ? value.slice(0, 10) : '');
+
 export const useInvoiceForm = (invoice?: Tagihan | null) => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
 
@@ -51,7 +70,7 @@ export const useInvoiceForm = (invoice?: Tagihan | null) => {
       setFormData({
         id_kontrak: invoiceData.id_kontrak || '',
         nomor_tagihan: invoiceData.nomor_tagihan || '',
-        tanggal_tagihan: invoiceData.tanggal_tagihan || '',
+        tanggal_tagihan: toDateInput(invoiceData.tanggal_tagihan),
         direksi_pekerjaan: '', // Will be set from contract data
         tipe_kontrak: invoiceData.tipe_kontrak || '',
         kbo_bagian: '', // Tidak disimpan di tagihan; diisi dari kontrak terpilih
@@ -59,9 +78,9 @@ export const useInvoiceForm = (invoice?: Tagihan | null) => {
         nilai_tagihan: invoiceData.nilai_tagihan?.toString() || '',
         status_tagihan: invoiceData.status_tagihan || '',
         memo_required: invoiceData.memo_required || false,
-        tanggal_pengiriman_memo: invoiceData.tanggal_pengiriman_memo || '',
+        tanggal_pengiriman_memo: toDateInput(invoiceData.tanggal_pengiriman_memo),
         dokumen_memo: invoiceData.dokumen_memo || '',
-        dokumen_tagihan: Array.isArray(invoiceData.dokumen_tagihan) ? invoiceData.dokumen_tagihan : [],
+        dokumen_tagihan: parseDocuments(invoiceData.dokumen_tagihan),
         catatan: invoiceData.catatan || ''
       });
     } else {
