@@ -74,6 +74,7 @@ export const AddUserDialog = ({ isOpen, onOpenChange, formData, setFormData, onS
                 <SelectItem value="section_head">{roleLabels.section_head}</SelectItem>
                 <SelectItem value="supervisor">{roleLabels.supervisor}</SelectItem>
                 <SelectItem value="technician">{roleLabels.technician}</SelectItem>
+                <SelectItem value="head_office">{roleLabels.head_office}</SelectItem>
                 <SelectItem value="external">{roleLabels.external}</SelectItem>
                 <SelectItem value="guest">{roleLabels.guest}</SelectItem>
               </SelectContent>

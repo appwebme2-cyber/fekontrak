@@ -6,6 +6,7 @@ export type ConfigurableRole =
   | 'section_head'
   | 'supervisor'
   | 'technician'
+  | 'head_office'
   | 'external'
   | 'guest';
 
@@ -16,6 +17,7 @@ export const DEFAULT_ROLE_LABELS: RoleLabels = {
   section_head: 'Section Head',
   supervisor: 'Supervisor',
   technician: 'Technician',
+  head_office: 'Head Office',
   external: 'External',
   guest: 'Guest',
 };
@@ -115,6 +117,17 @@ export const DEFAULT_ROLE_PERMISSIONS: RolePermissionMatrix = {
   section_head: { ...STAFF_DEFAULT_FLAGS },
   supervisor: { ...STAFF_DEFAULT_FLAGS },
   technician: { ...STAFF_DEFAULT_FLAGS },
+  // Kantor pusat: hanya melihat (viewer), semua menu terlihat, tidak bisa menambah/ubah/hapus.
+  head_office: {
+    canCreate: false,
+    canEdit: false,
+    canDelete: false,
+    canManageUsers: false,
+    canManageVendors: false,
+    canUploadDokumen: false,
+    canApprovalDokumen: false,
+    visibleMenus: CONFIGURABLE_MENU_ITEMS.map((m) => m.key),
+  },
   guest: {
     canCreate: false,
     canEdit: false,

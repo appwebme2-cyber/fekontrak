@@ -15,6 +15,7 @@ const ROLE_GRADIENTS: Record<string, string> = {
   section_head: 'from-indigo-500 to-indigo-600',
   supervisor: 'from-teal-500 to-teal-600',
   technician: 'from-cyan-500 to-cyan-600',
+  head_office: 'from-emerald-500 to-emerald-600',
   external: 'from-orange-500 to-orange-600',
   guest: 'from-purple-500 to-purple-600',
 };

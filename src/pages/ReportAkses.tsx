@@ -59,6 +59,7 @@ const ROLE_BADGE_COLOR: Record<string, string> = {
   section_head: 'bg-indigo-100 text-indigo-800 border-indigo-200',
   supervisor: 'bg-violet-100 text-violet-800 border-violet-200',
   technician: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+  head_office: 'bg-emerald-100 text-emerald-800 border-emerald-200',
   external: 'bg-orange-100 text-orange-800 border-orange-200',
   guest: 'bg-gray-100 text-gray-700 border-gray-200',
 };
