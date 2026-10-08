@@ -36,9 +36,14 @@ export const ContractTimeInfo = ({ contract, fieldText }: ContractTimeInfoProps)
   };
   const mplDays = computeMpl();
 
-  // Kontrak yang sudah ditandai "Selesai" tidak perlu lagi dihitung keterlambatannya -
-  // progress durasi cuma relevan buat kontrak yang masih berjalan.
-  const isCompleted = contract.status_kontrak === 'Selesai';
+  // Kontrak yang sudah selesai (status Selesai, atau progress aktual sudah 100% untuk
+  // Lumpsum/Unit Price) tidak perlu lagi dihitung keterlambatannya - progress durasi
+  // cuma relevan buat kontrak yang masih berjalan.
+  const isCompleted =
+    contract.status_kontrak === 'Selesai' ||
+    contract.status_kontrak === 'Completed' ||
+    ((contract.tipe_kontrak === 'Lumpsum' || contract.tipe_kontrak === 'Unit Price') &&
+      (contract.progress_actual || 0) >= 100);
 
   const calculateDurationProgress = () => {
     if (!effectiveTanggalMulai || !effectiveTanggalSelesai)
@@ -89,9 +94,9 @@ export const ContractTimeInfo = ({ contract, fieldText }: ContractTimeInfoProps)
             isOverdue ? 'text-red-600' :
             isCritical ? 'text-orange-600' :
             'text-green-600'
-          }`}>
+          } ${isCompleted ? 'font-semibold' : ''}`}>
             {isCompleted
-              ? 'Kontrak selesai'
+              ? 'Done'
               : isOverdue
                 ? `Terlambat ${daysLate} hari`
                 : `Sisa ${daysRemaining} hari`}
