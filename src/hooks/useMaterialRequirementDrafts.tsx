@@ -217,14 +217,20 @@ export const useMaterialRequirementDraft = (id?: string) => {
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['material-requirement-draft', id] });
 
   const extractAi = useMutation({
-    mutationFn: async (): Promise<AiExtractionResult> => {
+    mutationFn: async (pin: string): Promise<AiExtractionResult> => {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/MaterialRequirementDrafts/${id}/extract-ai`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ pin })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Gagal ekstrak dengan AI");
+      if (!res.ok) {
+        // status dibawa supaya halaman bisa membuka ulang dialog PIN kalau PIN salah (403)
+        const error: any = new Error(data.message || "Gagal ekstrak dengan AI");
+        error.status = res.status;
+        throw error;
+      }
       return {
         problem: data.problem,
         rekomendasi_solusi: data.rekomendasiSolusi,

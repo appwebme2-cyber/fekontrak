@@ -16,6 +16,7 @@ import { LineItemFormDialog } from '@/components/material-requirement/LineItemFo
 import { RabItemManagerDialog } from '@/components/material-requirement/RabItemManagerDialog';
 import { AiExtractionReviewDialog } from '@/components/material-requirement/AiExtractionReviewDialog';
 import { AiGenerateProgress } from '@/components/material-requirement/AiGenerateProgress';
+import { AiPinDialog } from '@/components/material-requirement/AiPinDialog';
 import { exportDraftToExcel, getMatchStatus } from '@/components/material-requirement/exportDraftToExcel';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
 import { DocumentUploadArea } from '@/components/contracts/forms/components/DocumentUploadArea';
@@ -114,6 +115,8 @@ const MaterialRequirementDetail = () => {
   const [aiReviewOpen, setAiReviewOpen] = useState(false);
   const [aiResult, setAiResult] = useState<AiExtractionResult | null>(null);
   const [applyingAi, setApplyingAi] = useState(false);
+  const [pinOpen, setPinOpen] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
 
   const { uploading, handleFileUpload, removeDocument } = useMaterialRequirementDocumentUpload({
     formData: {
@@ -184,10 +187,24 @@ const MaterialRequirementDetail = () => {
     setDeletingLine(null);
   };
 
-  const handleExtractAi = async () => {
-    const result = await extractAi.mutateAsync();
-    setAiResult(result);
-    setAiReviewOpen(true);
+  const openPinDialog = () => {
+    setPinError(null);
+    setPinOpen(true);
+  };
+
+  const handleExtractAi = async (pin: string) => {
+    setPinOpen(false);
+    try {
+      const result = await extractAi.mutateAsync(pin);
+      setAiResult(result);
+      setAiReviewOpen(true);
+    } catch (error: any) {
+      // Toast error sudah ditampilkan oleh hook; untuk PIN salah buka lagi dialog supaya bisa diulang
+      if (error?.status === 403) {
+        setPinError(error.message || 'PIN salah.');
+        setPinOpen(true);
+      }
+    }
   };
 
   const handleApplyAiResult = async (data: {
@@ -277,7 +294,7 @@ const MaterialRequirementDetail = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleExtractAi}
+            onClick={openPinDialog}
             disabled={extractAi.isPending || (draft.rekomendasi_documents.length === 0 && draft.gambar_kerja_documents.length === 0)}
             className="border-purple-300 text-purple-700 hover:bg-purple-50"
           >
@@ -423,6 +440,13 @@ const MaterialRequirementDetail = () => {
         onConfirm={confirmDeleteLine}
         title="Hapus Baris Kebutuhan?"
         description={`Apakah Anda yakin ingin menghapus baris '${deletingLine?.uraian_pekerjaan}'?`}
+      />
+
+      <AiPinDialog
+        open={pinOpen}
+        onOpenChange={setPinOpen}
+        onSubmit={handleExtractAi}
+        error={pinError}
       />
 
       <AiExtractionReviewDialog
