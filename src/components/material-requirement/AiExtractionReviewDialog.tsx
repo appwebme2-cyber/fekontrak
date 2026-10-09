@@ -34,7 +34,9 @@ interface AiExtractionReviewDialogProps {
   onOpenChange: (open: boolean) => void;
   result: AiExtractionResult | null;
   rabItems: RabItem[];
+  existingLineCount: number;
   onApply: (data: {
+    replaceExisting: boolean;
     problem?: string;
     rekomendasi_solusi?: string;
     tag_unit?: string;
@@ -43,7 +45,8 @@ interface AiExtractionReviewDialogProps {
   isApplying?: boolean;
 }
 
-export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems, onApply, isApplying }: AiExtractionReviewDialogProps) {
+export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems, existingLineCount, onApply, isApplying }: AiExtractionReviewDialogProps) {
+  const [replaceExisting, setReplaceExisting] = useState(false);
   const [problem, setProblem] = useState('');
   const [rekomendasiSolusi, setRekomendasiSolusi] = useState('');
   const [tagUnit, setTagUnit] = useState('');
@@ -51,6 +54,7 @@ export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems,
 
   useEffect(() => {
     if (open && result) {
+      setReplaceExisting(false);
       setProblem(result.problem || '');
       setRekomendasiSolusi(result.rekomendasi_solusi || '');
       setTagUnit(result.tag_unit || '');
@@ -104,6 +108,7 @@ export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems,
         };
       });
     await onApply({
+      replaceExisting: existingLineCount > 0 && replaceExisting,
       problem: problem || undefined,
       rekomendasi_solusi: rekomendasiSolusi || undefined,
       tag_unit: tagUnit || undefined,
@@ -221,6 +226,23 @@ export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems,
             )}
           </div>
         </div>
+
+        {existingLineCount > 0 && (
+          <label className={`flex items-start gap-2 rounded-lg border p-3 text-sm cursor-pointer ${replaceExisting ? 'border-amber-300 bg-amber-50' : 'bg-muted/20'}`}>
+            <Checkbox
+              checked={replaceExisting}
+              onCheckedChange={(v) => setReplaceExisting(!!v)}
+              className="mt-0.5"
+            />
+            <span>
+              <span className="font-medium">Ganti semua {existingLineCount} baris yang sudah ada di draft ini</span>
+              <span className="block text-xs text-muted-foreground">
+                Dicentang: baris lama (pekerjaan &amp; material) dihapus lalu diganti hasil di atas, jadi tidak dobel.
+                Tidak dicentang: hasil di atas ditambahkan di bawah baris yang sudah ada.
+              </span>
+            </span>
+          </label>
+        )}
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Batal</Button>

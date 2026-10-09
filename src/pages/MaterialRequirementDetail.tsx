@@ -100,7 +100,7 @@ const MaterialRequirementDetail = () => {
   const navigate = useNavigate();
   const { draft, isLoading, refresh, extractAi } = useMaterialRequirementDraft(id);
   const { updateDraft } = useMaterialRequirementDrafts();
-  const { createLine, updateLine, deleteLine } = useMaterialRequirementLines(id || '');
+  const { createLine, updateLine, deleteLine, deleteAllLines } = useMaterialRequirementLines(id || '');
   const { rabItems, isLoading: rabItemsLoading } = useRabItems(draft?.id_kontrak);
   const { canEdit, canDelete, canCreate } = usePermissions();
 
@@ -190,6 +190,7 @@ const MaterialRequirementDetail = () => {
   };
 
   const handleApplyAiResult = async (data: {
+    replaceExisting: boolean;
     problem?: string;
     rekomendasi_solusi?: string;
     tag_unit?: string;
@@ -212,6 +213,10 @@ const MaterialRequirementDetail = () => {
           rekomendasi_documents: draft.rekomendasi_documents,
           gambar_kerja_documents: draft.gambar_kerja_documents,
         });
+      }
+      // Hasil AI sudah ada di memori, jadi baris lama baru dihapus setelah ekstraksi berhasil
+      if (data.replaceExisting) {
+        await deleteAllLines.mutateAsync();
       }
       for (const line of data.lines) {
         await createLine.mutateAsync(line);
@@ -423,6 +428,7 @@ const MaterialRequirementDetail = () => {
         onOpenChange={setAiReviewOpen}
         result={aiResult}
         rabItems={rabItems}
+        existingLineCount={draft.lines.length}
         onApply={handleApplyAiResult}
         isApplying={applyingAi}
       />

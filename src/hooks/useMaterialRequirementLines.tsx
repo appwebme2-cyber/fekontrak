@@ -138,5 +138,23 @@ export const useMaterialRequirementLines = (idDraft: string) => {
     }
   });
 
-  return { createLine, updateLine, deleteLine };
+  // Hapus semua baris draft sekaligus (tanpa toast - dipakai sebagai langkah dalam "ganti dengan hasil AI")
+  const deleteAllLines = useMutation({
+    mutationFn: async () => {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_URL}/MaterialRequirementLines/by-draft/${idDraft}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Gagal menghapus baris lama");
+      }
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Gagal menghapus baris lama", variant: "destructive" });
+    }
+  });
+
+  return { createLine, updateLine, deleteLine, deleteAllLines };
 };
