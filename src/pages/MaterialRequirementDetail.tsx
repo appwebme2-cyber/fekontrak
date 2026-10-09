@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Pencil, Plus, Trash2, Settings2, FileText, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { ArrowLeft, Pencil, Plus, Trash2, Settings2, FileText, Image as ImageIcon, Sparkles, Download } from 'lucide-react';
 import { useMaterialRequirementDraft, useMaterialRequirementDrafts, MaterialRequirementDraft, AiExtractionResult } from '@/hooks/useMaterialRequirementDrafts';
 import { useMaterialRequirementLines, MaterialRequirementLine, LineJenis } from '@/hooks/useMaterialRequirementLines';
 import { useMaterialRequirementDocumentUpload } from '@/hooks/useMaterialRequirementDocumentUpload';
@@ -15,25 +15,22 @@ import { DraftFormDialog } from '@/components/material-requirement/DraftFormDial
 import { LineItemFormDialog } from '@/components/material-requirement/LineItemFormDialog';
 import { RabItemManagerDialog } from '@/components/material-requirement/RabItemManagerDialog';
 import { AiExtractionReviewDialog } from '@/components/material-requirement/AiExtractionReviewDialog';
+import { exportDraftToExcel, getMatchStatus } from '@/components/material-requirement/exportDraftToExcel';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
 import { DocumentUploadArea } from '@/components/contracts/forms/components/DocumentUploadArea';
 import { DocumentList } from '@/components/contracts/forms/components/DocumentList';
 
-const MATCH_TOLERANCE = 0.01; // toleransi relatif 1%
-
 function getMatchBadge(kalkulasi: number, klaim: number | null | undefined) {
-  if (klaim === null || klaim === undefined) {
-    return <Badge variant="outline" className="text-muted-foreground">Belum ada klaim</Badge>;
+  switch (getMatchStatus(kalkulasi, klaim)) {
+    case 'Belum ada klaim':
+      return <Badge variant="outline" className="text-muted-foreground">Belum ada klaim</Badge>;
+    case 'Sesuai':
+      return <Badge className="bg-green-100 text-green-800">Sesuai</Badge>;
+    case 'Overclaim':
+      return <Badge className="bg-red-100 text-red-800">Overclaim</Badge>;
+    default:
+      return <Badge className="bg-amber-100 text-amber-800">Underclaim</Badge>;
   }
-  const diff = Math.abs(kalkulasi - klaim);
-  const base = Math.max(Math.abs(kalkulasi), Math.abs(klaim), 1e-9);
-  if (diff / base <= MATCH_TOLERANCE) {
-    return <Badge className="bg-green-100 text-green-800">Sesuai</Badge>;
-  }
-  if (klaim > kalkulasi) {
-    return <Badge className="bg-red-100 text-red-800">Overclaim</Badge>;
-  }
-  return <Badge className="bg-amber-100 text-amber-800">Underclaim</Badge>;
 }
 
 const LineTable = ({
@@ -244,11 +241,17 @@ const MaterialRequirementDetail = () => {
             {draft.nomor_mrf && <p className="text-blue-100/85 text-sm">{draft.nomor_mrf}</p>}
             <p className="text-blue-100/85 text-sm mt-1">{draft.kontrak?.judul_kontrak}</p>
           </div>
-          {canEdit && (
-            <Button variant="secondary" size="sm" onClick={() => setEditDraftOpen(true)}>
-              <Pencil className="h-4 w-4 mr-1" /> Edit Header
+          <div className="flex gap-2">
+            {/* Export tidak mengubah data, jadi tersedia untuk semua role termasuk viewer */}
+            <Button variant="secondary" size="sm" onClick={() => exportDraftToExcel(draft)}>
+              <Download className="h-4 w-4 mr-1" /> Export Excel
             </Button>
-          )}
+            {canEdit && (
+              <Button variant="secondary" size="sm" onClick={() => setEditDraftOpen(true)}>
+                <Pencil className="h-4 w-4 mr-1" /> Edit Header
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
