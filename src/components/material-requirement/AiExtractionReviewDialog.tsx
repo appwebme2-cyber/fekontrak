@@ -26,7 +26,7 @@ interface ReviewLine {
   volume_kalkulasi: string;
   volume_klaim: string;
   catatan_kalkulasi: string;
-  aiSuggestedKode?: string | null;
+  kodeDokumen?: string | null;
 }
 
 interface AiExtractionReviewDialogProps {
@@ -59,7 +59,8 @@ export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems,
       setRekomendasiSolusi(result.rekomendasi_solusi || '');
       setTagUnit(result.tag_unit || '');
       setLines(result.lines.map((l) => {
-        const matched = l.kode_item ? rabItems.find((r) => r.kode_item === l.kode_item) : undefined;
+        // Penautan berdasarkan id item RAB dari backend (bukan kode, karena kode bisa kembar)
+        const matched = l.id_rab_item ? rabItems.find((r) => r.id_rab_item === l.id_rab_item) : undefined;
         return {
           checked: true,
           jenis: l.jenis,
@@ -69,7 +70,7 @@ export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems,
           volume_kalkulasi: String(l.volume_kalkulasi ?? ''),
           volume_klaim: l.volume_klaim != null ? String(l.volume_klaim) : '',
           catatan_kalkulasi: l.catatan_kalkulasi || '',
-          aiSuggestedKode: l.kode_item,
+          kodeDokumen: l.kode_dokumen,
         };
       }));
     }
@@ -167,8 +168,8 @@ export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems,
                               <CheckCircle2 className="h-3 w-3" /> Tercocokkan ke RAB
                             </span>
                           )}
-                          {line.aiSuggestedKode && !line.id_rab_item && (
-                            <span className="text-xs text-amber-700">AI usulkan kode "{line.aiSuggestedKode}" tapi tidak ditemukan di master RAB</span>
+                          {line.kodeDokumen && !line.id_rab_item && (
+                            <span className="text-xs text-amber-700">Kode di dokumen: {line.kodeDokumen} (belum ada di master RAB)</span>
                           )}
                         </div>
                         <div>
