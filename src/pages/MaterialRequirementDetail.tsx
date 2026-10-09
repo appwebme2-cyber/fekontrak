@@ -15,6 +15,7 @@ import { DraftFormDialog } from '@/components/material-requirement/DraftFormDial
 import { LineItemFormDialog } from '@/components/material-requirement/LineItemFormDialog';
 import { RabItemManagerDialog } from '@/components/material-requirement/RabItemManagerDialog';
 import { AiExtractionReviewDialog } from '@/components/material-requirement/AiExtractionReviewDialog';
+import { AiGenerateProgress } from '@/components/material-requirement/AiGenerateProgress';
 import { exportDraftToExcel, getMatchStatus } from '@/components/material-requirement/exportDraftToExcel';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
 import { DocumentUploadArea } from '@/components/contracts/forms/components/DocumentUploadArea';
@@ -272,7 +273,7 @@ const MaterialRequirementDetail = () => {
       </div>
 
       {canCreate && (
-        <div className="flex justify-end">
+        <div className="flex flex-col items-end gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -283,6 +284,7 @@ const MaterialRequirementDetail = () => {
             <Sparkles className="h-4 w-4 mr-1" />
             {extractAi.isPending ? 'Memproses dokumen...' : 'Auto Ekstrak & Generate dengan AI (Beta)'}
           </Button>
+          <AiGenerateProgress active={extractAi.isPending} hasRabItems={rabItems.length > 0} />
         </div>
       )}
 
