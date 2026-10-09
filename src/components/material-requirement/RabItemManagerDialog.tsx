@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,9 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Pencil, Trash2, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, FileSpreadsheet } from 'lucide-react';
 import { useRabItems, RabItem } from '@/hooks/useRabItems';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
+import { useToast } from '@/hooks/use-toast';
+import { parseRabExcel, ParsedRabItem } from './parseRabExcel';
 
 interface RabItemManagerDialogProps {
   open: boolean;
@@ -31,11 +33,36 @@ const emptyForm = {
 };
 
 export function RabItemManagerDialog({ open, onOpenChange, idKontrak, judulKontrak }: RabItemManagerDialogProps) {
-  const { rabItems, isLoading, createRabItem, updateRabItem, deleteRabItem } = useRabItems(idKontrak);
+  const { rabItems, isLoading, createRabItem, updateRabItem, importRabItems, deleteRabItem } = useRabItems(idKontrak);
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importPreview, setImportPreview] = useState<{ fileName: string; items: ParsedRabItem[] } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
   const [deletingItem, setDeletingItem] = useState<RabItem | null>(null);
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // supaya file yang sama bisa dipilih ulang
+    if (!file) return;
+    try {
+      const items = parseRabExcel(await file.arrayBuffer());
+      if (items.length === 0) {
+        toast({ title: 'Tidak ada item terbaca', description: 'Pastikan file berisi sheet RAB dengan kolom URAIAN, SAT, UPAH, MATERIAL, ALAT.', variant: 'destructive' });
+        return;
+      }
+      setImportPreview({ fileName: file.name, items });
+    } catch (err: any) {
+      toast({ title: 'Gagal membaca file', description: err.message || 'File Excel tidak bisa dibaca', variant: 'destructive' });
+    }
+  };
+
+  const confirmImport = async () => {
+    if (!importPreview) return;
+    await importRabItems.mutateAsync({ idKontrak, items: importPreview.items });
+    setImportPreview(null);
+  };
 
   const resetForm = () => {
     setForm(emptyForm);
@@ -96,11 +123,55 @@ export function RabItemManagerDialog({ open, onOpenChange, idKontrak, judulKontr
               Daftar item RAB kontrak ini, dipakai untuk mencocokkan baris pekerjaan pada draft kebutuhan.
             </p>
             {!showForm && (
-              <Button size="sm" onClick={() => setShowForm(true)}>
-                <Plus className="h-4 w-4 mr-1" /> Tambah Item
-              </Button>
+              <div className="flex gap-2 shrink-0">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls"
+                  className="hidden"
+                  onChange={handleFileSelected}
+                />
+                <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                  <FileSpreadsheet className="h-4 w-4 mr-1" /> Import dari Excel
+                </Button>
+                <Button size="sm" onClick={() => setShowForm(true)}>
+                  <Plus className="h-4 w-4 mr-1" /> Tambah Item
+                </Button>
+              </div>
             )}
           </div>
+
+          {importPreview && (
+            <div className="border rounded-lg p-4 space-y-3 mb-4 bg-muted/20">
+              <div className="flex justify-between items-start gap-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">Pratinjau impor: {importPreview.items.length} item terbaca</p>
+                  <p className="text-xs text-muted-foreground truncate">{importPreview.fileName}</p>
+                </div>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setImportPreview(null)}><X className="h-4 w-4" /></Button>
+              </div>
+              <ul className="text-xs space-y-1">
+                {importPreview.items.slice(0, 5).map((it, i) => (
+                  <li key={i} className="truncate">
+                    <span className="font-mono mr-2">{it.kode_item}</span>
+                    {it.uraian_pekerjaan} <span className="text-muted-foreground">({it.satuan})</span>
+                  </li>
+                ))}
+                {importPreview.items.length > 5 && (
+                  <li className="text-muted-foreground">... dan {importPreview.items.length - 5} item lainnya</li>
+                )}
+              </ul>
+              <p className="text-xs text-muted-foreground">
+                Item yang kode dan uraiannya sudah ada di kontrak ini akan dilewati, jadi aman kalau diimpor ulang.
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setImportPreview(null)}>Batal</Button>
+                <Button type="button" onClick={confirmImport} disabled={importRabItems.isPending}>
+                  {importRabItems.isPending ? 'Mengimpor...' : `Import ${importPreview.items.length} Item`}
+                </Button>
+              </div>
+            </div>
+          )}
 
           {showForm && (
             <form onSubmit={handleSubmit} className="border rounded-lg p-4 space-y-3 mb-4 bg-muted/20">

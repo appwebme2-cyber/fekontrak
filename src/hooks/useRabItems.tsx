@@ -110,6 +110,46 @@ export const useRabItems = (idKontrak?: string) => {
     }
   });
 
+  const importRabItems = useMutation({
+    mutationFn: async ({ idKontrak: kontrakId, items }: {
+      idKontrak: string;
+      items: Omit<Partial<RabItem>, 'id_rab_item' | 'id_kontrak'>[];
+    }) => {
+      const token = localStorage.getItem("token");
+      const payload = {
+        idKontrak: kontrakId,
+        items: items.map((i) => ({
+          idKontrak: kontrakId,
+          kodeItem: i.kode_item,
+          kategori: i.kategori,
+          uraianPekerjaan: i.uraian_pekerjaan,
+          satuan: i.satuan,
+          hargaSatuanUpah: i.harga_satuan_upah,
+          hargaSatuanMaterial: i.harga_satuan_material,
+          hargaSatuanAlat: i.harga_satuan_alat,
+        })),
+      };
+      const res = await fetch(`${API_URL}/RabItems/bulk`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Gagal impor item RAB");
+      return data as { added: number; skipped: number };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['rab-items'] });
+      toast({
+        title: "Impor selesai",
+        description: `${result.added} item ditambahkan${result.skipped > 0 ? `, ${result.skipped} dilewati (sudah ada)` : ''}`,
+      });
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Gagal impor item RAB", variant: "destructive" });
+    }
+  });
+
   const deleteRabItem = useMutation({
     mutationFn: async (id: string) => {
       const token = localStorage.getItem("token");
@@ -131,5 +171,5 @@ export const useRabItems = (idKontrak?: string) => {
     }
   });
 
-  return { rabItems, isLoading, error, createRabItem, updateRabItem, deleteRabItem };
+  return { rabItems, isLoading, error, createRabItem, updateRabItem, importRabItems, deleteRabItem };
 };
