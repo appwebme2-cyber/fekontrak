@@ -24,6 +24,7 @@ interface ReviewLine {
   uraian_pekerjaan: string;
   satuan: string;
   volume_kalkulasi: string;
+  volume_klaim: string;
   catatan_kalkulasi: string;
   aiSuggestedKode?: string | null;
 }
@@ -37,7 +38,7 @@ interface AiExtractionReviewDialogProps {
     problem?: string;
     rekomendasi_solusi?: string;
     tag_unit?: string;
-    lines: { jenis: 'Pekerjaan' | 'Material'; id_rab_item?: string; kode_item_snapshot?: string; uraian_pekerjaan: string; satuan: string; volume_kalkulasi: number; catatan_kalkulasi?: string }[];
+    lines: { jenis: 'Pekerjaan' | 'Material'; id_rab_item?: string; kode_item_snapshot?: string; uraian_pekerjaan: string; satuan: string; volume_kalkulasi: number; volume_klaim?: number; catatan_kalkulasi?: string }[];
   }) => Promise<void>;
   isApplying?: boolean;
 }
@@ -62,6 +63,7 @@ export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems,
           uraian_pekerjaan: l.uraian_pekerjaan,
           satuan: l.satuan,
           volume_kalkulasi: String(l.volume_kalkulasi ?? ''),
+          volume_klaim: l.volume_klaim != null ? String(l.volume_klaim) : '',
           catatan_kalkulasi: l.catatan_kalkulasi || '',
           aiSuggestedKode: l.kode_item,
         };
@@ -97,6 +99,7 @@ export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems,
           uraian_pekerjaan: l.uraian_pekerjaan,
           satuan: l.satuan,
           volume_kalkulasi: Number(l.volume_kalkulasi) || 0,
+          volume_klaim: l.volume_klaim !== '' ? Number(l.volume_klaim) : undefined,
           catatan_kalkulasi: l.catatan_kalkulasi || undefined,
         };
       });
@@ -177,19 +180,35 @@ export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems,
                           rows={1}
                           className="text-sm"
                         />
-                        <div className="grid grid-cols-2 gap-2">
-                          <Input
-                            value={line.satuan}
-                            onChange={(e) => updateLine(idx, { satuan: e.target.value })}
-                            placeholder="Satuan"
-                          />
-                          <Input
-                            type="number"
-                            step="0.0001"
-                            value={line.volume_kalkulasi}
-                            onChange={(e) => updateLine(idx, { volume_kalkulasi: e.target.value })}
-                            placeholder="Volume"
-                          />
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Satuan</Label>
+                            <Input
+                              value={line.satuan}
+                              onChange={(e) => updateLine(idx, { satuan: e.target.value })}
+                              placeholder="Satuan"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Vol. Kalkulasi</Label>
+                            <Input
+                              type="number"
+                              step="0.0001"
+                              value={line.volume_kalkulasi}
+                              onChange={(e) => updateLine(idx, { volume_kalkulasi: e.target.value })}
+                              placeholder="Volume"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Vol. Klaim (dari tagihan)</Label>
+                            <Input
+                              type="number"
+                              step="0.0001"
+                              value={line.volume_klaim}
+                              onChange={(e) => updateLine(idx, { volume_klaim: e.target.value })}
+                              placeholder="kosong"
+                            />
+                          </div>
                         </div>
                         {line.catatan_kalkulasi && (
                           <p className="text-xs text-muted-foreground">{line.catatan_kalkulasi}</p>

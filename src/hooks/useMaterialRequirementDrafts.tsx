@@ -35,6 +35,7 @@ export interface AiExtractedLine {
   uraian_pekerjaan: string;
   satuan: string;
   volume_kalkulasi: number;
+  volume_klaim?: number | null;
   catatan_kalkulasi?: string | null;
 }
 
@@ -232,6 +233,7 @@ export const useMaterialRequirementDraft = (id?: string) => {
           uraian_pekerjaan: l.uraianPekerjaan,
           satuan: l.satuan,
           volume_kalkulasi: l.volumeKalkulasi,
+          volume_klaim: l.volumeKlaim,
           catatan_kalkulasi: l.catatanKalkulasi,
         })),
       };
