@@ -1,27 +1,12 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
-import { Mail, Lock, Eye, EyeOff, User, CheckCircle, Check, X } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { isVendorRole } from '@/hooks/useRolePermissionsConfig';
-
-const pwRules = [
-  { key: 'length', label: 'Min. 8 karakter',  test: (p: string) => p.length >= 8 },
-  { key: 'upper',  label: 'Huruf besar (A-Z)', test: (p: string) => /[A-Z]/.test(p) },
-  { key: 'lower',  label: 'Huruf kecil (a-z)', test: (p: string) => /[a-z]/.test(p) },
-  { key: 'digit',  label: 'Angka (0-9)',        test: (p: string) => /[0-9]/.test(p) },
-  { key: 'sym',    label: 'Simbol (!@#$...)',   test: (p: string) => /[^A-Za-z0-9]/.test(p) },
-];
-const pwStrength = [
-  { label: 'Sangat Lemah', bar: 'bg-red-500',    text: 'text-red-500'    },
-  { label: 'Lemah',        bar: 'bg-orange-500', text: 'text-orange-500' },
-  { label: 'Cukup',        bar: 'bg-yellow-500', text: 'text-yellow-500' },
-  { label: 'Kuat',         bar: 'bg-blue-500',   text: 'text-blue-500'   },
-  { label: 'Sangat Kuat',  bar: 'bg-green-500',  text: 'text-green-500'  },
-];
 
 const getRedirectPath = (role?: string) =>
   isVendorRole(role) ? '/kontrak-lumpsum' : '/dashboard';
@@ -34,26 +19,15 @@ const LS_LOCKOUT_TS  = 'login_lockout_until';
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showSignUpPassword, setShowSignUpPassword] = useState(false);
-  const [registerSuccess, setRegisterSuccess] = useState(false);
-  const [pwTouched, setPwTouched] = useState(false);
-  const [signupPassword, setSignupPassword] = useState('');
-  const [pwFocused, setPwFocused] = useState(false);
   const [lockoutCountdown, setLockoutCountdown] = useState(0);
   const [loginAttempts, setLoginAttempts] = useState(0);
   const countdownRef = useRef<ReturnType<typeof setInterval>>();
 
-  const pwPassed = useMemo(() => pwRules.map(r => r.test(signupPassword)), [signupPassword]);
-  const pwScore = pwPassed.filter(Boolean).length;
-  const pwAllOk = pwScore === pwRules.length;
-  const pwCfg = signupPassword.length > 0 ? pwStrength[pwScore] : null;
-
   const navigate = useNavigate();
-  const { signIn, signUp, user, loading: authLoading } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 80);
@@ -115,22 +89,6 @@ const Auth = () => {
         localStorage.setItem(LS_ATTEMPTS, String(nextAttempts));
         setLoginAttempts(nextAttempts);
       }
-    }
-    setLoading(false);
-  };
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPwTouched(true);
-    if (!pwAllOk) return;
-    setLoading(true);
-    const { error } = await signUp(email, signupPassword, fullName);
-    if (!error) {
-      setRegisterSuccess(true);
-      setEmail('');
-      setSignupPassword('');
-      setFullName('');
-      setPwTouched(false);
     }
     setLoading(false);
   };
@@ -291,23 +249,6 @@ const Auth = () => {
 
 
           {/* ── Form ── */}
-          {registerSuccess ? (
-            <div className="text-center py-6 space-y-3">
-              <div className="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mx-auto">
-                <CheckCircle className="w-7 h-7 text-green-500" />
-              </div>
-              <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200">Registrasi Berhasil!</h3>
-              <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                Akun dibuat. Tunggu admin mengaktifkan akun sebelum login.
-              </p>
-              <button
-                onClick={() => setRegisterSuccess(false)}
-                className="text-red-600 text-sm underline font-medium hover:text-red-700 transition-colors"
-              >
-                Kembali ke login
-              </button>
-            </div>
-          ) : (
             <>
               <form onSubmit={handleSignIn} className="space-y-3.5">
                     <div className="space-y-1">
@@ -395,110 +336,16 @@ const Auth = () => {
                     </Button>
                   </form>
 
-              {/* hidden signup form - kept for future use */}
-              {false && <form onSubmit={handleSignUp} className="space-y-3.5">
-                    <div className="space-y-1">
-                      <Label htmlFor="r-name" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                        <User className="h-3.5 w-3.5 text-gray-400" /> Nama Lengkap
-                      </Label>
-                      <Input id="r-name" type="text" placeholder="Nama lengkap Anda" value={fullName}
-                        onChange={e => setFullName(e.target.value)} required disabled={loading}
-                        className="h-10 rounded-xl border-gray-200 dark:border-gray-700 focus:border-red-500 focus:ring-2 focus:ring-red-500/15 text-sm" />
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label htmlFor="r-email" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                        <Mail className="h-3.5 w-3.5 text-gray-400" /> Email
-                      </Label>
-                      <Input id="r-email" type="email" placeholder="nama@pertamina.com" value={email}
-                        onChange={e => setEmail(e.target.value)} required disabled={loading}
-                        className="h-10 rounded-xl border-gray-200 dark:border-gray-700 focus:border-red-500 focus:ring-2 focus:ring-red-500/15 text-sm" />
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label htmlFor="r-pass" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                        <Lock className="h-3.5 w-3.5 text-gray-400" /> Password
-                      </Label>
-                      <div className="relative">
-                        <Input id="r-pass" type={showSignUpPassword ? 'text' : 'password'} placeholder="Buat password yang kuat"
-                          value={signupPassword}
-                          onChange={e => { setSignupPassword(e.target.value); setPwTouched(true); }}
-                          onFocus={() => setPwFocused(true)}
-                          onBlur={() => setPwFocused(false)}
-                          required disabled={loading}
-                          className="h-10 rounded-xl border-gray-200 dark:border-gray-700 focus:border-red-500 focus:ring-2 focus:ring-red-500/15 pr-10 text-sm" />
-                        <button type="button" tabIndex={-1} onClick={() => setShowSignUpPassword(p => !p)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                          {showSignUpPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-
-                        {/* Password tooltip */}
-                        {pwFocused && (
-                          <div className="absolute left-0 top-[calc(100%+10px)] w-full z-50 rounded-2xl shadow-2xl overflow-visible"
-                            style={{ background: 'rgba(10,14,35,0.96)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
-                            {/* Arrow */}
-                            <div className="absolute -top-[6px] left-5 w-3 h-3 rotate-45"
-                              style={{ background: 'rgba(10,14,35,0.96)', borderTop: '1px solid rgba(255,255,255,0.1)', borderLeft: '1px solid rgba(255,255,255,0.1)' }} />
-
-                            <div className="p-3.5">
-                              {/* Strength bar + label */}
-                              <div className="mb-3">
-                                <div className="flex gap-1 h-1.5 mb-1.5">
-                                  {pwRules.map((_, i) => (
-                                    <div key={i} className={`flex-1 rounded-full transition-all duration-300 ${signupPassword.length > 0 && pwCfg && i < pwScore ? pwCfg.bar : 'bg-white/10'}`} />
-                                  ))}
-                                </div>
-                                <p className={`text-[11px] font-semibold ${pwCfg ? pwCfg.text : 'text-gray-500'}`}>
-                                  {pwCfg ? pwCfg.label : 'Ketik password untuk melihat kekuatan'}
-                                </p>
-                              </div>
-
-                              <div className="w-full h-px bg-white/8 mb-2.5" />
-
-                              {/* Rules */}
-                              <div className="grid grid-cols-1 gap-1.5">
-                                {pwRules.map((rule, i) => {
-                                  const ok = pwPassed[i];
-                                  const active = signupPassword.length > 0 || pwTouched;
-                                  return (
-                                    <div key={rule.key} className={`flex items-center gap-2 text-xs transition-all duration-200 ${ok ? 'text-emerald-400' : active ? 'text-red-400' : 'text-gray-500'}`}>
-                                      <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-200 ${ok ? 'bg-emerald-500/20' : active ? 'bg-red-500/15' : 'bg-white/8'}`}>
-                                        {ok ? <Check className="w-2.5 h-2.5" /> : <X className="w-2.5 h-2.5" />}
-                                      </div>
-                                      {rule.label}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <Button type="submit" disabled={loading} className="w-full h-10 rounded-xl font-semibold text-sm text-white border-0 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98]"
-                      style={{ background: loading ? '#9ca3af' : '#E31E24' }}>
-                      {loading ? (
-                        <span className="flex items-center gap-2">
-                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Memproses...
-                        </span>
-                      ) : 'Daftar'}
-                    </Button>
-                  </form>
-              }
-
               {/* Info box */}
               <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950/40 rounded-xl border border-blue-100 dark:border-blue-900/50">
                 <div className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0 animate-pulse" />
                   <p className="text-xs text-blue-600 dark:text-blue-400 leading-relaxed">
-                    <span className="font-semibold">Info:</span> Akun baru memerlukan aktivasi administrator sebelum dapat digunakan.
+                    <span className="font-semibold">Info:</span> Akun dibuat oleh administrator. Hubungi admin jika Anda belum memiliki akun.
                   </p>
                 </div>
               </div>
             </>
-          )}
 
           {/* Footer */}
           <p className="text-center text-[11px] text-gray-300 dark:text-gray-600 mt-5">
