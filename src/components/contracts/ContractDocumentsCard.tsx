@@ -34,6 +34,8 @@ const ContractDocumentsCard = ({ contractDocuments = [], amendmentDocuments = []
 
   const downloadFile = (url: string, filename: string) => downloadFileSecure(url, filename);
 
+  // Daftar dokumen pakai grid-cols-1 (minmax(0,1fr)): tanpa itu kolom grid melebar mengikuti nama file
+  // terpanjang sehingga kartu dan tombol Lihat/Download terpotong di kanan.
   const renderDocumentSection = (documents: any[], title: string, emptyMessage: string) => {
     return (
       <div className="space-y-4">
@@ -48,7 +50,7 @@ const ContractDocumentsCard = ({ contractDocuments = [], amendmentDocuments = []
         </div>
 
         {documents.length > 0 ? (
-          <div className="grid gap-3">
+          <div className="grid grid-cols-1 gap-3">
             {documents.map((doc: any, idx: number) => {
               const filename = doc.name || `Dokumen ${idx + 1}`;
               const fileExtension = filename.split('.').pop()?.toLowerCase() || '';
@@ -56,15 +58,15 @@ const ContractDocumentsCard = ({ contractDocuments = [], amendmentDocuments = []
               const uploadDate = doc.upload_date ? new Date(doc.upload_date).toLocaleDateString('id-ID') : 'Unknown';
               
               return (
-                <div key={doc.id || idx} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
-                  <div className="flex items-center justify-between">
+                <div key={doc.id || idx} className="min-w-0 bg-white rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       {getFileIcon(filename)}
                       <div className="flex-1 min-w-0">
-                        <p className="text-gray-800 font-medium truncate">
+                        <p className="text-gray-800 font-medium line-clamp-2 break-words" title={filename}>
                           {filename}
                         </p>
-                        <div className="flex items-center gap-4 text-gray-600 text-sm mt-1">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600 text-sm mt-1">
                           <span className="uppercase bg-gray-100 px-2 py-1 rounded text-xs">{fileExtension}</span>
                           <span>•</span>
                           <span>{formatFileSize(fileSize)}</span>
@@ -74,7 +76,7 @@ const ContractDocumentsCard = ({ contractDocuments = [], amendmentDocuments = []
                       </div>
                     </div>
                     
-                    <div className="flex gap-2 ml-4 flex-shrink-0">
+                    <div className="flex gap-2 flex-shrink-0">
                       {doc.url && (
                         <>
                           <Button
