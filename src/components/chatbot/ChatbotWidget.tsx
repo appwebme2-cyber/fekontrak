@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Bot, Maximize2, MessageCircle, Minimize2, RotateCcw, Send, X } from 'lucide-react';
+import { ArrowLeft, Bot, History, Maximize2, MessageCircle, Minimize2, SquarePen, Send, X } from 'lucide-react';
 import { useChatbot, type ChatPageContext } from '@/hooks/useChatbot';
 import { ChatAnswerBlocks } from './ChatAnswerBlocks';
+import { ChatHistoryPanel } from './ChatHistoryPanel';
 
 const SUGGESTIONS = [
   'Berapa jumlah kontrak aktif per tipe?',
@@ -46,7 +47,11 @@ export const ChatbotWidget = () => {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [input, setInput] = useState('');
-  const { messages, isLoading, remaining, limit, send, reset, fetchQuota } = useChatbot(open);
+  const [showHistory, setShowHistory] = useState(false);
+  const {
+    messages, isLoading, statusText, remaining, limit, sessionId, sessions, sessionsLoading,
+    send, reset, fetchQuota, loadSessions, openSession, deleteSession,
+  } = useChatbot(open);
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -110,8 +115,16 @@ export const ChatbotWidget = () => {
             {remaining !== null && limit !== null ? `Sisa ${remaining} dari ${limit} pertanyaan hari ini` : 'Tanya data kontrak, tagihan, dan lainnya'}
           </div>
         </div>
-        <button type="button" onClick={reset} title="Percakapan baru" className="rounded p-1.5 hover:bg-white/15">
-          <RotateCcw className="h-4 w-4" />
+        <button
+          type="button"
+          onClick={() => setShowHistory((v) => !v)}
+          title={showHistory ? 'Kembali ke percakapan' : 'Riwayat percakapan'}
+          className={`rounded p-1.5 hover:bg-white/15 ${showHistory ? 'bg-white/20' : ''}`}
+        >
+          {showHistory ? <ArrowLeft className="h-4 w-4" /> : <History className="h-4 w-4" />}
+        </button>
+        <button type="button" onClick={() => { reset(); setShowHistory(false); }} title="Percakapan baru" className="rounded p-1.5 hover:bg-white/15">
+          <SquarePen className="h-4 w-4" />
         </button>
         <button type="button" onClick={() => setExpanded((v) => !v)} title={expanded ? 'Perkecil' : 'Perbesar'} className="hidden rounded p-1.5 hover:bg-white/15 sm:block">
           {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
@@ -121,8 +134,22 @@ export const ChatbotWidget = () => {
         </button>
       </div>
 
+      {showHistory && (
+        <div className="flex-1 overflow-y-auto bg-white">
+          <div className="border-b border-gray-100 px-4 py-2 text-xs font-medium text-gray-500">Riwayat percakapan (50 terakhir)</div>
+          <ChatHistoryPanel
+            sessions={sessions}
+            loading={sessionsLoading}
+            activeId={sessionId}
+            onLoad={loadSessions}
+            onOpen={async (id) => { if (await openSession(id)) setShowHistory(false); }}
+            onDelete={deleteSession}
+          />
+        </div>
+      )}
+
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto bg-gray-50/60 px-4 py-4">
+      <div ref={scrollRef} className={`flex-1 space-y-4 overflow-y-auto bg-gray-50/60 px-4 py-4 ${showHistory ? 'hidden' : ''}`}>
         {messages.length === 0 && (
           <div className="space-y-3">
             <div className="rounded-xl border border-gray-200 bg-white p-3 text-sm text-gray-700">
@@ -176,14 +203,14 @@ export const ChatbotWidget = () => {
                 <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400 [animation-delay:-0.15s]" />
                 <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" />
               </span>
-              Mengambil dan menganalisis data...
+              {statusText ?? 'Mengambil dan menganalisis data...'}
             </div>
           </div>
         )}
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-200 bg-white p-3">
+      <div className={`border-t border-gray-200 bg-white p-3 ${showHistory ? 'hidden' : ''}`}>
         {quotaExhausted && (
           <div className="mb-2 rounded-md bg-amber-50 px-3 py-1.5 text-xs text-amber-700">
             Batas pertanyaan hari ini sudah habis. Silakan coba lagi besok.
