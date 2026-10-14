@@ -21,6 +21,14 @@ export interface ChatBlock {
   label?: string;
 }
 
+/** Halaman yang sedang dibuka, dikirim supaya chatbot paham "kontrak ini" / "tagihan ini". */
+export interface ChatPageContext {
+  path: string;
+  pageTitle?: string;
+  kontrakId?: string;
+  tagihanId?: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -76,7 +84,7 @@ export const useChatbot = (enabled: boolean) => {
     }
   }, [enabled]);
 
-  const send = useCallback(async (question: string) => {
+  const send = useCallback(async (question: string, context?: ChatPageContext) => {
     const trimmed = question.trim();
     if (!trimmed || isLoading) return;
 
@@ -97,7 +105,7 @@ export const useChatbot = (enabled: boolean) => {
       const res = await fetch(`${API_URL}/Chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ question: trimmed, history }),
+        body: JSON.stringify({ question: trimmed, history, context }),
         signal: controller.signal,
       });
       const data = await res.json().catch(() => ({}));

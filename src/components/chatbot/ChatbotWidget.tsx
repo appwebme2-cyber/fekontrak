@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Bot, Maximize2, MessageCircle, Minimize2, RotateCcw, Send, X } from 'lucide-react';
-import { useChatbot } from '@/hooks/useChatbot';
+import { useChatbot, type ChatPageContext } from '@/hooks/useChatbot';
 import { ChatAnswerBlocks } from './ChatAnswerBlocks';
 
 const SUGGESTIONS = [
@@ -9,7 +10,36 @@ const SUGGESTIONS = [
   'Kontrak yang berakhir dalam 30 hari ke depan',
   'Tren nilai tagihan per bulan tahun ini',
   'Vendor dengan nilai kontrak terbesar',
+  'Ringkas laporan harian minggu ini',
 ];
+
+const PAGE_TITLES: Record<string, string> = {
+  '/dashboard': 'Executive Dashboard',
+  '/contract-performance': 'Performance Monitoring',
+  '/favorites': 'Favorit',
+  '/kontrak-lumpsum': 'Kontrak Lumpsum',
+  '/kontrak-unit-price': 'Kontrak Unit Price',
+  '/kontrak-tsa-ltsa': 'Kontrak TSA/LTSA',
+  '/amandemen': 'Amandemen',
+  '/invoices': 'Tagihan',
+  '/user-purchase': 'User Purchase (PADI)',
+  '/approval': 'Approval Dokumen',
+  '/laporan-harian': 'Laporan Harian',
+  '/material-requirement': 'Kebutuhan Material & Pekerjaan',
+};
+
+const buildPageContext = (pathname: string): ChatPageContext => {
+  const kontrak = pathname.match(/^\/contracts\/([^/]+)/);
+  if (kontrak) return { path: pathname, pageTitle: 'Detail Kontrak', kontrakId: decodeURIComponent(kontrak[1]) };
+
+  const tagihan = pathname.match(/^\/(?:invoices|invoice-detail)\/([^/]+)/);
+  if (tagihan) return { path: pathname, pageTitle: 'Detail Tagihan', tagihanId: decodeURIComponent(tagihan[1]) };
+
+  if (/^\/material-requirement\/[^/]+/.test(pathname)) return { path: pathname, pageTitle: 'Detail Draft Kebutuhan Material' };
+  if (/^\/user-purchase\/[^/]+/.test(pathname)) return { path: pathname, pageTitle: 'Detail User Purchase (PADI)' };
+
+  return { path: pathname, pageTitle: PAGE_TITLES[pathname] };
+};
 
 /** Chatbot melayang di pojok kanan bawah; hanya dirender untuk pengguna internal (lihat Layout). */
 export const ChatbotWidget = () => {
@@ -17,6 +47,7 @@ export const ChatbotWidget = () => {
   const [expanded, setExpanded] = useState(false);
   const [input, setInput] = useState('');
   const { messages, isLoading, remaining, limit, send, reset, fetchQuota } = useChatbot(open);
+  const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -37,7 +68,7 @@ export const ChatbotWidget = () => {
     const question = (text ?? input).trim();
     if (!question || isLoading || quotaExhausted) return;
     setInput('');
-    send(question);
+    send(question, buildPageContext(location.pathname));
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -76,7 +107,7 @@ export const ChatbotWidget = () => {
             <span className="rounded bg-white/20 px-1.5 py-px text-[10px] font-medium">Beta</span>
           </div>
           <div className="text-[11px] text-blue-100">
-            {remaining !== null && limit !== null ? `Sisa ${remaining} dari ${limit} pertanyaan hari ini` : 'Tanya data kontrak, tagihan, dan amandemen'}
+            {remaining !== null && limit !== null ? `Sisa ${remaining} dari ${limit} pertanyaan hari ini` : 'Tanya data kontrak, tagihan, dan lainnya'}
           </div>
         </div>
         <button type="button" onClick={reset} title="Percakapan baru" className="rounded p-1.5 hover:bg-white/15">
@@ -95,7 +126,7 @@ export const ChatbotWidget = () => {
         {messages.length === 0 && (
           <div className="space-y-3">
             <div className="rounded-xl border border-gray-200 bg-white p-3 text-sm text-gray-700">
-              Halo! Saya bisa membantu menjawab pertanyaan seputar <strong>kontrak, amandemen, progress, dan tagihan</strong> di MAESTRO,
+              Halo! Saya bisa membantu menjawab pertanyaan seputar <strong>kontrak, amandemen, progress, tagihan</strong>, juga laporan harian, PADI, approval dokumen, dan kebutuhan material di MAESTRO,
               lengkap dengan tabel dan grafik. Saya hanya membaca data, tidak bisa mengubahnya.
             </div>
             <div className="text-xs font-medium text-gray-500">Contoh pertanyaan:</div>

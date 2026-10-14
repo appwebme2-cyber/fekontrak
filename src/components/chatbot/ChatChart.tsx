@@ -4,6 +4,7 @@ import {
   ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import type { ChatBlock } from '@/hooks/useChatbot';
+import { exportChatTable } from './exportChatTable';
 
 // Palet kategorikal tervalidasi (urutan tetap, tidak diputar ulang)
 const SERIES_COLORS = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
@@ -157,13 +158,28 @@ export const ChatChart = ({ block }: { block: ChatBlock }) => {
     <div className="rounded-lg border border-gray-200 bg-[#fcfcfb] p-3">
       <div className="mb-2 flex items-start justify-between gap-2">
         {block.title && <div className="text-xs font-semibold text-gray-900">{block.title}</div>}
-        <button
-          type="button"
-          onClick={() => setShowTable((v) => !v)}
-          className="ml-auto shrink-0 text-[11px] text-gray-500 underline-offset-2 hover:text-gray-800 hover:underline"
-        >
-          {showTable ? 'Lihat grafik' : 'Lihat tabel'}
-        </button>
+        <div className="ml-auto flex shrink-0 items-center gap-3">
+          {showTable && (
+            <button
+              type="button"
+              onClick={() => exportChatTable(
+                block.title,
+                ['Kategori', ...series.map((s) => s.name)],
+                labels.map((label, li) => [label, ...series.map((s) => Number(s.values[li] ?? 0))]),
+              )}
+              className="text-[11px] font-medium text-green-700 underline-offset-2 hover:underline"
+            >
+              Excel
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowTable((v) => !v)}
+            className="text-[11px] text-gray-500 underline-offset-2 hover:text-gray-800 hover:underline"
+          >
+            {showTable ? 'Lihat grafik' : 'Lihat tabel'}
+          </button>
+        </div>
       </div>
 
       {showTable ? (

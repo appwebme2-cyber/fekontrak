@@ -1,8 +1,9 @@
 import { Fragment, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, FileSpreadsheet } from 'lucide-react';
 import type { ChatBlock } from '@/hooks/useChatbot';
 import { ChatChart } from './ChatChart';
+import { exportChatTable } from './exportChatTable';
 
 // **tebal** -> <strong>; sisanya teks biasa (React meng-escape isinya)
 const renderInline = (text: string): ReactNode[] =>
@@ -48,9 +49,18 @@ const TableBlock = ({ block }: { block: ChatBlock }) => {
 
   return (
     <div className="rounded-lg border border-gray-200">
-      {block.title && (
-        <div className="border-b border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-900">{block.title}</div>
-      )}
+      <div className="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-3 py-1.5">
+        <div className="min-w-0 flex-1 truncate text-xs font-semibold text-gray-900">{block.title || 'Tabel'}</div>
+        <button
+          type="button"
+          onClick={() => exportChatTable(block.title, columns, rows)}
+          title="Download sebagai file Excel"
+          className="inline-flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium text-green-700 hover:bg-green-50"
+        >
+          <FileSpreadsheet className="h-3.5 w-3.5" />
+          Excel
+        </button>
+      </div>
       <div className="max-h-72 overflow-auto">
         <table className="w-full text-xs">
           {columns.length > 0 && (
