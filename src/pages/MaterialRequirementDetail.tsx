@@ -299,7 +299,7 @@ const MaterialRequirementDetail = () => {
             className="border-purple-300 text-purple-700 hover:bg-purple-50"
           >
             <Sparkles className="h-4 w-4 mr-1" />
-            {extractAi.isPending ? 'Memproses dokumen...' : 'Auto Ekstrak & Generate dengan AI (Beta)'}
+            {extractAi.isPending ? 'Memproses dokumen...' : 'Auto Ekstrak & Generate dengan AI'}
           </Button>
           <AiGenerateProgress active={extractAi.isPending} hasRabItems={rabItems.length > 0} />
         </div>

@@ -4,6 +4,7 @@ import { ArrowLeft, Bot, History, Maximize2, MessageCircle, Minimize2, SquarePen
 import { useChatbot, type ChatPageContext } from '@/hooks/useChatbot';
 import { ChatAnswerBlocks } from './ChatAnswerBlocks';
 import { ChatHistoryPanel } from './ChatHistoryPanel';
+import { ChatPinGate } from './ChatPinGate';
 
 const SUGGESTIONS = [
   'Berapa jumlah kontrak aktif per tipe?',
@@ -51,9 +52,11 @@ export const ChatbotWidget = () => {
   // Siapa yang boleh memakai chatbot ditentukan server (env Chat__AllowedRoles); tombol baru muncul setelah dicek
   const [allowed, setAllowed] = useState(false);
   const {
-    messages, isLoading, statusText, remaining, limit, sessionId, sessions, sessionsLoading,
-    send, reset, fetchQuota, loadSessions, openSession, deleteSession,
+    messages, isLoading, statusText, remaining, limit, sessionId, sessions, sessionsLoading, pinUnlocked,
+    send, reset, fetchQuota, loadSessions, openSession, deleteSession, verifyPin,
   } = useChatbot();
+  // Konten chatbot terkunci sampai PIN benar (dicek server di setiap permintaan)
+  const locked = !pinUnlocked;
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -117,14 +120,12 @@ export const ChatbotWidget = () => {
       <div className="flex items-center gap-2 px-4 py-3 text-white" style={{ background: 'linear-gradient(135deg, #002D6E, #004FA0)' }}>
         <Bot className="h-5 w-5 shrink-0" />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 text-sm font-semibold">
-            Asisten MAESTRO
-            <span className="rounded bg-white/20 px-1.5 py-px text-[10px] font-medium">Beta</span>
-          </div>
+          <div className="text-sm font-semibold">Asisten MAESTRO</div>
           <div className="text-[11px] text-blue-100">
             {remaining !== null && limit !== null ? `Sisa ${remaining} dari ${limit} pertanyaan hari ini` : 'Tanya data kontrak, tagihan, dan lainnya'}
           </div>
         </div>
+        {!locked && (<>
         <button
           type="button"
           onClick={() => setShowHistory((v) => !v)}
@@ -136,6 +137,7 @@ export const ChatbotWidget = () => {
         <button type="button" onClick={() => { reset(); setShowHistory(false); }} title="Percakapan baru" className="rounded p-1.5 hover:bg-white/15">
           <SquarePen className="h-4 w-4" />
         </button>
+        </>)}
         <button type="button" onClick={() => setExpanded((v) => !v)} title={expanded ? 'Perkecil' : 'Perbesar'} className="hidden rounded p-1.5 hover:bg-white/15 sm:block">
           {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
         </button>
@@ -144,7 +146,9 @@ export const ChatbotWidget = () => {
         </button>
       </div>
 
-      {showHistory && (
+      {locked && <ChatPinGate onVerify={verifyPin} />}
+
+      {!locked && showHistory && (
         <div className="flex-1 overflow-y-auto bg-white">
           <div className="border-b border-gray-100 px-4 py-2 text-xs font-medium text-gray-500">Riwayat percakapan (50 terakhir)</div>
           <ChatHistoryPanel
@@ -159,7 +163,7 @@ export const ChatbotWidget = () => {
       )}
 
       {/* Messages */}
-      <div ref={scrollRef} className={`flex-1 space-y-4 overflow-y-auto bg-gray-50/60 px-4 py-4 ${showHistory ? 'hidden' : ''}`}>
+      <div ref={scrollRef} className={`flex-1 space-y-4 overflow-y-auto bg-gray-50/60 px-4 py-4 ${showHistory || locked ? 'hidden' : ''}`}>
         {messages.length === 0 && (
           <div className="space-y-3">
             <div className="rounded-xl border border-gray-200 bg-white p-3 text-sm text-gray-700">
@@ -220,7 +224,7 @@ export const ChatbotWidget = () => {
       </div>
 
       {/* Input */}
-      <div className={`border-t border-gray-200 bg-white p-3 ${showHistory ? 'hidden' : ''}`}>
+      <div className={`border-t border-gray-200 bg-white p-3 ${showHistory || locked ? 'hidden' : ''}`}>
         {quotaExhausted && (
           <div className="mb-2 rounded-md bg-amber-50 px-3 py-1.5 text-xs text-amber-700">
             Batas pertanyaan hari ini sudah habis. Silakan coba lagi besok.

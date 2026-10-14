@@ -52,6 +52,10 @@ const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 const authHeader = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` });
 
+// PIN chatbot hanya disimpan di memori: tetap ada saat pindah halaman, diminta lagi setelah reload/tab baru
+let chatPin: string | null = null;
+const chatHeaders = (): Record<string, string> => ({ ...authHeader(), ...(chatPin ? { 'X-Chat-Pin': chatPin } : {}) });
+
 // Percakapan yang sedang terbuka disimpan per tab (sessionStorage) supaya tidak hilang saat pindah
 // halaman; percakapan lengkap tersimpan di server dan bisa dibuka lagi lewat Riwayat.
 const readStorage = <T,>(key: string, fallback: T): T => {
@@ -149,6 +153,34 @@ export const useChatbot = () => {
   const [limit, setLimit] = useState<number | null>(null);
   const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [pinUnlocked, setPinUnlocked] = useState(() => chatPin !== null);
+
+  /** Server menolak PIN (salah/terkunci/berubah): kunci lagi supaya user diminta PIN. */
+  const lockIfPinRejected = useCallback((data: { pinInvalid?: boolean }) => {
+    if (data?.pinInvalid) {
+      chatPin = null;
+      setPinUnlocked(false);
+    }
+  }, []);
+
+  const verifyPin = useCallback(async (pin: string): Promise<{ ok: boolean; message?: string }> => {
+    try {
+      const res = await fetch(`${API_URL}/Chat/verify-pin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        body: JSON.stringify({ pin }),
+      });
+      if (res.ok) {
+        chatPin = pin;
+        setPinUnlocked(true);
+        return { ok: true };
+      }
+      const data = await res.json().catch(() => ({}));
+      return { ok: false, message: data.message || `Gagal memeriksa PIN (${res.status}).` };
+    } catch {
+      return { ok: false, message: 'Tidak dapat terhubung ke server.' };
+    }
+  }, []);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => { writeStorage(STORAGE_KEY, messages.slice(-40)); }, [messages]);
@@ -187,7 +219,7 @@ export const useChatbot = () => {
     try {
       const res = await fetch(`${API_URL}/Chat/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        headers: { 'Content-Type': 'application/json', ...chatHeaders() },
         body: JSON.stringify({ question: trimmed, history, context, sessionId }),
         signal: controller.signal,
       });
@@ -196,6 +228,7 @@ export const useChatbot = () => {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         if (typeof data.sisa === 'number') setRemaining(data.sisa);
+        lockIfPinRejected(data);
         if (res.status === 401) throw new Error('Sesi login sudah berakhir. Silakan login ulang.');
         throw new Error(data.message || `Gagal memproses pertanyaan (${res.status}).`);
       }
@@ -225,7 +258,7 @@ export const useChatbot = () => {
       setStatusText(null);
       abortRef.current = null;
     }
-  }, [isLoading, messages, sessionId]);
+  }, [isLoading, messages, sessionId, lockIfPinRejected]);
 
   /** Mulai percakapan baru (percakapan lama tetap ada di Riwayat). */
   const reset = useCallback(() => {
@@ -239,20 +272,24 @@ export const useChatbot = () => {
   const loadSessions = useCallback(async () => {
     setSessionsLoading(true);
     try {
-      const res = await fetch(`${API_URL}/Chat/sessions`, { headers: authHeader() });
+      const res = await fetch(`${API_URL}/Chat/sessions`, { headers: chatHeaders() });
       if (res.ok) setSessions(await res.json());
+      else lockIfPinRejected(await res.json().catch(() => ({})));
     } catch {
       // daftar riwayat gagal dimuat: biarkan daftar lama
     } finally {
       setSessionsLoading(false);
     }
-  }, []);
+  }, [lockIfPinRejected]);
 
   const openSession = useCallback(async (id: string) => {
     abortRef.current?.abort();
     try {
-      const res = await fetch(`${API_URL}/Chat/sessions/${encodeURIComponent(id)}`, { headers: authHeader() });
-      if (!res.ok) throw new Error();
+      const res = await fetch(`${API_URL}/Chat/sessions/${encodeURIComponent(id)}`, { headers: chatHeaders() });
+      if (!res.ok) {
+        lockIfPinRejected(await res.json().catch(() => ({})));
+        throw new Error();
+      }
       const data: { messages: { id: string; role: string; content: string }[] } = await res.json();
       setMessages(data.messages.map((m) =>
         m.role === 'assistant'
@@ -264,12 +301,15 @@ export const useChatbot = () => {
     } catch {
       return false;
     }
-  }, []);
+  }, [lockIfPinRejected]);
 
   const deleteSession = useCallback(async (id: string) => {
     try {
-      const res = await fetch(`${API_URL}/Chat/sessions/${encodeURIComponent(id)}`, { method: 'DELETE', headers: authHeader() });
-      if (!res.ok) return false;
+      const res = await fetch(`${API_URL}/Chat/sessions/${encodeURIComponent(id)}`, { method: 'DELETE', headers: chatHeaders() });
+      if (!res.ok) {
+        lockIfPinRejected(await res.json().catch(() => ({})));
+        return false;
+      }
       setSessions((prev) => prev.filter((s) => s.id !== id));
       if (id === sessionId) {
         setMessages([]);
@@ -279,11 +319,11 @@ export const useChatbot = () => {
     } catch {
       return false;
     }
-  }, [sessionId]);
+  }, [sessionId, lockIfPinRejected]);
 
   return {
     messages, isLoading, statusText, remaining, limit, sessionId,
-    sessions, sessionsLoading,
-    send, reset, fetchQuota, loadSessions, openSession, deleteSession,
+    sessions, sessionsLoading, pinUnlocked,
+    send, reset, fetchQuota, loadSessions, openSession, deleteSession, verifyPin,
   };
 };
