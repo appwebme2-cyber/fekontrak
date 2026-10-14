@@ -395,7 +395,7 @@ const Layout = ({ children }: LayoutProps) => {
         </main>
       </div>
 
-      {/* Chatbot hanya untuk pengguna internal (bukan External/Vendor) */}
+      {/* Chatbot: role yang boleh diatur server (Chat__AllowedRoles, default admin); External/Vendor tidak pernah */}
       {userProfile && !isVendorRole(userProfile.role) && <ChatbotWidget />}
 
       {/* Idle Session Warning Modal */}

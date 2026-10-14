@@ -48,13 +48,21 @@ export const ChatbotWidget = () => {
   const [expanded, setExpanded] = useState(false);
   const [input, setInput] = useState('');
   const [showHistory, setShowHistory] = useState(false);
+  // Siapa yang boleh memakai chatbot ditentukan server (env Chat__AllowedRoles); tombol baru muncul setelah dicek
+  const [allowed, setAllowed] = useState(false);
   const {
     messages, isLoading, statusText, remaining, limit, sessionId, sessions, sessionsLoading,
     send, reset, fetchQuota, loadSessions, openSession, deleteSession,
-  } = useChatbot(open);
+  } = useChatbot();
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchQuota().then((ok) => { if (!cancelled) setAllowed(ok); });
+    return () => { cancelled = true; };
+  }, [fetchQuota]);
 
   useEffect(() => {
     if (open) {
@@ -82,6 +90,8 @@ export const ChatbotWidget = () => {
       submit();
     }
   };
+
+  if (!allowed) return null;
 
   if (!open) {
     return (

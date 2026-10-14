@@ -140,7 +140,7 @@ const readEventStream = async (
   throw new Error('Koneksi terputus sebelum jawaban selesai. Coba lagi.');
 };
 
-export const useChatbot = (enabled: boolean) => {
+export const useChatbot = () => {
   const [messages, setMessages] = useState<ChatMessage[]>(() => readStorage<ChatMessage[]>(STORAGE_KEY, []));
   const [sessionId, setSessionId] = useState<string | null>(() => readStorage<string | null>(SESSION_KEY, null));
   const [isLoading, setIsLoading] = useState(false);
@@ -154,18 +154,19 @@ export const useChatbot = (enabled: boolean) => {
   useEffect(() => { writeStorage(STORAGE_KEY, messages.slice(-40)); }, [messages]);
   useEffect(() => { writeStorage(SESSION_KEY, sessionId); }, [sessionId]);
 
-  const fetchQuota = useCallback(async () => {
-    if (!enabled) return;
+  /** Ambil sisa kuota. Mengembalikan false kalau akun ini tidak diizinkan memakai chatbot (403/401). */
+  const fetchQuota = useCallback(async (): Promise<boolean> => {
     try {
       const res = await fetch(`${API_URL}/Chat/quota`, { headers: authHeader() });
-      if (!res.ok) return;
+      if (!res.ok) return false;
       const data = await res.json();
       setRemaining(data.sisa);
       setLimit(data.limit);
+      return true;
     } catch {
-      // kuota hanya informasi; abaikan kalau gagal
+      return false;
     }
-  }, [enabled]);
+  }, []);
 
   const send = useCallback(async (question: string, context?: ChatPageContext) => {
     const trimmed = question.trim();
