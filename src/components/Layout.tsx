@@ -33,6 +33,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { RealTimeNotifications } from '@/components/ui/real-time-notifications';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useIdleTimeout } from '@/hooks/useIdleTimeout';
+import { isVendorRole } from '@/hooks/useRolePermissionsConfig';
+import { ChatbotWidget } from '@/components/chatbot/ChatbotWidget';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -392,6 +394,9 @@ const Layout = ({ children }: LayoutProps) => {
           <div className="p-6">{children}</div>
         </main>
       </div>
+
+      {/* Chatbot hanya untuk pengguna internal (bukan External/Vendor) */}
+      {userProfile && !isVendorRole(userProfile.role) && <ChatbotWidget />}
 
       {/* Idle Session Warning Modal */}
       {showIdleWarning && (

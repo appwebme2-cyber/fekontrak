@@ -1,0 +1,188 @@
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { Bot, Maximize2, MessageCircle, Minimize2, RotateCcw, Send, X } from 'lucide-react';
+import { useChatbot } from '@/hooks/useChatbot';
+import { ChatAnswerBlocks } from './ChatAnswerBlocks';
+
+const SUGGESTIONS = [
+  'Berapa jumlah kontrak aktif per tipe?',
+  'Kontrak mana saja yang terlambat?',
+  'Kontrak yang berakhir dalam 30 hari ke depan',
+  'Tren nilai tagihan per bulan tahun ini',
+  'Vendor dengan nilai kontrak terbesar',
+];
+
+/** Chatbot melayang di pojok kanan bawah; hanya dirender untuk pengguna internal (lihat Layout). */
+export const ChatbotWidget = () => {
+  const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [input, setInput] = useState('');
+  const { messages, isLoading, remaining, limit, send, reset, fetchQuota } = useChatbot(open);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      fetchQuota();
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [open, fetchQuota]);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+  }, [messages, isLoading, open]);
+
+  const quotaExhausted = remaining === 0;
+
+  const submit = (text?: string) => {
+    const question = (text ?? input).trim();
+    if (!question || isLoading || quotaExhausted) return;
+    setInput('');
+    send(question);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submit();
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label="Buka Asisten MAESTRO"
+        className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+        style={{ background: '#E31E24' }}
+      >
+        <MessageCircle className="h-6 w-6" />
+      </button>
+    );
+  }
+
+  return (
+    <div
+      className={`fixed z-40 flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl
+        inset-x-2 bottom-2 top-16 sm:inset-x-auto sm:top-auto sm:right-5 sm:bottom-5
+        ${expanded ? 'sm:h-[85vh] sm:w-[760px]' : 'sm:h-[620px] sm:w-[420px]'} sm:max-h-[calc(100vh-2.5rem)] sm:max-w-[calc(100vw-2.5rem)]`}
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2 px-4 py-3 text-white" style={{ background: 'linear-gradient(135deg, #002D6E, #004FA0)' }}>
+        <Bot className="h-5 w-5 shrink-0" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 text-sm font-semibold">
+            Asisten MAESTRO
+            <span className="rounded bg-white/20 px-1.5 py-px text-[10px] font-medium">Beta</span>
+          </div>
+          <div className="text-[11px] text-blue-100">
+            {remaining !== null && limit !== null ? `Sisa ${remaining} dari ${limit} pertanyaan hari ini` : 'Tanya data kontrak, tagihan, dan amandemen'}
+          </div>
+        </div>
+        <button type="button" onClick={reset} title="Percakapan baru" className="rounded p-1.5 hover:bg-white/15">
+          <RotateCcw className="h-4 w-4" />
+        </button>
+        <button type="button" onClick={() => setExpanded((v) => !v)} title={expanded ? 'Perkecil' : 'Perbesar'} className="hidden rounded p-1.5 hover:bg-white/15 sm:block">
+          {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+        </button>
+        <button type="button" onClick={() => setOpen(false)} title="Tutup" className="rounded p-1.5 hover:bg-white/15">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto bg-gray-50/60 px-4 py-4">
+        {messages.length === 0 && (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-gray-200 bg-white p-3 text-sm text-gray-700">
+              Halo! Saya bisa membantu menjawab pertanyaan seputar <strong>kontrak, amandemen, progress, dan tagihan</strong> di MAESTRO,
+              lengkap dengan tabel dan grafik. Saya hanya membaca data, tidak bisa mengubahnya.
+            </div>
+            <div className="text-xs font-medium text-gray-500">Contoh pertanyaan:</div>
+            <div className="flex flex-wrap gap-2">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => submit(s)}
+                  disabled={isLoading || quotaExhausted}
+                  className="rounded-full border border-gray-200 bg-white px-3 py-1 text-left text-xs text-gray-700 hover:border-red-300 hover:bg-red-50 disabled:opacity-50"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {messages.map((m) =>
+          m.role === 'user' ? (
+            <div key={m.id} className="flex justify-end">
+              <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-sm px-3.5 py-2 text-sm text-white" style={{ background: '#E31E24' }}>
+                {m.content}
+              </div>
+            </div>
+          ) : (
+            <div key={m.id} className="flex gap-2">
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[#004FA0]">
+                <Bot className="h-4 w-4" />
+              </div>
+              <div className={`min-w-0 flex-1 rounded-2xl rounded-tl-sm border px-3.5 py-2.5 ${m.isError ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-white'}`}>
+                <ChatAnswerBlocks blocks={m.blocks ?? []} onNavigate={() => setExpanded(false)} />
+              </div>
+            </div>
+          ),
+        )}
+
+        {isLoading && (
+          <div className="flex gap-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[#004FA0]">
+              <Bot className="h-4 w-4" />
+            </div>
+            <div className="flex items-center gap-2 rounded-2xl rounded-tl-sm border border-gray-200 bg-white px-3.5 py-2.5 text-xs text-gray-500">
+              <span className="flex gap-1">
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400 [animation-delay:-0.3s]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400 [animation-delay:-0.15s]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" />
+              </span>
+              Mengambil dan menganalisis data...
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-gray-200 bg-white p-3">
+        {quotaExhausted && (
+          <div className="mb-2 rounded-md bg-amber-50 px-3 py-1.5 text-xs text-amber-700">
+            Batas pertanyaan hari ini sudah habis. Silakan coba lagi besok.
+          </div>
+        )}
+        <div className="flex items-end gap-2">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            rows={1}
+            maxLength={2000}
+            disabled={quotaExhausted}
+            placeholder="Tulis pertanyaan... (Enter untuk kirim)"
+            className="max-h-32 min-h-[40px] flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-500/15 disabled:bg-gray-50"
+          />
+          <button
+            type="button"
+            onClick={() => submit()}
+            disabled={!input.trim() || isLoading || quotaExhausted}
+            aria-label="Kirim"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white transition-opacity disabled:opacity-40"
+            style={{ background: '#E31E24' }}
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="mt-1.5 text-[10px] text-gray-400">Jawaban AI bisa keliru. Cek kembali data penting di menu terkait.</div>
+      </div>
+    </div>
+  );
+};
