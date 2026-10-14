@@ -24,6 +24,7 @@ import {
   GitBranch,
   Calculator,
   Star,
+  Wallet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -127,6 +128,7 @@ const Layout = ({ children }: LayoutProps) => {
         { name: 'Pengaturan Admin', href: '/admin-settings', icon: Settings },
         { name: 'Pengaturan Role', href: '/role-settings', icon: Shield },
         { name: 'Report Akses', href: '/report-akses', icon: ClipboardList },
+        { name: 'Pemakaian AI', href: '/ai-usage', icon: Wallet },
       ]
     }
   ];

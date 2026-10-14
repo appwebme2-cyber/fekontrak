@@ -50,6 +50,7 @@ import DataManagement from "@/pages/DataManagement";
 import LaporanHarian from "@/pages/LaporanHarian";
 import Profile from "@/pages/Profile";
 import ReportAkses from "@/pages/ReportAkses";
+import AiUsage from "@/pages/AiUsage";
 
 import Favorites from "@/pages/Favorites";
 
@@ -102,6 +103,7 @@ const App = () => (
                         <Route path="/user-purchase/:id" element={<ModuleGuard moduleKey="user-purchase"><UserPurchaseDetail /></ModuleGuard>} />
                         <Route path="/data-management" element={<DataManagement />} />
                         <Route path="/report-akses" element={<ReportAkses />} />
+                        <Route path="/ai-usage" element={<AiUsage />} />
                         <Route path="/laporan-harian" element={<ModuleGuard moduleKey="laporan-harian"><LaporanHarian /></ModuleGuard>} />
                         <Route path="/material-requirement" element={<ModuleGuard moduleKey="material-requirement"><MaterialRequirementList /></ModuleGuard>} />
                         <Route path="/material-requirement/:id" element={<ModuleGuard moduleKey="material-requirement"><MaterialRequirementDetail /></ModuleGuard>} />
