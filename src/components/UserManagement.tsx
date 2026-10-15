@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -68,24 +69,13 @@ const UserManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex items-center justify-between animate-fade-in-scale">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Users className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-              Manajemen Pengguna
-            </h1>
-            <p className="text-muted-foreground">
-              Kelola akun pengguna dan kontrol akses berbasis role
-            </p>
-          </div>
-        </div>
-        
-        {/* Add User Button - only for admin */}
-        {isAdmin && (
-          <Button 
+      <PageHeader
+        icon={Users}
+        title="Manajemen Pengguna"
+        description="Kelola akun pengguna dan kontrol akses berbasis role"
+        actions={isAdmin && (
+          // Add User Button - only for admin
+          <Button
             onClick={() => setIsAddDialogOpen(true)}
             className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
           >
@@ -93,7 +83,7 @@ const UserManagement = () => {
             Tambah Pengguna
           </Button>
         )}
-      </div>
+      />
 
       {/* User Info */}
       <div className="mb-4 animate-fade-in-scale" style={{ animationDelay: '0.1s' }}>

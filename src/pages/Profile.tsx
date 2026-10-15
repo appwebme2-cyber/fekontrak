@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { User, Mail, Shield, BookOpen, KeyRound, Eye, EyeOff, Download, Check, X } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
+import { User, Mail, Shield, BookOpen, KeyRound, Eye, EyeOff, Download, Check, X, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -88,10 +89,7 @@ const Profile = () => {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Profil Saya</h1>
-        <p className="text-sm text-muted-foreground mt-1">Informasi akun dan pengaturan keamanan</p>
-      </div>
+      <PageHeader icon={UserCircle} title="Profil Saya" description="Informasi akun dan pengaturan keamanan" />
 
       {/* User Card */}
       <Card>

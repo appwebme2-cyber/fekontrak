@@ -1,22 +1,12 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation, Link } from 'react-router-dom';
-import { 
-  AlertCircle, 
-  CheckCircle, 
-  Clock, 
-  TrendingUp, 
-  AlertTriangle,
-  Activity,
-  BarChart3,
-  FileDown,
-  Calendar,
-  FileEdit
-} from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, TrendingUp, AlertTriangle, Activity, BarChart3, FileDown, Calendar, FileEdit, Target } from 'lucide-react';
 import { useOptimizedSLAMonitoring } from '@/hooks/useOptimizedSLAMonitoring';
 import { useApplicationData } from '@/hooks/useApplicationData';
 import { ProgressBillingDeviationCard } from '@/components/sla/ProgressBillingDeviationCard';
@@ -159,24 +149,19 @@ const ContractPerformanceMonitoring = () => {
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Contract Performance Monitoring
-          </h1>
-          <p className="text-gray-600 mt-2 text-lg">
-            Operational control panel for compliance, SLA adherence, progress deviations, and billing alignment
-          </p>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader
+        icon={Target}
+        title="Contract Performance Monitoring"
+        description="Operational control panel for compliance, SLA adherence, progress deviations, and billing alignment"
+        actions={
           <Link to="/dashboard">
             <Button variant="outline" className="flex items-center gap-2">
               <Activity className="h-4 w-4" />
               Executive Dashboard
             </Button>
           </Link>
-        </div>
-      </div>
+        }
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-5 mb-6">

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -109,21 +110,17 @@ const LaporanHarian = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <ClipboardList className="h-6 w-6 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Laporan Harian</h1>
-            <p className="text-sm text-gray-500">Data laporan kegiatan maintenance harian via WhatsApp</p>
-          </div>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </Button>
-      </div>
+      <PageHeader
+        icon={ClipboardList}
+        title="Laporan Harian"
+        description="Data laporan kegiatan maintenance harian via WhatsApp"
+        actions={
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+        }
+      />
 
 
       {/* Filter */}

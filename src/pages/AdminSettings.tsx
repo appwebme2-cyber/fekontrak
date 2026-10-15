@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -243,17 +244,11 @@ const AdminSettings = () => {
 
   return (
     <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      {/* Modern Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            System Configuration
-          </h1>
-          <p className="text-gray-600 mt-2 text-lg">
-            Manage system settings and monitoring parameters
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
+      <PageHeader
+        icon={Settings}
+        title="System Configuration"
+        description="Manage system settings and monitoring parameters"
+        actions={<>
           <Badge variant="outline" className="flex items-center gap-2 px-3 py-2">
             <Database className="h-4 w-4" />
             {konfigurasi.length} Settings
@@ -262,8 +257,8 @@ const AdminSettings = () => {
             <Shield className="h-4 w-4" />
             Admin Panel
           </Badge>
-        </div>
-      </div>
+        </>}
+      />
 
       {/* Tabbed Interface */}
       <Tabs defaultValue="sla" className="w-full">

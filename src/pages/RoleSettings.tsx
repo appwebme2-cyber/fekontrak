@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -100,22 +101,17 @@ const RoleSettings = () => {
 
   return (
     <div className="space-y-6 p-6 max-w-5xl mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Shield className="h-7 w-7 text-blue-600" />
-            Pengaturan Role
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Atur hak akses untuk role Manager, Section Head, Supervisor, Technician, External, dan
-            Guest. Role Admin selalu memiliki akses penuh dan tidak dapat diubah.
-          </p>
-        </div>
-        <Badge variant={isSyncedRemotely ? 'secondary' : 'outline'} className="flex items-center gap-2 px-3 py-2">
-          <Info className="h-4 w-4" />
-          {isSyncedRemotely ? 'Tersimpan di server' : 'Tersimpan lokal di perangkat ini'}
-        </Badge>
-      </div>
+      <PageHeader
+        icon={Shield}
+        title="Pengaturan Role"
+        description="Atur hak akses untuk role Manager, Section Head, Supervisor, Technician, External, dan Guest. Role Admin selalu memiliki akses penuh dan tidak dapat diubah."
+        actions={
+          <Badge variant={isSyncedRemotely ? 'secondary' : 'outline'} className="flex items-center gap-2 px-3 py-2">
+            <Info className="h-4 w-4" />
+            {isSyncedRemotely ? 'Tersimpan di server' : 'Tersimpan lokal di perangkat ini'}
+          </Badge>
+        }
+      />
 
       {SHOW_NAMA_JENIS_AKUN && (
         <Card>

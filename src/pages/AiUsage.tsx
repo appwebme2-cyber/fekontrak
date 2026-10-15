@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAiTopupMutations, useAiUsageSummary } from '@/hooks/useAiUsage';
+import { PageHeader } from '@/components/PageHeader';
 
 const SERIES_COLOR = '#2a78d6';
 const GRID = '#e1e0d9';
@@ -102,11 +103,11 @@ const AiUsage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Pemakaian AI</h1>
-          <p className="text-sm text-gray-500">Perkiraan biaya Claude untuk chatbot dan ekstraksi dokumen, serta sisa saldo kredit.</p>
-        </div>
+      <PageHeader
+        icon={Wallet}
+        title="Pemakaian AI"
+        description="Perkiraan biaya Claude untuk chatbot dan ekstraksi dokumen, serta sisa saldo kredit."
+        actions={
         <div className="flex rounded-lg border border-gray-200 bg-white p-0.5 text-sm">
           {[7, 30, 90].map((d) => (
             <button
@@ -119,7 +120,8 @@ const AiUsage = () => {
             </button>
           ))}
         </div>
-      </div>
+        }
+      />
 
       {isLoading && (
         <div className="flex items-center gap-2 text-sm text-gray-500"><Loader2 className="h-4 w-4 animate-spin" /> Memuat data pemakaian...</div>

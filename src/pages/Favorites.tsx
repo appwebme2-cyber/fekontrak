@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { PageHeader } from '@/components/PageHeader';
 import { Star, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ContractList } from '@/components/contracts/ContractList';
@@ -34,14 +35,11 @@ const Favorites = () => {
 
   return (
     <div className="space-y-6 p-6 bg-background min-h-screen">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Star className="h-6 w-6 fill-yellow-400 text-yellow-400" /> Kontrak Favorit
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Kontrak yang Anda tandai bintang, supaya cepat ditemukan. Klik bintang di kartu atau halaman detail kontrak untuk menambah/menghapus.
-        </p>
-      </div>
+      <PageHeader
+        icon={Star}
+        title="Kontrak Favorit"
+        description="Kontrak yang Anda tandai bintang, supaya cepat ditemukan. Klik bintang di kartu atau halaman detail kontrak untuk menambah/menghapus."
+      />
 
       {favoriteIds.length === 0 ? (
         <div className="text-center py-16 border rounded-lg bg-card">

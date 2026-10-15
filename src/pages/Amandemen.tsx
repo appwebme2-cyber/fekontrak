@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
+import { PageHeader } from '@/components/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileText, Search, Coins, ArrowUpDown } from 'lucide-react';
+import { FileText, Search, Coins, ArrowUpDown, GitBranch } from 'lucide-react';
 import { useContracts } from '@/hooks/useContracts';
 import { useQuery } from '@tanstack/react-query';
 //import { supabase } from '@/integrations/supabase/client';
@@ -158,10 +159,7 @@ const { data: allAmendments = [], isLoading: isLoadingAmendments } = useQuery({
 
   return (
    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Amandemen Kontrak</h1>
-        <p className="text-muted-foreground">Daftar seluruh amandemen dari semua kontrak</p>
-      </div>
+      <PageHeader icon={GitBranch} title="Amandemen Kontrak" description="Daftar seluruh amandemen dari semua kontrak" />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

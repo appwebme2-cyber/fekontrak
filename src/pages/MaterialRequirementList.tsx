@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PageHeader } from '@/components/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -47,14 +48,11 @@ const MaterialRequirementList = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-600 py-7 px-6 md:px-12 text-white mb-2 shadow-lg">
-        <h1 className="text-2xl md:text-3xl font-bold mb-1 flex items-center gap-2">
-          <Calculator className="h-7 w-7" /> Kebutuhan Material & Pekerjaan
-        </h1>
-        <p className="text-blue-100/85">
-          Draft kebutuhan material & pekerjaan dari Rekomendasi/MRF, dicocokkan ke RAB kontrak
-        </p>
-      </div>
+      <PageHeader
+        icon={Calculator}
+        title="Kebutuhan Material & Pekerjaan"
+        description="Draft kebutuhan material & pekerjaan dari Rekomendasi/MRF, dicocokkan ke RAB kontrak"
+      />
 
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <h2 className="text-lg font-semibold text-gray-700">Daftar Draft ({filtered.length})</h2>

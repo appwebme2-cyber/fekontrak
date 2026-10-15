@@ -1,4 +1,6 @@
 import { useOptimizedTsaLogic } from '@/hooks/useOptimizedTsaLogic';
+import { PageHeader } from '@/components/PageHeader';
+import { TrendingUp } from 'lucide-react';
 import { ContractsSearchFilter } from "@/components/contracts/ContractsSearchFilter";
 import { ContractList } from "@/components/contracts/ContractList";
 import { ContractTableView } from "@/components/contracts/ContractTableView";
@@ -62,16 +64,16 @@ const KontrakTsaLtsa = () => {
 
   return (
     <div className="space-y-6 p-6 bg-background min-h-screen">
-      <div className="flex justify-between items-center">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">Kontrak TSA/LTSA</h1>
+      <PageHeader
+        icon={TrendingUp}
+        title="Kontrak TSA/LTSA"
+        description={<>
+          Daftar kontrak layanan teknis jangka panjang (TSA/LTSA)
           {summary.withAmendments > 0 && (
-            <p className="text-sm text-orange-600">
-              {summary.withAmendments} kontrak memiliki amandemen
-            </p>
+            <span className="text-orange-600"> · {summary.withAmendments} kontrak memiliki amandemen</span>
           )}
-        </div>
-        {canCreate && (
+        </>}
+        actions={canCreate && (
           <button
             onClick={handleAddContract}
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md"
@@ -79,7 +81,7 @@ const KontrakTsaLtsa = () => {
             Tambah Kontrak TSA/LTSA
           </button>
         )}
-      </div>
+      />
 
       <ContractsSearchFilter
         searchTerm={searchTerm}

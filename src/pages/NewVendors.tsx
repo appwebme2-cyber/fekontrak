@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -112,28 +113,23 @@ const NewVendors = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Gradient header with summary cards */}
-      <div className="rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-600 py-7 px-6 md:px-12 text-white mb-2 shadow-lg">
-        <h1 className="text-3xl md:text-4xl font-bold mb-1">Manajemen Vendor</h1>
-        <p className="text-blue-100/85 mb-5">Kelola daftar vendor dan informasi kontak vendor perusahaan</p>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5 md:gap-9">
-          {summaryCards.map((card, i) => (
-            <div
-              key={card.title}
-              className={`flex items-center gap-4 bg-white/10 rounded-xl px-5 py-4 transition hover:scale-105 hover:shadow-lg`}
-              style={{ animationDelay: `${i * 100}ms` }}
-            >
-              <div className={`p-2 rounded-lg bg-gradient-to-tr ${card.color} shadow-lg`}>
-                <card.icon className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">
-                  {card.title === "Rata-rata Score" ? `${card.value(vendors)}/100` : card.value(vendors)}
-                </div>
-                <div className="text-xs text-blue-100/80 mt-1">{card.title}</div>
-              </div>
+      <PageHeader icon={Building2} title="Manajemen Vendor" description="Kelola daftar vendor dan informasi kontak vendor perusahaan" />
+
+      {/* Ringkasan vendor (dulu di dalam banner gradasi) */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        {summaryCards.map((card) => (
+          <div key={card.title} className="flex items-center gap-4 rounded-xl border bg-white px-5 py-4 shadow-sm">
+            <div className={`p-2 rounded-lg bg-gradient-to-tr ${card.color}`}>
+              <card.icon className="h-6 w-6 text-white" />
             </div>
-          ))}
-        </div>
+            <div>
+              <div className="text-2xl font-bold text-gray-800">
+                {card.title === "Rata-rata Score" ? `${card.value(vendors)}/100` : card.value(vendors)}
+              </div>
+              <div className="mt-1 text-xs text-gray-500">{card.title}</div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Main Section: Add button & Search */}

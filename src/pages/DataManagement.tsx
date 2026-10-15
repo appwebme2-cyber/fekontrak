@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { ExportSection } from "@/components/data-management/ExportSection";
 import { ImportSection } from "@/components/data-management/ImportSection";
-import { Download, Upload } from "lucide-react";
+import { Download, Upload, Database } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function DataManagement() {
@@ -30,12 +31,7 @@ export default function DataManagement() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Manajemen Data</h1>
-        <p className="text-muted-foreground">
-          Export dan import data kontrak serta tagihan dalam format Excel
-        </p>
-      </div>
+      <PageHeader icon={Database} title="Manajemen Data" description="Export dan import data kontrak serta tagihan dalam format Excel" />
 
       <Separator />
 

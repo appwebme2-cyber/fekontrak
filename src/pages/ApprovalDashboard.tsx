@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -76,17 +77,7 @@ const ApprovalDashboard = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="bg-card rounded-2xl shadow-lg border p-6">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-blue-100 rounded-xl">
-            <ClipboardCheck className="h-7 w-7 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Approval Dokumen</h1>
-            <p className="text-gray-500">Review dan setujui dokumen dari vendor</p>
-          </div>
-        </div>
-      </div>
+      <PageHeader icon={ClipboardCheck} title="Approval Dokumen" description="Review dan setujui dokumen dari vendor" />
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">

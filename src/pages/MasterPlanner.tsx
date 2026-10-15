@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Edit, Trash2 } from "lucide-react";
+import { Search, Plus, Edit, Trash2, UserCog } from "lucide-react";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -44,10 +45,7 @@ const MasterPlanner = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="rounded-2xl bg-gradient-to-r from-blue-700 via-indigo-600 to-purple-600 py-7 px-6 md:px-12 text-white mb-2 shadow-lg">
-        <h1 className="text-3xl md:text-4xl font-bold mb-1">Master Planner</h1>
-        <p className="text-blue-100/85">Kelola daftar planner (P&S, OH, TA)</p>
-      </div>
+      <PageHeader icon={UserCog} title="Master Planner" description="Kelola daftar planner (P&S, OH, TA)" />
 
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <h2 className="text-lg font-semibold text-gray-700">Daftar Planner ({filtered.length})</h2>

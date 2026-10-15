@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ShieldCheck, Check, X, Search, Download, History, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Check, X, Search, Download, History, ChevronLeft, ChevronRight, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useUserManagement } from '@/components/user-management/hooks/useUserManagement';
 import { useLogAkses, type LogAksesItem, type LogAksesResponse } from '@/hooks/useLogAkses';
@@ -248,15 +249,7 @@ const ReportAkses: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center gap-3">
-        <ShieldCheck className="h-6 w-6 text-blue-600" />
-        <div>
-          <h1 className="text-2xl font-bold">Report Akses</h1>
-          <p className="text-sm text-muted-foreground">
-            Matriks hak akses per akun pengguna berdasarkan role yang dikonfigurasi
-          </p>
-        </div>
-      </div>
+      <PageHeader icon={ClipboardList} title="Report Akses" description="Matriks hak akses per akun pengguna berdasarkan role yang dikonfigurasi" />
 
       {/* Ringkasan menu per role */}
       <Card>

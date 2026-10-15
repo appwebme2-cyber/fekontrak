@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Plus, Search, TrendingUp, Coins, ShoppingBag, Activity } from "lucide-react";
+import { PageHeader } from '@/components/PageHeader';
+import { Plus, Search, TrendingUp, Coins, ShoppingBag, Activity, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -95,25 +96,18 @@ const UserPurchase = () => {
   return (
     <div className="container mx-auto p-6 space-y-8 bg-background min-h-screen">
       {/* Header */}
-      <div className="bg-card rounded-2xl shadow-lg border p-8">
-        <div className="flex justify-between items-center">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              User Purchase (PADI)
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Kelola data pembelian dan transaksi dengan mudah
-            </p>
-          </div>
-          {/* Tambah: hanya Admin & PIC */}
-          {canCreate && (
-            <Button onClick={handleAddNew} className="shadow-lg px-6 py-3 text-lg">
-              <Plus className="h-5 w-5 mr-2" />
-              Tambah Pembelian
-            </Button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        icon={ShoppingCart}
+        title="User Purchase (PADI)"
+        description="Kelola data pembelian dan transaksi dengan mudah"
+        actions={canCreate && (
+          // Tambah: hanya Admin & PIC
+          <Button onClick={handleAddNew}>
+            <Plus className="h-4 w-4 mr-2" />
+            Tambah Pembelian
+          </Button>
+        )}
+      />
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">

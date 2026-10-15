@@ -1,7 +1,8 @@
 import React from 'react';
+import { PageHeader } from '@/components/PageHeader';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Coins } from 'lucide-react';
 import { InvoiceFormDialog } from '@/components/invoices/InvoiceFormDialog';
 import { InvoiceStatisticsCards } from '@/components/invoices/InvoiceStatisticsCards';
 import { InvoiceFilters } from '@/components/invoices/InvoiceFilters';
@@ -64,20 +65,18 @@ const InvoiceManagement = () => {
   return (
     <div className="space-y-6 p-6 bg-background min-h-screen">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Management Tagihan</h1>
-          <p className="text-muted-foreground mt-1">Kelola semua tagihan dan invoice kontrak</p>
-        </div>
-
-        {/* Tambah Tagihan: hanya Admin & PIC */}
-        {canCreate && (
+      <PageHeader
+        icon={Coins}
+        title="Management Tagihan"
+        description="Kelola semua tagihan dan invoice kontrak"
+        actions={canCreate && (
+          // Tambah Tagihan: hanya Admin & PIC
           <Button onClick={handleCreateInvoice} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Tambah Tagihan
           </Button>
         )}
-      </div>
+      />
 
       <InvoiceStatisticsCards
         totalInvoices={totalInvoices}
