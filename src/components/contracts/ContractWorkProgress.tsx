@@ -32,7 +32,7 @@ export const ContractWorkProgress = ({ contract, fieldText }: ContractWorkProgre
               <div className="flex justify-between items-center">
                 <span className="text-gray-800 font-medium text-lg">{Math.round(contract.progress_plan || 0)}%</span>
                 <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span className="text-blue-600 text-sm font-medium">Rencana</span>
                 </div>
               </div>
@@ -50,7 +50,7 @@ export const ContractWorkProgress = ({ contract, fieldText }: ContractWorkProgre
             <div className="flex justify-between items-center">
               <span className="text-gray-800 font-medium text-lg">{Math.round(contract.progress_actual || 0)}%</span>
               <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-green-600 text-sm font-medium">Aktual</span>
               </div>
             </div>

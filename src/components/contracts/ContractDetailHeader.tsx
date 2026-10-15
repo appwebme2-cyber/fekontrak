@@ -62,11 +62,6 @@ export const ContractDetailHeader = ({
 
   return (
     <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white overflow-hidden">
-      {/* Animated background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
-      </div>
-      
       <div className="relative z-10 p-8">
         <div className="flex items-start justify-between mb-6">
           <Button
