@@ -8,6 +8,7 @@ import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ModuleGuard from "@/components/ModuleGuard";
+import AdminGuard from "@/components/AdminGuard";
 import Layout from "@/components/Layout";
 import ApprovalDashboard from './pages/ApprovalDashboard';
 
@@ -93,17 +94,17 @@ const App = () => (
                         <Route path="/invoice-detail/:id" element={<ModuleGuard moduleKey="invoices"><InvoiceDetail /></ModuleGuard>} />
                         <Route path="/sla-monitoring" element={<Navigate to="/contract-performance" replace />} />
                         <Route path="/contract-performance" element={<ModuleGuard moduleKey="contract-performance"><ContractPerformanceMonitoring /></ModuleGuard>} />
-                        <Route path="/admin-settings" element={<AdminSettings />} />
-                        <Route path="/role-settings" element={<RoleSettings />} />
-                        <Route path="/users" element={<Users />} />
-                        <Route path="/vendors" element={<NewVendors />} />
-                        <Route path="/master/program-kerja" element={<MasterProgramKerja />} />
-                        <Route path="/master/planner" element={<MasterPlanner />} />
+                        <Route path="/admin-settings" element={<AdminGuard><AdminSettings /></AdminGuard>} />
+                        <Route path="/role-settings" element={<AdminGuard><RoleSettings /></AdminGuard>} />
+                        <Route path="/users" element={<AdminGuard><Users /></AdminGuard>} />
+                        <Route path="/vendors" element={<AdminGuard><NewVendors /></AdminGuard>} />
+                        <Route path="/master/program-kerja" element={<AdminGuard><MasterProgramKerja /></AdminGuard>} />
+                        <Route path="/master/planner" element={<AdminGuard><MasterPlanner /></AdminGuard>} />
                         <Route path="/user-purchase" element={<ModuleGuard moduleKey="user-purchase"><UserPurchase /></ModuleGuard>} />
                         <Route path="/user-purchase/:id" element={<ModuleGuard moduleKey="user-purchase"><UserPurchaseDetail /></ModuleGuard>} />
-                        <Route path="/data-management" element={<DataManagement />} />
-                        <Route path="/report-akses" element={<ReportAkses />} />
-                        <Route path="/ai-usage" element={<AiUsage />} />
+                        <Route path="/data-management" element={<AdminGuard><DataManagement /></AdminGuard>} />
+                        <Route path="/report-akses" element={<AdminGuard><ReportAkses /></AdminGuard>} />
+                        <Route path="/ai-usage" element={<AdminGuard><AiUsage /></AdminGuard>} />
                         <Route path="/laporan-harian" element={<ModuleGuard moduleKey="laporan-harian"><LaporanHarian /></ModuleGuard>} />
                         <Route path="/material-requirement" element={<ModuleGuard moduleKey="material-requirement"><MaterialRequirementList /></ModuleGuard>} />
                         <Route path="/material-requirement/:id" element={<ModuleGuard moduleKey="material-requirement"><MaterialRequirementDetail /></ModuleGuard>} />

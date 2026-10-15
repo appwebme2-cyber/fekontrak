@@ -1,8 +1,12 @@
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 const API_URL = "https://bekontrak-production.up.railway.app/api";
 
 export const useAuthActions = (setUser: any, setSession: any, setUserProfile: any) => {
+  // Data yang di-cache React Query (favorit, daftar kontrak, dll.) milik user yang logout
+  // dibuang, supaya tidak sempat tampil ke user berikutnya di browser yang sama.
+  const queryClient = useQueryClient();
   const { toast } = useToast();
 
   // ==================== SIGN IN ====================
@@ -95,12 +99,14 @@ export const useAuthActions = (setUser: any, setSession: any, setUserProfile: an
         }).catch(() => {});
       }
       localStorage.removeItem("token");
+      queryClient.clear();
       setUser(null);
       setSession(null);
       setUserProfile(null);
       toast({ title: "Berhasil", description: "Logout berhasil!" });
     } catch (error) {
       localStorage.removeItem("token");
+      queryClient.clear();
       setUser(null);
       setSession(null);
       setUserProfile(null);
