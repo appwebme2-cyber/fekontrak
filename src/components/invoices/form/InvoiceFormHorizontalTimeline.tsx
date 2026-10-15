@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { CheckCircle, Circle, RefreshCw } from 'lucide-react';
+import { CheckCircle, Circle, RefreshCw, Loader2, Lightbulb } from 'lucide-react';
 import { statusOptions } from './constants/statusOptions';
 
 interface InvoiceFormHorizontalTimelineProps {
@@ -41,7 +41,7 @@ export const InvoiceFormHorizontalTimeline = ({
           )}
           {statusLoading && (
             <p className="text-sm text-blue-600 mt-2 font-medium animate-pulse">
-              🔄 Memproses perubahan status...
+              <Loader2 className="inline h-4 w-4 mr-1 -mt-0.5 animate-spin" />Memproses perubahan status...
             </p>
           )}
         </div>
@@ -154,7 +154,7 @@ export const InvoiceFormHorizontalTimeline = ({
         {/* Instructions */}
         <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
           <p className="text-sm text-blue-700 text-center">
-            💡 <strong>Petunjuk:</strong> Klik pada node untuk memilih status, klik lagi untuk membatalkan pilihan
+            <Lightbulb className="inline h-4 w-4 mr-1 -mt-0.5" /><strong>Petunjuk:</strong> Klik pada node untuk memilih status, klik lagi untuk membatalkan pilihan
           </p>
         </div>
       </div>

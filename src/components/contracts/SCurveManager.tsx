@@ -11,7 +11,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Plus, Trash2, Save, TrendingUp, BarChart2, Settings, AlertCircle, History, Sparkles, Download, Upload } from 'lucide-react';
+import { Plus, Trash2, Save, TrendingUp, BarChart2, Settings, AlertCircle, History, Sparkles, Download, Upload, Lightbulb } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -724,7 +724,7 @@ export const SCurveManager = ({ idKontrak, hasAmendment }: SCurveManagerProps) =
                     </tbody>
                   </table>
                   <p className="text-xs text-gray-400 mt-2">
-                    💡 Kolom biru = Plan, kolom hijau = Actual — diisi dalam <strong>poin bobot</strong> yang dicapai
+                    <Lightbulb className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-amber-500" />Kolom biru = Plan, kolom hijau = Actual — diisi dalam <strong>poin bobot</strong> yang dicapai
                     aktivitas itu pada periode tersebut (bukan persentase). Total poin tiap aktivitas di semua
                     periode maksimal sebesar bobotnya (kolom "Bobot").
                   </p>

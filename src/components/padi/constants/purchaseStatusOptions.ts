@@ -30,16 +30,6 @@ export const getProgressGradient = (progress: number) => {
   return 'from-red-400 to-red-600'; // BAST
 };
 
-export const getStatusIcon = (status: string) => {
-  const icons = {
-    'BAST': '📋',
-    'SA/GR': '📦',
-    'INVOICE': '🧾', 
-    'Payment Approval': '✅',
-    'Invoice Paid': '💰'
-  };
-  return icons[status as keyof typeof icons] || '📋';
-};
 
 export const statusDateFieldMap = {
   'BAST': 'tanggal_bast',

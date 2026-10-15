@@ -7,7 +7,7 @@ import { useInvoiceDocumentUpload } from './hooks/useInvoiceDocumentUpload';
 import { InvoiceDocumentUploadArea } from './components/InvoiceDocumentUploadArea';
 import { InvoiceDocumentList } from './components/InvoiceDocumentList';
 import { TagihanDocument } from '@/lib/utils/typeUtils';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2, FileText } from 'lucide-react';
 
 interface InvoiceFormMemoTabProps {
   formData: any;
@@ -77,7 +77,7 @@ export const InvoiceFormMemoTab = ({
           {formData.dokumen_memo && (
             <div className="flex items-center justify-between p-3 border border-border rounded-lg bg-card">
               <div className="flex items-center space-x-2">
-                <span>📄</span>
+                <FileText className="h-4 w-4 shrink-0 text-red-500" />
                 <span className="text-sm font-medium">Dokumen Memo</span>
               </div>
               <div className="flex items-center space-x-1">

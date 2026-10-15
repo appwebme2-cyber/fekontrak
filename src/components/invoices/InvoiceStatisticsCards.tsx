@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileText, Coins } from 'lucide-react';
+import { FileText, Coins, Hourglass } from 'lucide-react';
 
 interface InvoiceStatisticsCardsProps {
   totalInvoices: number;
@@ -61,7 +61,7 @@ export const InvoiceStatisticsCards = ({
               <p className="text-2xl font-bold">{pendingInvoices}</p>
             </div>
             <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
-              <span className="text-sm font-bold">⏳</span>
+              <Hourglass className="h-4 w-4 text-white" />
             </div>
           </div>
         </CardContent>

@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '@/components/ui/label';
 import {
   CheckCircle, XCircle, Clock, FileText,
-  ExternalLink, Search, Filter, ClipboardCheck
+  ExternalLink, Search, Filter, ClipboardCheck, Paperclip, User, Calendar
 } from 'lucide-react';
 import { useDokumenApproval, DokumenApproval } from '@/hooks/useDokumenApproval';
 import { useAuth } from '@/hooks/useAuth';
@@ -195,17 +195,17 @@ const ApprovalDashboard = () => {
                         <StatusBadge status={dok.status_approval} />
                       </div>
                       {dok.judul_kontrak && (
-                        <p className="text-sm text-blue-600 mt-1">📋 {dok.judul_kontrak}</p>
+                        <p className="text-sm text-blue-600 mt-1"><FileText className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />{dok.judul_kontrak}</p>
                       )}
                       {dok.deskripsi_dokumen && (
                         <p className="text-sm text-gray-500 mt-1">{dok.deskripsi_dokumen}</p>
                       )}
                       <div className="flex items-center gap-4 mt-2 text-xs text-gray-400 flex-wrap">
-                        <span>📎 {dok.nama_file}</span>
+                        <span><Paperclip className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />{dok.nama_file}</span>
                         <span>{formatFileSize(dok.ukuran_file)}</span>
-                        <span>👤 {dok.uploaded_by || '-'}</span>
+                        <span><User className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />{dok.uploaded_by || '-'}</span>
                         {dok.created_at && (
-                          <span>📅 {new Date(dok.created_at).toLocaleDateString('id-ID')}</span>
+                          <span><Calendar className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />{new Date(dok.created_at).toLocaleDateString('id-ID')}</span>
                         )}
                       </div>
                       {dok.catatan_reviewer && (

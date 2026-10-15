@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FilePreviewModal } from '@/components/ui/file-preview-modal';
 import { TagihanDocument } from '@/lib/utils/typeUtils';
-import { formatFileSize, getFileIcon } from '@/components/contracts/forms/utils/documentUtils';
+import { formatFileSize } from '@/components/contracts/forms/utils/documentUtils';
+import { FileTypeIcon } from '@/components/contracts/forms/components/FileTypeIcon';
 import { Eye, Trash2, Download, ExternalLink } from 'lucide-react';
 import { openFileInTab, downloadFile as downloadFileSecure } from '@/lib/utils/fileTokenUtils';
 
@@ -38,9 +39,7 @@ export const InvoiceDocumentList = ({ documents, onRemove, title }: InvoiceDocum
               className="flex items-center justify-between p-3 border border-border rounded-lg bg-card hover:bg-accent/50 transition-colors"
             >
               <div className="flex items-center space-x-3 flex-1 min-w-0">
-                <span className="text-lg" role="img" aria-label="file">
-                  {getFileIcon(doc.type || '')}
-                </span>
+                <FileTypeIcon type={doc.type} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
                     {doc.name || 'Unknown File'}

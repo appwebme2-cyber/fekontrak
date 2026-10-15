@@ -7,14 +7,6 @@ export const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-export const getFileIcon = (type: string | undefined | null): string => {
-  if (!type) return '📁';
-  if (type.includes('pdf')) return '📄';
-  if (type.includes('word') || type.includes('document')) return '📝';
-  if (type.includes('image')) return '🖼️';
-  return '📁';
-};
-
 export const validateFile = (file: File): { isValid: boolean; error?: string } => {
   // Validate file size (50MB limit)
   if (file.size > 50 * 1024 * 1024) {

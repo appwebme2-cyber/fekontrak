@@ -1,3 +1,4 @@
+import { AlertTriangle } from 'lucide-react';
 
 interface BillingSummaryProps {
   contractValue: number;
@@ -40,7 +41,7 @@ export const BillingSummary = ({
       
       {totalPercentage !== 100 && (
         <p className="text-sm text-amber-600">
-          ⚠️ Total persentase harus 100% untuk termin yang valid
+          <AlertTriangle className="inline h-4 w-4 mr-1 -mt-0.5" />Total persentase harus 100% untuk termin yang valid
         </p>
       )}
     </>

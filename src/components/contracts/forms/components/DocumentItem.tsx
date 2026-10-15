@@ -2,7 +2,8 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Eye } from 'lucide-react';
-import { formatFileSize, getFileIcon } from '../utils/documentUtils';
+import { formatFileSize } from '../utils/documentUtils';
+import { FileTypeIcon } from './FileTypeIcon';
 
 interface DocumentItemProps {
   document: {
@@ -18,17 +19,26 @@ interface DocumentItemProps {
   disabled?: boolean;
 }
 
+// Label jenis file dari ekstensi nama (DOCX, PDF, JPG). Tipe MIME seperti
+// "vnd.openxmlformats-officedocument..." terlalu panjang untuk badge.
+const fileBadge = (name: string, type: string) => {
+  const ext = name.includes('.') ? name.split('.').pop() ?? '' : '';
+  if (ext && ext.length <= 5) return ext.toUpperCase();
+  const subtype = type.split('/')[1] ?? '';
+  return subtype && subtype.length <= 5 ? subtype.toUpperCase() : 'FILE';
+};
+
 export const DocumentItem = ({ document, onRemove, onPreview, disabled = false }: DocumentItemProps) => {
   return (
     <div className="flex items-center justify-between gap-2 p-3 bg-muted/30 rounded-lg border">
       {/* min-w-0 supaya nama file panjang terpotong "…" dan tombol tetap terlihat */}
       <div className="flex items-center space-x-3 flex-1 min-w-0">
-        <span className="text-lg shrink-0">{getFileIcon(document.type)}</span>
+        <FileTypeIcon type={document.type} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <p className="text-sm font-medium truncate" title={document.name}>{document.name}</p>
             <Badge variant="secondary" className="text-xs shrink-0">
-              {document.type.split('/')[1]?.toUpperCase() || 'FILE'}
+              {fileBadge(document.name, document.type)}
             </Badge>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">

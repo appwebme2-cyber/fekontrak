@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -155,7 +156,7 @@ const ContractDetail = () => {
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-red-50">
         <Card className="max-w-md text-center border-red-300 shadow-lg">
           <div className="p-8">
-            <span className="text-red-600 text-2xl">⚠️</span>
+            <AlertTriangle className="mx-auto h-8 w-8 text-red-600" />
             <h3 className="text-xl font-semibold mt-4 mb-3 text-gray-800">Kontrak Tidak Ditemukan</h3>
             <button onClick={() => navigate('/contracts')} className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
               Kembali ke Daftar Kontrak
