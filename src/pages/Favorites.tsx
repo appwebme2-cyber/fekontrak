@@ -34,7 +34,7 @@ const Favorites = () => {
   }
 
   return (
-    <div className="space-y-6 p-6 bg-background min-h-screen">
+    <div className="space-y-6">
       <PageHeader
         icon={Star}
         title="Kontrak Favorit"

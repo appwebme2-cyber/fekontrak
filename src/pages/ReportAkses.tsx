@@ -248,7 +248,7 @@ const ReportAkses: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <PageHeader icon={ClipboardList} title="Report Akses" description="Matriks hak akses per akun pengguna berdasarkan role yang dikonfigurasi" />
 
       {/* Ringkasan menu per role */}

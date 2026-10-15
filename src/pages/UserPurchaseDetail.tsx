@@ -96,7 +96,7 @@ const UserPurchaseDetail = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <div className="space-y-6">
       {/* Header */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
         <div className="flex items-center justify-between mb-4">

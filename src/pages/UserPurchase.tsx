@@ -94,7 +94,7 @@ const UserPurchase = () => {
   const endItem = Math.min(pagination.currentPage * pagination.pageSize, totalFiltered);
 
   return (
-    <div className="container mx-auto p-6 space-y-8 bg-background min-h-screen">
+    <div className="space-y-6">
       {/* Header */}
       <PageHeader
         icon={ShoppingCart}

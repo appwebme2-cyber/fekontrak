@@ -100,7 +100,7 @@ const RoleSettings = () => {
   );
 
   return (
-    <div className="space-y-6 p-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl">
       <PageHeader
         icon={Shield}
         title="Pengaturan Role"

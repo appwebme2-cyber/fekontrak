@@ -203,7 +203,7 @@ const InvoiceDetail = () => {
   const documents: TagihanDocument[] = jsonToTagihanDocuments(invoice.dokumen_tagihan);
 
   return (
-    <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
+    <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate('/invoices')} className="flex items-center gap-2">

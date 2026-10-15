@@ -69,7 +69,7 @@ export default function KontrakLumpsum() {
   }
 
   return (
-    <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
+    <div className="space-y-6">
       {/* Tombol Tambah: hanya Admin & PIC */}
       <KontrakLumpsumHeader
         isAdmin={canCreate}
