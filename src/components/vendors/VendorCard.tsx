@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Building2, MapPin, User, Phone, Edit, Trash2, Star } from "lucide-react";
@@ -59,11 +60,11 @@ export const VendorCard = ({ vendor, isAdmin, onEdit, onDelete }: VendorCardProp
         <Tooltip delayDuration={200}>
           <TooltipTrigger asChild>
             <h3 className="font-semibold text-lg leading-tight line-clamp-2 min-h-[2.5em] cursor-default">
-              {vendor.nama_vendor}
+              {formatTitle(vendor.nama_vendor)}
             </h3>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="start" className="max-w-sm border-gray-900 bg-gray-900 text-white">
-            {vendor.nama_vendor}
+            {formatTitle(vendor.nama_vendor)}
           </TooltipContent>
         </Tooltip>
       </div>

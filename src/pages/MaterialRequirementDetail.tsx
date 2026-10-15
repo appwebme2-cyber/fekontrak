@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -262,7 +263,7 @@ const MaterialRequirementDetail = () => {
               <Badge className="bg-white/20 text-white border-0">{draft.status}</Badge>
             </div>
             {draft.nomor_mrf && <p className="text-blue-100/85 text-sm">{draft.nomor_mrf}</p>}
-            <p className="text-blue-100/85 text-sm mt-1">{draft.kontrak?.judul_kontrak}</p>
+            <p className="text-blue-100/85 text-sm mt-1">{formatTitle(draft.kontrak?.judul_kontrak)}</p>
           </div>
           <div className="flex gap-2">
             {/* Export tidak mengubah data, jadi tersedia untuk semua role termasuk viewer */}

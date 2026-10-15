@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { ArrowLeft, ExternalLink, Download, Calendar, Hash, FileText, Coins, Building2, MapPin, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -155,7 +156,7 @@ const UserPurchaseDetail = () => {
             </div>
             <div className="flex items-center gap-3">
               <FileText className="h-4 w-4 text-green-600" />
-              <div><p className="text-sm text-gray-500">Judul Pembelian</p><p className="font-semibold">{padi.judul_pembelian}</p></div>
+              <div><p className="text-sm text-gray-500">Judul Pembelian</p><p className="font-semibold">{formatTitle(padi.judul_pembelian)}</p></div>
             </div>
             {padi.no_po_pr && (
               <div className="flex items-center gap-3">
@@ -195,7 +196,7 @@ const UserPurchaseDetail = () => {
                     <div className="w-6 h-6 bg-gradient-to-r from-orange-400 to-pink-400 rounded-full flex items-center justify-center">
                       <Building2 className="h-3 w-3 text-white" />
                     </div>
-                    <span className="font-medium text-gray-700">{padi.vendor.nama_vendor}</span>
+                    <span className="font-medium text-gray-700">{formatTitle(padi.vendor.nama_vendor)}</span>
                   </div>
                 </div>
               </div>

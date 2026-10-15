@@ -1,5 +1,6 @@
 
 import { Badge } from "@/components/ui/badge";
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Edit, Trash2, Building2, Calendar, Coins } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -116,12 +117,12 @@ export const ContractDetailHeader = ({
             </div>
             
             <h1 className="text-2xl font-bold mb-3 animate-slide-in-right leading-tight">
-              {fieldText(contract.judul_kontrak)}
+              {fieldText(formatTitle(contract.judul_kontrak))}
             </h1>
             
             <div className="flex items-center gap-2 text-blue-100 text-lg animate-fade-in">
               <Building2 className="h-5 w-5" />
-              <span className="font-semibold">{getVendorName()}</span>
+              <span className="font-semibold">{formatTitle(getVendorName())}</span>
             </div>
             
             {contract.direksi_pekerjaan && (

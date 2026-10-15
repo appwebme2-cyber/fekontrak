@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Badge } from '@/components/ui/badge';
 import { ExternalLink, Edit, Trash2 } from 'lucide-react';
 import { Kontrak } from '@/types/database';
@@ -107,17 +108,17 @@ export const ContractCardHeader = ({
         <Tooltip delayDuration={200}>
           <TooltipTrigger asChild>
             <h3 className="font-semibold text-lg mb-2 leading-tight line-clamp-2 min-h-[2.5em] cursor-default">
-              {contract.judul_kontrak}
+              {formatTitle(contract.judul_kontrak)}
             </h3>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="start" className="max-w-sm border-gray-900 bg-gray-900 text-white">
-            {contract.judul_kontrak}
+            {formatTitle(contract.judul_kontrak)}
           </TooltipContent>
         </Tooltip>
 
         {getVendorName && (
-          <div className="text-sm opacity-90 mb-1 truncate" title={`Vendor: ${getVendorName(contract.id_vendor)}`}>
-            Vendor: {getVendorName(contract.id_vendor)}
+          <div className="text-sm opacity-90 mb-1 truncate" title={`Vendor: ${formatTitle(getVendorName(contract.id_vendor))}`}>
+            Vendor: {formatTitle(getVendorName(contract.id_vendor))}
           </div>
         )}
 

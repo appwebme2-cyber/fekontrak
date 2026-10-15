@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Badge } from '@/components/ui/badge';
 import { InvoiceCardActions } from './InvoiceCardActions';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -34,11 +35,11 @@ export const InvoiceCardHeader = ({ invoice, onView, onEdit, onDelete }: Invoice
         <Tooltip delayDuration={200}>
           <TooltipTrigger asChild>
             <h3 className="font-semibold text-base leading-tight mb-1 text-white line-clamp-2 min-h-[2.5em] cursor-default">
-              {invoice.kontrak?.judul_kontrak || 'N/A'}
+              {formatTitle(invoice.kontrak?.judul_kontrak) || 'N/A'}
             </h3>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="start" className="max-w-sm border-gray-900 bg-gray-900 text-white">
-            {invoice.kontrak?.judul_kontrak || 'N/A'}
+            {formatTitle(invoice.kontrak?.judul_kontrak) || 'N/A'}
           </TooltipContent>
         </Tooltip>
         <div className="text-sm text-white/90 font-medium truncate" title={invoice.termin || 'Termin Belum Ditentukan'}>

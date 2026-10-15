@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { PageHeader } from '@/components/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -138,11 +139,11 @@ const MaterialRequirementList = () => {
                 <Tooltip delayDuration={200}>
                   <TooltipTrigger asChild>
                     <p className="text-sm text-white/90 leading-tight line-clamp-2 min-h-[2.5em] cursor-default">
-                      {d.kontrak?.judul_kontrak || 'Kontrak tidak ditemukan'}
+                      {formatTitle(d.kontrak?.judul_kontrak) || 'Kontrak tidak ditemukan'}
                     </p>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" align="start" className="max-w-sm border-gray-900 bg-gray-900 text-white">
-                    {d.kontrak?.judul_kontrak || 'Kontrak tidak ditemukan'}
+                    {formatTitle(d.kontrak?.judul_kontrak) || 'Kontrak tidak ditemukan'}
                   </TooltipContent>
                 </Tooltip>
               </div>

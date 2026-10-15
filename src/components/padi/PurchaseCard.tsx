@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -95,11 +96,11 @@ export const PurchaseCard = ({ purchase, onView, onEdit, onDelete }: PurchaseCar
         <Tooltip delayDuration={200}>
           <TooltipTrigger asChild>
             <h3 className="font-semibold text-base leading-tight text-white line-clamp-2 min-h-[2.5em] cursor-default">
-              {purchase.judul_pembelian}
+              {formatTitle(purchase.judul_pembelian)}
             </h3>
           </TooltipTrigger>
           <TooltipContent side="bottom" align="start" className="max-w-sm border-gray-900 bg-gray-900 text-white">
-            {purchase.judul_pembelian}
+            {formatTitle(purchase.judul_pembelian)}
           </TooltipContent>
         </Tooltip>
       </div>
@@ -128,7 +129,7 @@ export const PurchaseCard = ({ purchase, onView, onEdit, onDelete }: PurchaseCar
         {purchase.vendor && (
           <div className="flex items-center gap-2 min-w-0">
             <Building2 className="h-4 w-4 text-orange-600 shrink-0" />
-            <span className="text-sm text-gray-600 truncate" title={purchase.vendor.nama_vendor}>{purchase.vendor.nama_vendor}</span>
+            <span className="text-sm text-gray-600 truncate" title={formatTitle(purchase.vendor.nama_vendor)}>{formatTitle(purchase.vendor.nama_vendor)}</span>
           </div>
         )}
 

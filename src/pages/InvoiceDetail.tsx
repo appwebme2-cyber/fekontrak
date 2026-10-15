@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -210,7 +211,7 @@ const InvoiceDetail = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Detail Tagihan Kontrak</h1>
-            <p className="text-gray-600">{invoice.kontrak?.judul_kontrak}</p>
+            <p className="text-gray-600">{formatTitle(invoice.kontrak?.judul_kontrak)}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -262,7 +263,7 @@ const InvoiceDetail = () => {
               <p className="text-sm opacity-90">Status Kontrak</p>
             </div>
             <div>
-              <p className="text-lg font-semibold">{invoice.kontrak?.vendor?.nama_vendor}</p>
+              <p className="text-lg font-semibold">{formatTitle(invoice.kontrak?.vendor?.nama_vendor)}</p>
               <p className="text-sm opacity-90">Vendor</p>
             </div>
             <div>
@@ -359,7 +360,7 @@ const InvoiceDetail = () => {
             <Card>
               <CardHeader><CardTitle className="flex items-center gap-2"><Building className="h-5 w-5" />Informasi Kontrak</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <div><p className="text-sm text-gray-600">Judul Kontrak</p><p className="font-semibold">{invoice.kontrak?.judul_kontrak}</p></div>
+                <div><p className="text-sm text-gray-600">Judul Kontrak</p><p className="font-semibold">{formatTitle(invoice.kontrak?.judul_kontrak)}</p></div>
                 <div><p className="text-sm text-gray-600">Status</p><Badge variant="outline">{invoice.kontrak?.status_kontrak}</Badge></div>
                 <div><p className="text-sm text-gray-600">Tipe</p><Badge variant="secondary">{invoice.kontrak?.tipe_kontrak}</Badge></div>
                 <div><p className="text-sm text-gray-600">Nilai Kontrak</p><p className="font-semibold">{formatCurrency(nilaiKontrak)}</p></div>
@@ -376,7 +377,7 @@ const InvoiceDetail = () => {
             <Card>
               <CardHeader><CardTitle className="flex items-center gap-2"><User className="h-5 w-5" />Informasi Vendor</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <div><p className="text-sm text-gray-600">Nama Vendor</p><p className="font-semibold">{invoice.kontrak?.vendor?.nama_vendor}</p></div>
+                <div><p className="text-sm text-gray-600">Nama Vendor</p><p className="font-semibold">{formatTitle(invoice.kontrak?.vendor?.nama_vendor)}</p></div>
                 {invoice.kontrak?.vendor?.alamat && <div><p className="text-sm text-gray-600">Alamat</p><p className="font-semibold">{invoice.kontrak.vendor.alamat}</p></div>}
                 {invoice.kontrak?.vendor?.pic_nama && (
                   <div>
