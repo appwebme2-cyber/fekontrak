@@ -52,13 +52,8 @@ export const PurchaseList = ({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Ditemukan {purchases.length} pembelian
-        </h2>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+      {/* Jumlah pembelian sudah tampil di judul "Daftar Pembelian (N)" di atas daftar */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {purchases.map((purchase) => (
           <PurchaseCard
             key={purchase.id_padi}

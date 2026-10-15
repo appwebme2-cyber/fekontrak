@@ -167,18 +167,18 @@ const UserPurchase = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="md:col-span-2">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Cari berdasarkan judul, nomor pembelian, atau vendor..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 py-3 text-lg"
+                className="pl-10"
               />
             </div>
           </div>
           <div>
             <Select value={selectedBagian} onValueChange={setSelectedBagian}>
-              <SelectTrigger className="py-3 text-lg">
+              <SelectTrigger>
                 <SelectValue placeholder="Filter Bagian" />
               </SelectTrigger>
               <SelectContent>
@@ -198,7 +198,7 @@ const UserPurchase = () => {
 
       {/* Info bar */}
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Daftar Pembelian ({totalFiltered})</h2>
+        <h2 className="text-lg font-semibold text-gray-700">Daftar Pembelian ({totalFiltered})</h2>
         {totalFiltered > 0 && (
           <span className="text-sm text-muted-foreground">
             Menampilkan {startItem}-{endItem} dari {totalFiltered} pembelian

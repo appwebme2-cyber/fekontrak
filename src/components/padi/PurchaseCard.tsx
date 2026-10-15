@@ -1,15 +1,15 @@
 import React from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { 
-  Calendar, 
-  Coins, 
-  Building2, 
-  FileText, 
-  Edit, 
-  Trash2, 
-  Eye,
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Calendar,
+  Coins,
+  Building2,
+  FileText,
+  Edit,
+  Trash2,
+  ExternalLink,
   MapPin,
   Hash
 } from 'lucide-react';
@@ -51,69 +51,63 @@ export const PurchaseCard = ({ purchase, onView, onEdit, onDelete }: PurchaseCar
     }
   };
 
+  const stop = (fn: () => void) => (e: React.MouseEvent) => { e.stopPropagation(); fn(); };
+
   return (
-    <Card 
-      className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-md hover:scale-[1.02]"
+    <Card
+      className="group overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer border-0 shadow-md hover:scale-[1.02]"
       onClick={() => onView(purchase)}
     >
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Hash className="h-4 w-4 text-blue-600" />
-              <span className="font-semibold text-gray-900">{purchase.no_pembelian}</span>
-            </div>
-            <h3 className="font-bold text-lg text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
-              {purchase.judul_pembelian}
-            </h3>
+      {/* Header bergaya sama dengan kartu kontrak & tagihan */}
+      <div className="p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+        <div className="flex justify-between items-start gap-2 mb-2">
+          <div className="flex flex-wrap gap-2 min-w-0">
+            <Badge className={`${getStatusColor(purchase.status_purchase)} text-xs font-medium`}>
+              {purchase.status_purchase}
+            </Badge>
           </div>
-
-          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            {/* Edit: hanya tampil kalau onEdit ada */}
+          <div className="flex gap-1 flex-shrink-0 -mt-1 -mr-1">
             {onEdit && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => { e.stopPropagation(); onEdit(purchase); }}
-                className="h-8 w-8 p-0"
-              >
+              <button onClick={stop(() => onEdit(purchase))} title="Edit Pembelian"
+                className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-colors">
                 <Edit className="h-4 w-4" />
-              </Button>
+              </button>
             )}
-
-            {/* Hapus: hanya tampil kalau onDelete ada */}
             {onDelete && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => { e.stopPropagation(); onDelete(purchase); }}
-                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-              >
+              <button onClick={stop(() => onDelete(purchase))} title="Hapus Pembelian"
+                className="p-2 text-white/80 hover:text-white hover:bg-red-500/30 rounded-lg transition-colors">
                 <Trash2 className="h-4 w-4" />
-              </Button>
+              </button>
             )}
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => { e.stopPropagation(); onView(purchase); }}
-              className="h-8 w-8 p-0"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
+            <button onClick={stop(() => onView(purchase))} title="Lihat Detail"
+              className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-colors">
+              <ExternalLink className="h-4 w-4" />
+            </button>
           </div>
         </div>
-      </CardHeader>
 
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-gray-500" />
-            <span className="text-sm text-gray-600">{formatDate(purchase.tanggal)}</span>
-          </div>
-          <Badge className={getStatusColor(purchase.status_purchase)}>
-            {purchase.status_purchase}
-          </Badge>
+        <div className="flex items-center gap-1 text-sm text-white/80 mb-1 min-w-0">
+          <Hash className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate" title={purchase.no_pembelian}>{purchase.no_pembelian}</span>
+        </div>
+
+        {/* Judul maks. 2 baris, selalu setinggi 2 baris; judul lengkap di tooltip */}
+        <Tooltip delayDuration={200}>
+          <TooltipTrigger asChild>
+            <h3 className="font-semibold text-base leading-tight text-white line-clamp-2 min-h-[2.5em] cursor-default">
+              {purchase.judul_pembelian}
+            </h3>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" align="start" className="max-w-sm border-gray-900 bg-gray-900 text-white">
+            {purchase.judul_pembelian}
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <CardContent className="space-y-3 pt-4">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-gray-500" />
+          <span className="text-sm text-gray-600">{formatDate(purchase.tanggal)}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -123,22 +117,20 @@ export const PurchaseCard = ({ purchase, onView, onEdit, onDelete }: PurchaseCar
           </span>
         </div>
 
-        <div className="space-y-2">
-          {purchase.bagian && (
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-indigo-600" />
-              <Badge variant="outline" className={`${getBagianColor(purchase.bagian)} text-xs`}>
-                {purchase.bagian}
-              </Badge>
-            </div>
-          )}
-          {purchase.vendor && (
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-orange-600" />
-              <span className="text-sm text-gray-600 truncate">{purchase.vendor.nama_vendor}</span>
-            </div>
-          )}
-        </div>
+        {purchase.bagian && (
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-indigo-600" />
+            <Badge variant="outline" className={`${getBagianColor(purchase.bagian)} text-xs`}>
+              {purchase.bagian}
+            </Badge>
+          </div>
+        )}
+        {purchase.vendor && (
+          <div className="flex items-center gap-2 min-w-0">
+            <Building2 className="h-4 w-4 text-orange-600 shrink-0" />
+            <span className="text-sm text-gray-600 truncate" title={purchase.vendor.nama_vendor}>{purchase.vendor.nama_vendor}</span>
+          </div>
+        )}
 
         {purchase.no_po_pr && (
           <div className="flex items-center gap-2">

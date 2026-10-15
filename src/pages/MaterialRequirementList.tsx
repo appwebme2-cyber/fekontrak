@@ -5,7 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Calculator, Trash2 } from 'lucide-react';
+import { Search, Plus, Calculator, Trash2, ExternalLink, Hammer, Package } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMaterialRequirementDrafts, MaterialRequirementDraft } from '@/hooks/useMaterialRequirementDrafts';
 import { DraftFormDialog } from '@/components/material-requirement/DraftFormDialog';
 import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
@@ -105,31 +106,63 @@ const MaterialRequirementList = () => {
           {filtered.map((d) => (
             <Card
               key={d.id_draft}
-              className="cursor-pointer hover:shadow-lg transition-shadow"
+              className="group overflow-hidden cursor-pointer border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
               onClick={() => navigate(`/material-requirement/${d.id_draft}`)}
             >
-              <CardContent className="pt-5 space-y-2">
-                <div className="flex justify-between items-start gap-2">
-                  <div>
-                    <p className="font-semibold text-base">{d.tag_unit}</p>
-                    {d.nomor_mrf && <p className="text-xs text-muted-foreground">{d.nomor_mrf}</p>}
-                  </div>
-                  <Badge className={statusColor[d.status] || 'bg-gray-100 text-gray-800'}>{d.status}</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground truncate">{d.kontrak?.judul_kontrak}</p>
-                {d.problem && <p className="text-sm line-clamp-2">{d.problem}</p>}
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-xs text-muted-foreground">{d.lines.length} baris kebutuhan</span>
-                  {canDelete && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 w-7 p-0 text-destructive"
-                      onClick={(e) => { e.stopPropagation(); setDeletingDraft(d); }}
+              {/* Header bergaya sama dengan kartu kontrak & tagihan */}
+              <div className="p-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+                <div className="flex justify-between items-start gap-2 mb-2">
+                  <Badge className={`${statusColor[d.status] || 'bg-gray-100 text-gray-800'} text-xs font-medium`}>{d.status}</Badge>
+                  <div className="flex gap-1 flex-shrink-0 -mt-1 -mr-1">
+                    {canDelete && (
+                      <button
+                        title="Hapus Draft"
+                        className="p-2 text-white/80 hover:text-white hover:bg-red-500/30 rounded-lg transition-colors"
+                        onClick={(e) => { e.stopPropagation(); setDeletingDraft(d); }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                    <button
+                      title="Buka Draft"
+                      className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-colors"
+                      onClick={(e) => { e.stopPropagation(); navigate(`/material-requirement/${d.id_draft}`); }}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
+                      <ExternalLink className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+                <p className="font-semibold text-lg leading-tight truncate" title={d.tag_unit}>{d.tag_unit}</p>
+                <p className="text-sm text-white/80 truncate mb-1">MRF: {d.nomor_mrf || '-'}</p>
+                {/* Judul kontrak maks. 2 baris, selalu setinggi 2 baris; judul lengkap di tooltip */}
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <p className="text-sm text-white/90 leading-tight line-clamp-2 min-h-[2.5em] cursor-default">
+                      {d.kontrak?.judul_kontrak || 'Kontrak tidak ditemukan'}
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="start" className="max-w-sm border-gray-900 bg-gray-900 text-white">
+                    {d.kontrak?.judul_kontrak || 'Kontrak tidak ditemukan'}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+
+              <CardContent className="pt-4 space-y-3">
+                <div>
+                  <div className="text-xs font-medium text-gray-500 mb-0.5">Problem</div>
+                  <p className={`text-sm line-clamp-2 min-h-[2.5rem] ${d.problem ? 'text-gray-800' : 'text-gray-400 italic'}`}>
+                    {d.problem || 'Belum diisi'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 border-t pt-3 text-sm text-gray-600">
+                  <span className="flex items-center gap-1.5">
+                    <Hammer className="h-4 w-4 text-blue-600" />
+                    {d.lines.filter((l) => l.jenis !== 'Material').length} pekerjaan
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Package className="h-4 w-4 text-amber-600" />
+                    {d.lines.filter((l) => l.jenis === 'Material').length} material
+                  </span>
                 </div>
               </CardContent>
             </Card>
