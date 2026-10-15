@@ -4,7 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import {
+  Mail, Lock, Eye, EyeOff, ClipboardList, BarChart3, Wallet, Wrench, ShieldCheck, Radio, FileBarChart, AlertTriangle,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { isVendorRole } from '@/hooks/useRolePermissionsConfig';
 
@@ -94,10 +96,10 @@ const Auth = () => {
   };
 
   const features = [
-    { icon: '📋', label: 'Manajemen Kontrak Terintegrasi' },
-    { icon: '📊', label: 'Monitoring Progress Real-time' },
-    { icon: '💰', label: 'Kontrol Anggaran & Pembayaran' },
-    { icon: '🔧', label: 'Supervisory & Control Tools' },
+    { icon: ClipboardList, label: 'Manajemen Kontrak Terintegrasi' },
+    { icon: BarChart3, label: 'Monitoring Progress Real-time' },
+    { icon: Wallet, label: 'Kontrol Anggaran & Pembayaran' },
+    { icon: Wrench, label: 'Supervisory & Control Tools' },
   ];
 
   return (
@@ -200,7 +202,7 @@ const Auth = () => {
               <div key={i}
                 className={`flex items-center gap-3 rounded-xl p-3 transition-all duration-500 ${mounted ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}
                 style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', transitionDelay: `${220 + i * 75}ms` }}>
-                <span className="text-xl flex-shrink-0">{f.icon}</span>
+                <f.icon className="h-5 w-5 flex-shrink-0 text-blue-200" strokeWidth={1.75} />
                 <span className="text-blue-100 text-xs leading-snug">{f.label}</span>
               </div>
             ))}
@@ -212,14 +214,14 @@ const Auth = () => {
           {/* Quick-feature pills */}
           <div className="grid grid-cols-3 gap-2.5">
             {[
-              { icon: '🔐', label: 'Multi-role\nAccess' },
-              { icon: '📡', label: 'Monitoring\nReal-time' },
-              { icon: '📊', label: 'Laporan\nOtomatis' },
+              { icon: ShieldCheck, label: 'Multi-role\nAccess' },
+              { icon: Radio, label: 'Monitoring\nReal-time' },
+              { icon: FileBarChart, label: 'Laporan\nOtomatis' },
             ].map((s, i) => (
               <div key={i}
                 className={`rounded-xl p-3 text-center transition-all duration-500 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', transitionDelay: `${460 + i * 80}ms` }}>
-                <div className="text-2xl mb-1">{s.icon}</div>
+                <s.icon className="mx-auto mb-1.5 h-6 w-6 text-blue-200" strokeWidth={1.75} />
                 <div className="text-blue-200 text-[10px] whitespace-pre-line leading-tight">{s.label}</div>
               </div>
             ))}
@@ -293,7 +295,7 @@ const Auth = () => {
                     {loginAttempts > 0 && lockoutCountdown === 0 && (
                       <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs"
                         style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
-                        <span className="text-amber-500">⚠</span>
+                        <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
                         <span className="text-amber-600 dark:text-amber-400">
                           {loginAttempts}/{MAX_ATTEMPTS} percobaan gagal.{' '}
                           {MAX_ATTEMPTS - loginAttempts === 1

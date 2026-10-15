@@ -19,4 +19,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Build produksi membuang console.log/info/debug (log debug yang bisa mencetak data form,
+  // profil user, dsb. ke console browser). console.warn dan console.error tetap ada.
+  esbuild: mode === 'production'
+    ? { pure: ['console.log', 'console.info', 'console.debug'] }
+    : undefined,
 }));
