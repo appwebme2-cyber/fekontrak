@@ -5,6 +5,7 @@ import { ExternalLink, Edit, Trash2 } from 'lucide-react';
 import { Kontrak } from '@/types/database';
 import { ProgressStatusBadge } from '@/components/shared/ProgressStatusBadge';
 import { FavoriteButton } from '@/components/contracts/FavoriteButton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ContractCardHeaderProps {
   contract: Kontrak;
@@ -101,18 +102,27 @@ export const ContractCardHeader = ({
       </div>
 
       <div>
-        <h3 className="font-semibold text-lg mb-2 leading-tight">
-          {contract.judul_kontrak}
-        </h3>
+        {/* Judul maks. 2 baris dan selalu setinggi 2 baris supaya header semua kartu sama tinggi
+            (isi di bawahnya jadi sejajar). Judul lengkap muncul di tooltip saat kursor diarahkan. */}
+        <Tooltip delayDuration={200}>
+          <TooltipTrigger asChild>
+            <h3 className="font-semibold text-lg mb-2 leading-tight line-clamp-2 min-h-[2.5em] cursor-default">
+              {contract.judul_kontrak}
+            </h3>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" align="start" className="max-w-sm border-gray-900 bg-gray-900 text-white">
+            {contract.judul_kontrak}
+          </TooltipContent>
+        </Tooltip>
 
         {getVendorName && (
-          <div className="text-sm opacity-90 mb-1">
+          <div className="text-sm opacity-90 mb-1 truncate" title={`Vendor: ${getVendorName(contract.id_vendor)}`}>
             Vendor: {getVendorName(contract.id_vendor)}
           </div>
         )}
 
         {contract.direksi_pekerjaan && (
-          <div className="text-sm opacity-90">
+          <div className="text-sm opacity-90 truncate" title={`Direksi Pekerjaan: ${contract.direksi_pekerjaan}`}>
             Direksi Pekerjaan: {contract.direksi_pekerjaan}
           </div>
         )}
