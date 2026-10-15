@@ -278,7 +278,7 @@ const MaterialRequirementDetail = () => {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader><CardTitle className="text-base">Problem</CardTitle></CardHeader>
           <CardContent><p className="text-sm whitespace-pre-wrap">{draft.problem || '-'}</p></CardContent>
@@ -305,7 +305,7 @@ const MaterialRequirementDetail = () => {
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4" /> Dokumen Rekomendasi</CardTitle>

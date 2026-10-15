@@ -20,13 +20,14 @@ interface DocumentItemProps {
 
 export const DocumentItem = ({ document, onRemove, onPreview, disabled = false }: DocumentItemProps) => {
   return (
-    <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
-      <div className="flex items-center space-x-3 flex-1">
-        <span className="text-lg">{getFileIcon(document.type)}</span>
+    <div className="flex items-center justify-between gap-2 p-3 bg-muted/30 rounded-lg border">
+      {/* min-w-0 supaya nama file panjang terpotong "…" dan tombol tetap terlihat */}
+      <div className="flex items-center space-x-3 flex-1 min-w-0">
+        <span className="text-lg shrink-0">{getFileIcon(document.type)}</span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-sm font-medium truncate">{document.name}</p>
-            <Badge variant="secondary" className="text-xs">
+            <p className="text-sm font-medium truncate" title={document.name}>{document.name}</p>
+            <Badge variant="secondary" className="text-xs shrink-0">
               {document.type.split('/')[1]?.toUpperCase() || 'FILE'}
             </Badge>
           </div>
@@ -37,7 +38,7 @@ export const DocumentItem = ({ document, onRemove, onPreview, disabled = false }
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         {onPreview && document.url && (
           <Button
             type="button"
