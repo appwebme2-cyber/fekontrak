@@ -80,41 +80,49 @@ const ApprovalDashboard = () => {
       <PageHeader icon={ClipboardCheck} title="Approval Dokumen" description="Review dan setujui dokumen dari vendor" />
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        <Card className="bg-blue-50 border-blue-200">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs text-blue-600 font-medium">Total</p>
-              <p className="text-3xl font-bold text-blue-700">{stats.total}</p>
+              <p className="text-sm font-medium text-white/90">Total</p>
+              <p className="text-3xl font-bold">{stats.total}</p>
             </div>
-            <FileText className="h-8 w-8 text-blue-300" />
+            <div className="p-2 rounded-lg bg-white/20">
+              <FileText className="h-6 w-6 text-white" />
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-yellow-50 border-yellow-200">
+        <Card className="bg-gradient-to-r from-amber-500 to-amber-600 text-white border-0 shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs text-yellow-600 font-medium">Pending</p>
-              <p className="text-3xl font-bold text-yellow-700">{stats.pending}</p>
+              <p className="text-sm font-medium text-white/90">Pending</p>
+              <p className="text-3xl font-bold">{stats.pending}</p>
             </div>
-            <Clock className="h-8 w-8 text-yellow-300" />
+            <div className="p-2 rounded-lg bg-white/20">
+              <Clock className="h-6 w-6 text-white" />
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-green-50 border-green-200">
+        <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0 shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs text-green-600 font-medium">Approved</p>
-              <p className="text-3xl font-bold text-green-700">{stats.approved}</p>
+              <p className="text-sm font-medium text-white/90">Approved</p>
+              <p className="text-3xl font-bold">{stats.approved}</p>
             </div>
-            <CheckCircle className="h-8 w-8 text-green-300" />
+            <div className="p-2 rounded-lg bg-white/20">
+              <CheckCircle className="h-6 w-6 text-white" />
+            </div>
           </CardContent>
         </Card>
-        <Card className="bg-red-50 border-red-200">
+        <Card className="bg-gradient-to-r from-red-500 to-red-600 text-white border-0 shadow-sm">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-xs text-red-600 font-medium">Rejected</p>
-              <p className="text-3xl font-bold text-red-700">{stats.rejected}</p>
+              <p className="text-sm font-medium text-white/90">Rejected</p>
+              <p className="text-3xl font-bold">{stats.rejected}</p>
             </div>
-            <XCircle className="h-8 w-8 text-red-300" />
+            <div className="p-2 rounded-lg bg-white/20">
+              <XCircle className="h-6 w-6 text-white" />
+            </div>
           </CardContent>
         </Card>
       </div>

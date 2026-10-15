@@ -1,6 +1,4 @@
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, UserX } from 'lucide-react';
+import { User, UserX, type LucideIcon } from 'lucide-react';
 import { UserProfile } from '../types';
 import { usePermissions } from '@/hooks/usePermissions';
 import { CONFIGURABLE_ROLES, resolveConfigurableRole } from '@/hooks/useRolePermissionsConfig';
@@ -20,6 +18,19 @@ const ROLE_GRADIENTS: Record<string, string> = {
   guest: 'from-purple-500 to-purple-600',
 };
 
+/** Kartu ringkasan bergaya sama dengan kartu ringkasan di halaman Vendor. */
+const SummaryCard = ({ icon: Icon, gradient, value, label }: { icon: LucideIcon; gradient: string; value: number; label: string }) => (
+  <div className="flex items-center gap-4 rounded-xl border bg-white px-5 py-4 shadow-sm">
+    <div className={`p-2 rounded-lg bg-gradient-to-tr ${gradient}`}>
+      <Icon className="h-6 w-6 text-white" />
+    </div>
+    <div>
+      <div className="text-2xl font-bold text-gray-800">{value}</div>
+      <div className="mt-1 text-xs text-gray-500">{label}</div>
+    </div>
+  </div>
+);
+
 export const UserRoleSummaryCards = ({ users }: UserRoleSummaryCardsProps) => {
   const { roleLabels } = usePermissions();
 
@@ -29,34 +40,22 @@ export const UserRoleSummaryCards = ({ users }: UserRoleSummaryCardsProps) => {
     users.filter((user) => (user.role === 'admin' ? 'admin' : resolveConfigurableRole(user.role)) === role).length;
 
   return (
-    <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4 animate-fade-in-scale" style={{ animationDelay: '0.2s' }}>
-      {roleKeys.map((role, idx) => (
-        <Card
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      {roleKeys.map((role) => (
+        <SummaryCard
           key={role}
-          className={`card-hover border-0 text-white bg-gradient-to-r ${ROLE_GRADIENTS[role] ?? 'from-gray-500 to-gray-600'}`}
-        >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white/90">{roleLabels[role]}</CardTitle>
-            <User className="h-4 w-4 text-white" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white animate-count-up" style={{ animationDelay: `${0.1 * idx}s` }}>
-              {countForRole(role)}
-            </div>
-          </CardContent>
-        </Card>
+          icon={User}
+          gradient={ROLE_GRADIENTS[role] ?? 'from-gray-500 to-gray-600'}
+          value={countForRole(role)}
+          label={roleLabels[role]}
+        />
       ))}
-      <Card className="card-hover border-0 text-white bg-gradient-to-r from-gray-500 to-gray-600">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-white/90">Tidak Aktif</CardTitle>
-          <UserX className="h-4 w-4 text-white" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-white animate-count-up" style={{ animationDelay: `${0.1 * roleKeys.length}s` }}>
-            {users.filter(user => !user.is_active).length}
-          </div>
-        </CardContent>
-      </Card>
+      <SummaryCard
+        icon={UserX}
+        gradient="from-gray-500 to-gray-600"
+        value={users.filter((user) => !user.is_active).length}
+        label="Tidak Aktif"
+      />
     </div>
   );
 };
