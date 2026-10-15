@@ -404,17 +404,15 @@ const Layout = ({ children }: LayoutProps) => {
       {showIdleWarning && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-4" style={{ animation: 'fadeIn 0.18s ease' }}>
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          <div className="relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden"
-            style={{ background: 'linear-gradient(145deg, #0f1629 0%, #1a2340 100%)', border: '1px solid rgba(255,255,255,0.1)', animation: 'scaleIn 0.2s cubic-bezier(0.34,1.56,0.64,1)' }}>
+          <div className="relative w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-2xl overflow-hidden"
+            style={{ animation: 'scaleIn 0.2s cubic-bezier(0.34,1.56,0.64,1)' }}>
             <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b)' }} />
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none"
-              style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%)' }} />
             <div className="p-7">
               {/* Countdown ring */}
               <div className="flex justify-center mb-5">
                 <div className="relative w-20 h-20 flex items-center justify-center">
                   <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 80 80">
-                    <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6"/>
+                    <circle cx="40" cy="40" r="34" fill="none" stroke="#f3f4f6" strokeWidth="6"/>
                     <circle cx="40" cy="40" r="34" fill="none" stroke="#f59e0b" strokeWidth="6"
                       strokeDasharray={`${2 * Math.PI * 34}`}
                       strokeDashoffset={`${2 * Math.PI * 34 * (1 - idleCountdown / 120)}`}
@@ -422,7 +420,7 @@ const Layout = ({ children }: LayoutProps) => {
                       style={{ transition: 'stroke-dashoffset 0.9s linear' }}/>
                   </svg>
                   <div className="text-center">
-                    <div className="text-2xl font-black text-amber-400 leading-none">
+                    <div className="text-2xl font-black text-amber-500 leading-none">
                       {String(Math.floor(idleCountdown / 60)).padStart(1,'0')}:{String(idleCountdown % 60).padStart(2,'0')}
                     </div>
                   </div>
@@ -430,8 +428,8 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
 
               <div className="text-center mb-6">
-                <h3 className="text-lg font-bold text-white mb-1.5">Sesi Akan Berakhir</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">
+                <h3 className="text-lg font-bold text-gray-900 mb-1.5">Sesi Akan Berakhir</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
                   Tidak ada aktivitas terdeteksi. Anda akan otomatis keluar dalam waktu di atas.
                 </p>
               </div>
@@ -439,8 +437,7 @@ const Layout = ({ children }: LayoutProps) => {
               <div className="flex gap-3">
                 <button
                   onClick={handleSignOut}
-                  className="flex-1 h-10 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                  style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)' }}
+                  className="flex-1 h-10 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-50 active:scale-[0.98]"
                 >
                   Keluar Sekarang
                 </button>
@@ -468,23 +465,18 @@ const Layout = ({ children }: LayoutProps) => {
 
           {/* Modal card */}
           <div
-            className="relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden"
-            style={{ background: 'linear-gradient(145deg, #0f1629 0%, #1a2340 100%)', border: '1px solid rgba(255,255,255,0.1)', animation: 'scaleIn 0.2s cubic-bezier(0.34,1.56,0.64,1)' }}
+            className="relative w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-2xl overflow-hidden"
+            style={{ animation: 'scaleIn 0.2s cubic-bezier(0.34,1.56,0.64,1)' }}
           >
             {/* Top accent bar */}
             <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #E31E24, #ff6b6b, #E31E24)' }} />
-
-            {/* Decorative orb */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none"
-              style={{ background: 'radial-gradient(circle, rgba(227,30,36,0.15) 0%, transparent 70%)' }} />
 
             <div className="p-7">
               {/* Icon */}
               <div className="flex justify-center mb-5">
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center"
-                    style={{ background: 'rgba(227,30,36,0.12)', border: '1px solid rgba(227,30,36,0.25)' }}>
-                    <LogOut className="w-7 h-7 text-red-400" />
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center border border-red-100 bg-red-50">
+                    <LogOut className="w-7 h-7 text-red-600" />
                   </div>
                   <div className="absolute inset-0 rounded-full animate-ping"
                     style={{ background: 'rgba(227,30,36,0.08)', animationDuration: '2s' }} />
@@ -493,8 +485,8 @@ const Layout = ({ children }: LayoutProps) => {
 
               {/* Text */}
               <div className="text-center mb-6">
-                <h3 className="text-lg font-bold text-white mb-1.5">Keluar dari Sistem?</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">
+                <h3 className="text-lg font-bold text-gray-900 mb-1.5">Keluar dari Sistem?</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">
                   Sesi aktif Anda akan diakhiri. Pastikan semua pekerjaan telah tersimpan sebelum keluar.
                 </p>
               </div>
@@ -503,8 +495,7 @@ const Layout = ({ children }: LayoutProps) => {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowLogoutModal(false)}
-                  className="flex-1 h-10 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                  style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.8)' }}
+                  className="flex-1 h-10 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-50 active:scale-[0.98]"
                 >
                   Batal
                 </button>
@@ -519,12 +510,14 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </div>
           </div>
-
-          <style>{`
-            @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-            @keyframes scaleIn { from { opacity: 0; transform: scale(0.88) translateY(12px) } to { opacity: 1; transform: scale(1) translateY(0) } }
-          `}</style>
         </div>
+      )}
+
+      {(showLogoutModal || showIdleWarning) && (
+        <style>{`
+          @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+          @keyframes scaleIn { from { opacity: 0; transform: scale(0.88) translateY(12px) } to { opacity: 1; transform: scale(1) translateY(0) } }
+        `}</style>
       )}
     </div>
   );
