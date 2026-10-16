@@ -36,6 +36,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useIdleTimeout } from '@/hooks/useIdleTimeout';
 import { isVendorRole } from '@/hooks/useRolePermissionsConfig';
 import { ChatbotWidget } from '@/components/chatbot/ChatbotWidget';
+import { RuSwitcher } from '@/components/RuSwitcher';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -383,6 +384,7 @@ const Layout = ({ children }: LayoutProps) => {
             </nav>
 
             <div className="flex items-center space-x-2">
+              <RuSwitcher />
               <RealTimeNotifications showConnectionStatus={false} />
               <Button variant="ghost" size="sm" onClick={() => setShowLogoutModal(true)} className="flex items-center space-x-2 p-2">
                 <LogOut className="h-5 w-5" />

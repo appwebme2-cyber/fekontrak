@@ -6,6 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserFormData } from '../types';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useRuList } from '@/hooks/useRuList';
+
+const NO_RU = 'NONE';
 
 const API_URL = "https://bekontrak-production.up.railway.app/api";
 
@@ -19,7 +22,8 @@ interface EditUserDialogProps {
 
 export const EditUserDialog = ({ isOpen, onOpenChange, formData, setFormData, onSubmit }: EditUserDialogProps) => {
   const [vendors, setVendors] = useState<{ idVendor: string; namaVendor: string }[]>([]);
-  const { roleLabels, isAdmin } = usePermissions();
+  const { roleLabels, isAdmin, isSuperAdmin } = usePermissions();
+  const { rus } = useRuList(isOpen && isSuperAdmin);
 
   useEffect(() => {
     const fetchVendors = async () => {
@@ -71,7 +75,10 @@ export const EditUserDialog = ({ isOpen, onOpenChange, formData, setFormData, on
             <Label>Role</Label>
             <Select
               value={formData.role}
-              onValueChange={(value: any) => setFormData({ ...formData, role: value, id_vendor: '' })}
+              onValueChange={(value: any) => setFormData({
+                ...formData, role: value, id_vendor: '',
+                id_ru: value !== 'admin' && !formData.id_ru ? 'RU4' : formData.id_ru,
+              })}
             >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -86,6 +93,28 @@ export const EditUserDialog = ({ isOpen, onOpenChange, formData, setFormData, on
               </SelectContent>
             </Select>
           </div>
+
+{/* Multi-RU: hanya Super Admin yang menentukan RU pengguna */}
+          {isSuperAdmin && (
+            <div className="grid gap-2">
+              <Label htmlFor="edit-ru">Refinery Unit</Label>
+              <Select
+                value={formData.id_ru || NO_RU}
+                onValueChange={(value) => setFormData({ ...formData, id_ru: value === NO_RU ? '' : value })}
+              >
+                <SelectTrigger id="edit-ru"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {formData.role === 'admin' && <SelectItem value={NO_RU}>Semua RU (Super Admin)</SelectItem>}
+                  {rus.map(r => (
+                    <SelectItem key={r.idRu} value={r.idRu}>{r.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {formData.role === 'admin' && (
+                <p className="text-xs text-muted-foreground">Admin dengan satu RU hanya mengelola RU tersebut.</p>
+              )}
+            </div>
+          )}
 
           {/* Dropdown vendor — hanya muncul kalau role = external */}
           {formData.role === 'external' && (

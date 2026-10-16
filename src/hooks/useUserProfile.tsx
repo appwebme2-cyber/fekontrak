@@ -32,6 +32,7 @@ export const useUserProfile = (user: any) => {
         role: data.role,
         id_vendor: data.idVendor || null,
         created_at: data.createdAt,
+        id_ru: data.idRu || null, // multi-RU: null untuk Super Admin
       });
 
     } catch (error) {

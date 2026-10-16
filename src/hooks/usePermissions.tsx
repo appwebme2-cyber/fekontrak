@@ -25,6 +25,11 @@ export const usePermissions = () => {
   const configurableRole = resolveConfigurableRole(role);
   const isVendor = !isAdmin && configurableRole === 'external';
 
+  // Multi-RU: Super Admin = admin tanpa RU; Super Admin & Head Office bisa melihat lintas RU
+  const userRu: string | null = userProfile?.id_ru ?? null;
+  const isSuperAdmin = isAdmin && !!userProfile && !userRu;
+  const isCrossRu = isSuperAdmin || role === 'head_office';
+
   const allMenuKeys = CONFIGURABLE_MENU_ITEMS.map((m) => m.key);
 
   const flags = isAdmin
@@ -50,6 +55,9 @@ export const usePermissions = () => {
     role,
     isAdmin,
     isVendor,
+    isSuperAdmin,
+    isCrossRu,
+    userRu,
     roleLabel,
     roleLabels,
 

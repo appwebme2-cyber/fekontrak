@@ -9,6 +9,7 @@ export interface UserProfile {
   created_at: string;
   updated_at?: string;
   is_active: boolean;
+  id_ru?: string | null;
 }
 
 export interface UserFormData {
@@ -16,4 +17,6 @@ export interface UserFormData {
   full_name: string;
   role: 'admin' | ConfigurableRole;
   id_vendor?: string;
+  /** Multi-RU: '' untuk admin = Super Admin (semua RU). Hanya diatur Super Admin. */
+  id_ru: string;
 }

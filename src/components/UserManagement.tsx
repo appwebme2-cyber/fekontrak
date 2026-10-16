@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Search, Users, UserPlus, Copy, Check, KeyRound } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useRuList } from '@/hooks/useRuList';
 import { useUserManagement } from './user-management/hooks/useUserManagement';
 import { UserRoleSummaryCards } from './user-management/components/UserRoleSummaryCards';
 import { UserSearch } from './user-management/components/UserSearch';
@@ -21,7 +22,8 @@ const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [copied, setCopied] = useState(false);
   const { userProfile } = useAuth();
-  const { roleLabel } = usePermissions();
+  const { roleLabel, isCrossRu } = usePermissions();
+  const { ruLabel } = useRuList(isCrossRu);
 
   const {
     users,
@@ -142,6 +144,7 @@ const UserManagement = () => {
                   <TableHead className="font-semibold">Nama</TableHead>
                   <TableHead className="font-semibold">Email</TableHead>
                   <TableHead className="font-semibold">Role</TableHead>
+                  {isCrossRu && <TableHead className="font-semibold">RU</TableHead>}
                   <TableHead className="font-semibold">Status</TableHead>
                   {isAdmin && <TableHead className="font-semibold">Aktif</TableHead>}
                   {isAdmin && <TableHead className="font-semibold">Aksi</TableHead>}
@@ -150,7 +153,7 @@ const UserManagement = () => {
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={isAdmin ? 6 : 4} className="text-center py-8">
+                    <TableCell colSpan={(isAdmin ? 6 : 4) + (isCrossRu ? 1 : 0)} className="text-center py-8">
                       <div className="flex flex-col items-center space-y-2">
                         <Users className="w-8 h-8 text-muted-foreground" />
                         <p className="text-muted-foreground">
@@ -166,6 +169,8 @@ const UserManagement = () => {
                       user={user}
                       index={index}
                       isAdmin={isAdmin}
+                      showRu={isCrossRu}
+                      ruLabel={ruLabel}
                       currentUserId={userProfile?.id}
                       onToggleStatus={handleToggleUserStatus}
                       onEdit={handleEditUser}

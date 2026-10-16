@@ -3,6 +3,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { UserProfile, UserFormData } from '../types';
 import { resolveConfigurableRole } from '@/hooks/useRolePermissionsConfig';
+import { getActiveRu } from '@/lib/activeRu';
+
+// RU awal untuk pengguna baru: RU yang sedang dipilih di header, atau RU IV Cilacap
+const defaultRu = () => getActiveRu() ?? 'RU4';
 
 const API_URL = "https://bekontrak-production.up.railway.app/api";
 
@@ -22,6 +26,7 @@ const mapUser = (u: any): UserProfile => ({
   is_active: u.isActive ?? u.is_active ?? true,
   created_at: u.createdAt ?? u.created_at,
   updated_at: u.updatedAt ?? u.updated_at,
+  id_ru: u.idRu ?? u.id_ru ?? null,
 });
 
 const generatePassword = (): string => {
@@ -52,7 +57,7 @@ export const useUserManagement = () => {
   const [showCreatedPassword, setShowCreatedPassword] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [formData, setFormData] = useState<UserFormData>({
-    email: '', full_name: '', role: 'guest', id_vendor: '',
+    email: '', full_name: '', role: 'guest', id_vendor: '', id_ru: defaultRu(),
   });
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; user: UserProfile | null }>({
     open: false, user: null
@@ -100,7 +105,7 @@ export const useUserManagement = () => {
     }
     setSelectedUser(user);
     const role = user.role === 'admin' ? 'admin' : resolveConfigurableRole(user.role);
-    setFormData({ email: user.email, full_name: user.full_name, role, id_vendor: user.id_vendor || '' });
+    setFormData({ email: user.email, full_name: user.full_name, role, id_vendor: user.id_vendor || '', id_ru: user.id_ru ?? '' });
     setIsEditDialogOpen(true);
   };
 
@@ -135,12 +140,12 @@ export const useUserManagement = () => {
         // Update nama & email juga
         await fetch(`${API_URL}/profile/${selectedUser.id}`, {
           method: 'PUT', headers: authHeaders(),
-          body: JSON.stringify({ fullName: formData.full_name.trim(), email: formData.email.trim(), role: 'external' })
+          body: JSON.stringify({ fullName: formData.full_name.trim(), email: formData.email.trim(), role: 'external', idRu: formData.id_ru })
         });
       } else {
         const res = await fetch(`${API_URL}/profile/${selectedUser.id}`, {
           method: 'PUT', headers: authHeaders(),
-          body: JSON.stringify({ fullName: formData.full_name.trim(), email: formData.email.trim(), role: formData.role })
+          body: JSON.stringify({ fullName: formData.full_name.trim(), email: formData.email.trim(), role: formData.role, idRu: formData.id_ru })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data?.message);
@@ -170,7 +175,7 @@ export const useUserManagement = () => {
       // Pakai admin-register agar role bisa diset apapun
       const res = await fetch(`${API_URL}/auth/admin-register`, {
         method: 'POST', headers: authHeaders(),
-        body: JSON.stringify({ email: cleanEmail, fullName: cleanName, role: formData.role, password })
+        body: JSON.stringify({ email: cleanEmail, fullName: cleanName, role: formData.role, password, idRu: formData.id_ru })
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 400 && data?.message?.toLowerCase().includes('terdaftar')) {
@@ -188,7 +193,7 @@ export const useUserManagement = () => {
       }
 
       setIsAddDialogOpen(false);
-      setFormData({ email: '', full_name: '', role: 'guest', id_vendor: '' });
+      setFormData({ email: '', full_name: '', role: 'guest', id_vendor: '', id_ru: defaultRu() });
       setCreatedUserPassword(password);
       setShowCreatedPassword(true);
       fetchUsers();

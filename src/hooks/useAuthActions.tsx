@@ -1,5 +1,6 @@
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { setActiveRu } from '@/lib/activeRu';
 
 const API_URL = "https://bekontrak-production.up.railway.app/api";
 
@@ -99,6 +100,7 @@ export const useAuthActions = (setUser: any, setSession: any, setUserProfile: an
         }).catch(() => {});
       }
       localStorage.removeItem("token");
+      setActiveRu(null);
       queryClient.clear();
       setUser(null);
       setSession(null);
@@ -106,6 +108,7 @@ export const useAuthActions = (setUser: any, setSession: any, setUserProfile: an
       toast({ title: "Berhasil", description: "Logout berhasil!" });
     } catch (error) {
       localStorage.removeItem("token");
+      setActiveRu(null);
       queryClient.clear();
       setUser(null);
       setSession(null);

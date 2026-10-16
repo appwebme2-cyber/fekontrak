@@ -11,6 +11,9 @@ interface UserTableRowProps {
   user: UserProfile;
   index: number;
   isAdmin: boolean;
+  /** Multi-RU: tampilkan kolom RU (Super Admin / Head Office) */
+  showRu?: boolean;
+  ruLabel?: (idRu?: string | null) => string | null;
   currentUserId?: string;
   onToggleStatus: (userId: string, currentStatus: boolean) => void;
   onEdit: (user: UserProfile) => void;
@@ -21,6 +24,8 @@ export const UserTableRow = ({
   user,
   index,
   isAdmin,
+  showRu = false,
+  ruLabel,
   currentUserId,
   onToggleStatus,
   onEdit,
@@ -69,6 +74,11 @@ export const UserTableRow = ({
       <TableCell className="font-medium">{user.full_name}</TableCell>
       <TableCell>{user.email}</TableCell>
       <TableCell>{getRoleBadge(user.role)}</TableCell>
+      {showRu && (
+        <TableCell className="whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+          {user.id_ru ? ruLabel?.(user.id_ru) ?? user.id_ru : 'Semua RU'}
+        </TableCell>
+      )}
       <TableCell>{getStatusBadge(user.is_active)}</TableCell>
       {isAdmin && (
         <TableCell>
