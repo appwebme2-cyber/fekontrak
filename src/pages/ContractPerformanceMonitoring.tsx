@@ -15,6 +15,10 @@ import AmendmentMonitoringTab from '@/components/sla/AmendmentMonitoringTab';
 import { EnhancedSLAAnalyticsCharts } from '@/components/sla/EnhancedSLAAnalyticsCharts';
 import { EnhancedSLAFilters } from '@/components/sla/EnhancedSLAFilters';
 import { OptimizedSLAContractCard } from '@/components/sla/OptimizedSLAContractCard';
+import { ContractHistoryDialog } from '@/components/sla/ContractHistoryDialog';
+import { downloadLaporanSla, fetchKontrakSlaDetail } from '@/components/sla/contractSlaHistory';
+import type { EnhancedSLAContract } from '@/hooks/useOptimizedSLAMonitoring';
+import { useQueryClient } from '@tanstack/react-query';
 
 
 const ContractPerformanceMonitoring = () => {
@@ -79,13 +83,32 @@ const ContractPerformanceMonitoring = () => {
     window.open(`/contracts/${contractId}`, '_blank');
   }, []);
 
-  const handleDownloadReport = useCallback((contractId: string) => {
-    toast({ title: "Report Download", description: `Downloading SLA report for contract ${contractId}` });
-  }, [toast]);
+  // Report: unduh laporan SLA satu kontrak (.xlsx). History: linimasa kontrak di dialog.
+  const queryClient = useQueryClient();
+  const [historyContract, setHistoryContract] = useState<EnhancedSLAContract | null>(null);
+  const findSlaContract = useCallback(
+    (contractId: string) => stableSlaAnalysis?.contracts?.find((c) => c.id_kontrak === contractId) ?? null,
+    [stableSlaAnalysis]
+  );
+
+  const handleDownloadReport = useCallback(async (contractId: string) => {
+    const contract = findSlaContract(contractId);
+    if (!contract) return;
+    try {
+      const detail = await queryClient.fetchQuery({
+        queryKey: ['kontrak-sla-detail', contractId],
+        queryFn: () => fetchKontrakSlaDetail(contractId),
+        staleTime: 60_000,
+      });
+      downloadLaporanSla(contract, detail);
+    } catch (e) {
+      toast({ title: "Report gagal diunduh", description: (e as Error).message, variant: "destructive" });
+    }
+  }, [findSlaContract, queryClient, toast]);
 
   const handleViewHistory = useCallback((contractId: string) => {
-    toast({ title: "SLA History", description: `Showing SLA history for contract ${contractId}` });
-  }, [toast]);
+    setHistoryContract(findSlaContract(contractId));
+  }, [findSlaContract]);
 
   const filteredContracts = useMemo(() => {
     if (!stableSlaAnalysis?.contracts) return [];
@@ -256,6 +279,8 @@ const ContractPerformanceMonitoring = () => {
           <EnhancedProgressDeviationTab />
         </TabsContent>
       </Tabs>
+
+      <ContractHistoryDialog contract={historyContract} onOpenChange={(open) => !open && setHistoryContract(null)} />
     </div>
   );
 };
