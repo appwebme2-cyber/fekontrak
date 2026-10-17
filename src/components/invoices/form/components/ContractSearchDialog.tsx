@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Search, Filter, Building2, FileText, Calendar } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -193,7 +194,7 @@ export const ContractSearchDialog = ({
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-3">
                         <h4 className="font-medium text-foreground line-clamp-2">
-                          {contract.judul_kontrak}
+                          {formatTitle(contract.judul_kontrak)}
                         </h4>
                         <Badge variant="outline" className="ml-2 whitespace-nowrap">
                           {contract.tipe_kontrak}
@@ -208,7 +209,7 @@ export const ContractSearchDialog = ({
                           </div>
                           <div className="flex items-center gap-2">
                             <Building2 className="h-4 w-4" />
-                            <span className="truncate">{contract.vendor?.nama_vendor}</span>
+                            <span className="truncate">{formatTitle(contract.vendor?.nama_vendor)}</span>
                           </div>
                         </div>
 

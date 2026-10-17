@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { useNavigate } from 'react-router-dom';
 import { CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -417,7 +418,7 @@ export const ContractDetailContent = ({
                 </div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">Belum Ada Tagihan</h3>
                 <p className="text-gray-500 mb-6 max-w-md mx-auto">Belum ada tagihan termin yang dibuat untuk kontrak ini.</p>
-                <div className="text-sm text-gray-400">Kontrak: {contract.judul_kontrak}</div>
+                <div className="text-sm text-gray-400">Kontrak: {formatTitle(contract.judul_kontrak)}</div>
               </div>
             )}
           </div>

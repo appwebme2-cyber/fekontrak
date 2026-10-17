@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -396,8 +397,8 @@ const NewContracts = () => {
                   <div className="flex items-start gap-3">
                     <Building2 className="h-6 w-6 text-gray-400 mt-1 flex-shrink-0" />
                     <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-gray-900">{kontrak.judul_kontrak}</h3>
-                      <p className="text-gray-600">{kontrak.vendor?.nama_vendor}</p>
+                      <h3 className="font-semibold text-lg text-gray-900">{formatTitle(kontrak.judul_kontrak)}</h3>
+                      <p className="text-gray-600">{formatTitle(kontrak.vendor?.nama_vendor)}</p>
                       {kontrak.nilai_awal && (
                         <p className="text-sm font-medium text-green-600">
                           {formatCurrency(kontrak.nilai_awal)}

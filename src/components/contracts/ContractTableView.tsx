@@ -1,4 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Eye } from 'lucide-react';
@@ -57,7 +58,7 @@ export function ContractTableView({
             >
               <TableCell className="font-medium">
                 <div className="max-w-[200px]">
-                  <p className="truncate font-semibold">{contract.judul_kontrak}</p>
+                  <p className="truncate font-semibold">{formatTitle(contract.judul_kontrak)}</p>
                   <p className="text-sm text-muted-foreground">{contract.no_dokumen_kontrak}</p>
                 </div>
               </TableCell>

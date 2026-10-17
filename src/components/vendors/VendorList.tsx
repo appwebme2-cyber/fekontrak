@@ -1,5 +1,6 @@
 
 import { Button } from "@/components/ui/button";
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Star, Building, Phone, Mail, FileText } from "lucide-react";
 import { Vendor } from "@/types/database";
@@ -51,7 +52,7 @@ export const VendorList = ({ vendors, isAdmin, onEdit, onDelete }: VendorListPro
               {/* Top row - Name and Status */}
               <div className="flex items-center space-x-2 mb-1">
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                  {vendor.nama_vendor}
+                  {formatTitle(vendor.nama_vendor)}
                 </h3>
                 <Badge className={getStatusColor(vendor.status_vendor)}>
                   {vendor.status_vendor}

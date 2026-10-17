@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 import { Eye, Edit, Trash2, FileText, Calendar, Coins, Building, ExternalLink } from 'lucide-react';
@@ -107,7 +108,7 @@ export const InvoiceTable = ({ invoices, onView, onEdit, onDelete }: InvoiceTabl
                         )}
                       </div>
                       {invoice.kontrak?.vendor?.nama_vendor && (
-                        <p className="text-sm text-gray-500 truncate">{invoice.kontrak.vendor.nama_vendor}</p>
+                        <p className="text-sm text-gray-500 truncate">{formatTitle(invoice.kontrak.vendor.nama_vendor)}</p>
                       )}
                     </div>
                   </TableCell>

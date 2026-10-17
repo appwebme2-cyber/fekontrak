@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -328,7 +329,7 @@ const AmendmentMonitoringTab: React.FC = () => {
                           <Badge variant="outline">{alert.tipe_kontrak}</Badge>
                         </div>
                         
-                        <h3 className="font-semibold text-lg mb-2">{alert.judul_kontrak}</h3>
+                        <h3 className="font-semibold text-lg mb-2">{formatTitle(alert.judul_kontrak)}</h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                           <div className="flex items-center gap-2">
@@ -350,7 +351,7 @@ const AmendmentMonitoringTab: React.FC = () => {
                             <div className="flex items-center gap-2">
                               <Building className="h-4 w-4 text-gray-500" />
                               <div>
-                                <div className="font-medium">{alert.vendor.nama_vendor}</div>
+                                <div className="font-medium">{formatTitle(alert.vendor.nama_vendor)}</div>
                                 <div className="text-xs text-muted-foreground">Vendor</div>
                               </div>
                             </div>

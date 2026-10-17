@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -151,11 +152,11 @@ export const OptimizedSLAContractCard: React.FC<OptimizedSLAContractCardProps> =
                 <Building2 className="h-6 w-6 text-gray-400 mt-1 flex-shrink-0" />
                 <div className="flex-1">
                   <h3 className="font-semibold text-lg text-gray-900 mb-2 leading-tight">
-                    {contract.judul_kontrak}
+                    {formatTitle(contract.judul_kontrak)}
                   </h3>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <User className="h-4 w-4" />
-                    <span className="font-medium">{contract.vendor?.nama_vendor || 'Vendor tidak tersedia'}</span>
+                    <span className="font-medium">{formatTitle(contract.vendor?.nama_vendor) || 'Vendor tidak tersedia'}</span>
                   </div>
                   {contract.business_days_calculation && (
                     <div className="flex items-center gap-1 text-xs text-blue-600 mt-1">

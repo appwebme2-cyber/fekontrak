@@ -1,5 +1,6 @@
 
 import { Label } from '@/components/ui/label';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -98,7 +99,7 @@ export const InvoiceFormBasicTab = ({
             <CardContent className="p-4">
               <div className="flex justify-between items-start mb-3">
                 <h4 className="font-medium text-foreground">
-                  {selectedContract.judul_kontrak}
+                  {formatTitle(selectedContract.judul_kontrak)}
                 </h4>
                 <Badge variant="outline">
                   {selectedContract.tipe_kontrak}
@@ -113,7 +114,7 @@ export const InvoiceFormBasicTab = ({
                   </div>
                   <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4" />
-                    <span>{selectedContract.vendor?.nama_vendor}</span>
+                    <span>{formatTitle(selectedContract.vendor?.nama_vendor)}</span>
                   </div>
                 </div>
                 

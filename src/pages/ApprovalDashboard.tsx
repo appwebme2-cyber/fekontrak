@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -194,7 +195,7 @@ const ApprovalDashboard = () => {
                         <StatusBadge status={dok.status_approval} />
                       </div>
                       {dok.judul_kontrak && (
-                        <p className="text-sm text-blue-600 mt-1"><FileText className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />{dok.judul_kontrak}</p>
+                        <p className="text-sm text-blue-600 mt-1"><FileText className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />{formatTitle(dok.judul_kontrak)}</p>
                       )}
                       {dok.deskripsi_dokumen && (
                         <p className="text-sm text-gray-500 mt-1">{dok.deskripsi_dokumen}</p>

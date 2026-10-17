@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -122,7 +123,7 @@ export const AddUserDialog = ({ isOpen, onOpenChange, formData, setFormData, onS
                 <SelectTrigger><SelectValue placeholder="Pilih vendor..." /></SelectTrigger>
                 <SelectContent>
                   {vendors.map(v => (
-                    <SelectItem key={v.idVendor} value={v.idVendor}>{v.namaVendor}</SelectItem>
+                    <SelectItem key={v.idVendor} value={v.idVendor}>{formatTitle(v.namaVendor)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

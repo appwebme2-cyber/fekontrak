@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Star } from "lucide-react";
 import { Vendor } from "@/types/database";
+import { formatTitle } from '@/lib/utils/formatTitle';
 
 interface VendorTableProps {
   vendors: Vendor[];
@@ -57,7 +58,7 @@ export const VendorTable = ({ vendors, isAdmin, onEdit, onDelete }: VendorTableP
         {vendors.map((vendor) => (
           <TableRow key={vendor.id_vendor}>
             <TableCell className="font-medium">
-              {vendor.nama_vendor}
+              {formatTitle(vendor.nama_vendor)}
             </TableCell>
             <TableCell className="font-mono text-sm">
               {vendor.npwp || '-'}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -65,7 +66,7 @@ export function VendorCombobox({ vendors, value, onValueChange, placeholder = 'P
                       value === vendor.id_vendor ? 'opacity-100' : 'opacity-0'
                     )}
                   />
-                  {vendor.nama_vendor}
+                  {formatTitle(vendor.nama_vendor)}
                 </CommandItem>
               ))}
             </CommandGroup>

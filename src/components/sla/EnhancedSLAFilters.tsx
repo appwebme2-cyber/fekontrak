@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -135,7 +136,7 @@ export const EnhancedSLAFilters: React.FC<EnhancedSLAFiltersProps> = ({
                 <SelectItem value="all">Semua Vendor</SelectItem>
                 {vendors.map((vendor) => (
                   <SelectItem key={vendor.id_vendor} value={vendor.id_vendor}>
-                    {vendor.nama_vendor}
+                    {formatTitle(vendor.nama_vendor)}
                   </SelectItem>
                 ))}
               </SelectContent>

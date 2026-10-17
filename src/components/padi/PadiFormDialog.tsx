@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -228,7 +229,7 @@ export const PadiFormDialog = ({
                     <SelectContent>
                       {vendors.map((vendor) => (
                         <SelectItem key={vendor.id_vendor} value={vendor.id_vendor}>
-                          {vendor.nama_vendor}
+                          {formatTitle(vendor.nama_vendor)}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -75,7 +76,7 @@ export function KontrakCombobox({ contracts, value, onValueChange, placeholder =
                 >
                   <Check className={cn('mr-2 h-4 w-4', value === c.id_kontrak ? 'opacity-100' : 'opacity-0')} />
                   <span className="truncate">
-                    {c.judul_kontrak}
+                    {formatTitle(c.judul_kontrak)}
                     {c.tipe_kontrak && <span className="text-xs text-muted-foreground ml-2">({c.tipe_kontrak})</span>}
                   </span>
                 </CommandItem>

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { PageHeader } from '@/components/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -302,7 +303,7 @@ const { data: allAmendments = [], isLoading: isLoadingAmendments } = useQuery({
                       onClick={() => navigate(`/contracts/${row.id_kontrak}`)}
                     >
                       <TableCell className="text-muted-foreground">{startItem + index + 1}</TableCell>
-                      <TableCell className="font-medium max-w-[250px] truncate">{row.judul_kontrak}</TableCell>
+                      <TableCell className="font-medium max-w-[250px] truncate">{formatTitle(row.judul_kontrak)}</TableCell>
                       <TableCell>
                         <Badge variant="outline">#{row.nomor_urut}</Badge>
                       </TableCell>

@@ -1,4 +1,5 @@
 import { Label } from '@/components/ui/label';
+import { formatTitle } from '@/lib/utils/formatTitle';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useVendors } from '@/hooks/useVendors';
 import { useEffect } from 'react';
@@ -48,7 +49,7 @@ export const ContractVendorForm = ({ formData, setFormData }: ContractVendorForm
           <SelectContent>
             {vendors?.map((vendor: any) => (
               <SelectItem key={vendor.id} value={vendor.id}>
-                {vendor.nama_vendor}
+                {formatTitle(vendor.nama_vendor)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -62,7 +63,7 @@ export const ContractVendorForm = ({ formData, setFormData }: ContractVendorForm
           <div className="space-y-2 p-4 bg-gray-50 rounded-lg">
             <h4 className="font-medium">Informasi Vendor Terpilih</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-              <div><span className="font-medium">Nama:</span> {selectedVendor.nama_vendor}</div>
+              <div><span className="font-medium">Nama:</span> {formatTitle(selectedVendor.nama_vendor)}</div>
               <div><span className="font-medium">NPWP:</span> {selectedVendor.npwp || '-'}</div>
               <div className="md:col-span-2"><span className="font-medium">Alamat:</span> {selectedVendor.alamat || '-'}</div>
               <div><span className="font-medium">PIC:</span> {selectedVendor.pic_nama || '-'}</div>
