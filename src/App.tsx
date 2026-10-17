@@ -70,7 +70,17 @@ const PageLoader = () => (
   </div>
 );
 
-const queryClient = new QueryClient();
+// Data dianggap segar 1 menit: pindah antar halaman langsung memakai data yang sudah dimuat
+// tanpa meminta ulang ke server. Data yang diubah sendiri tetap langsung ter-update (setiap simpan
+// memanggil invalidateQueries), dan cache dibuang saat logout (useAuthActions).
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
