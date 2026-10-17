@@ -20,6 +20,8 @@ interface ContractsSearchFilterProps {
   };
   workDirectionFilter: string;
   setWorkDirectionFilter: (v: string) => void;
+  /** Direksi Pekerjaan yang ada di data kontrak (ikut RU yang tampil); kosong = daftar bawaan */
+  workDirectionOptions?: string[];
   amendmentFilter?: string;
   setAmendmentFilter?: (v: string) => void;
   viewMode?: 'card' | 'list';
@@ -42,6 +44,7 @@ export function ContractsSearchFilter({
   summary,
   workDirectionFilter,
   setWorkDirectionFilter,
+  workDirectionOptions,
   amendmentFilter = 'all',
   setAmendmentFilter,
   viewMode = 'card',
@@ -77,7 +80,7 @@ export function ContractsSearchFilter({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Semua Direksi</SelectItem>
-            {workDirectionOptionsStatic.map(option => (
+            {(workDirectionOptions?.length ? workDirectionOptions : workDirectionOptionsStatic).map(option => (
               <SelectItem key={option} value={option}>{option}</SelectItem>
             ))}
             <SelectItem value="__kosong__">(Belum diisi)</SelectItem>

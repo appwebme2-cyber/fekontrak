@@ -38,7 +38,7 @@ export const useSuperOptimizedDashboard = () => {
   // dan contractDetails jadi baca field yang salah (mis. c.direksiPekerjaan jadi
   // undefined kalau cache-nya kebetulan hasil tulisan useContracts) -> semua
   // kontrak keliru masuk kategori "Data Tidak Lengkap" di chart dashboard.
-  const { data: contracts = [], isLoading: contractsLoading } = useQuery({
+  const { data: contracts = [], isLoading: contractsLoading, error: contractsError } = useQuery({
     queryKey: ['contracts-dashboard-raw'],
     queryFn: async () => {
       const token = localStorage.getItem("token");
@@ -57,7 +57,7 @@ export const useSuperOptimizedDashboard = () => {
   // ================= TAGIHAN =================
   // Sama alasannya dengan query contracts di atas: key dibedakan dari ['tagihans']
   // (useTagihans.tsx) supaya cache tidak saling menimpa dengan bentuk data yang beda.
-  const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
+  const { data: invoices = [], isLoading: invoicesLoading, error: invoicesError } = useQuery({
     queryKey: ['tagihans-dashboard-raw'],
     queryFn: async () => {
       const token = localStorage.getItem("token");
@@ -134,6 +134,7 @@ export const useSuperOptimizedDashboard = () => {
     contractDetails,
     invoiceDetails,
     isLoading: contractsLoading || invoicesLoading || vendorsLoading,
+    error: (contractsError || invoicesError) as Error | null,
     dataConsistency,
   };
 };

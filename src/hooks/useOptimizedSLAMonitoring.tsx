@@ -132,6 +132,9 @@ export const useOptimizedSLAMonitoring = () => {
       overdue: contracts.filter(c => c.sla_status === 'overdue').length,
       completed: contracts.filter(c => c.sla_status === 'completed').length,
       invalid: contracts.filter(c => c.sla_status === 'invalid').length,
+      highRisk: contracts.filter(c => c.risk_level === 'high').length,
+      mediumRisk: contracts.filter(c => c.risk_level === 'medium').length,
+      lowRisk: contracts.filter(c => c.risk_level === 'low').length,
       complianceRate: 0
     };
     stats.complianceRate = stats.total > 0
@@ -188,3 +191,6 @@ export const useOptimizedSLAMonitoring = () => {
     contractDetails
   };
 };
+
+/** Hasil analisis SLA (dipakai komponen export SLA). */
+export type SLAAnalysis = NonNullable<ReturnType<typeof useOptimizedSLAMonitoring>['slaAnalysis']>;
