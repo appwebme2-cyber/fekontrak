@@ -3,6 +3,11 @@
 // Untuk user RU biasa nilai ini diabaikan server (selalu data RU-nya sendiri).
 const STORAGE_KEY = 'maestro_ru_aktif';
 
+/** Event saat server meminta RU dipilih dulu (Super Admin/Head Office menambah data saat "Semua RU"). */
+export const RU_REQUIRED_EVENT = 'ru:required';
+/** Event saat RU aktif diganti tanpa memuat ulang halaman. */
+export const RU_CHANGED_EVENT = 'ru:changed';
+
 export const getActiveRu = (): string | null => {
   try {
     return localStorage.getItem(STORAGE_KEY) || null;

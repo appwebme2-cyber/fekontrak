@@ -3,7 +3,7 @@ import { Factory } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useRuList } from '@/hooks/useRuList';
-import { getActiveRu, setActiveRu } from '@/lib/activeRu';
+import { getActiveRu, RU_CHANGED_EVENT, setActiveRu } from '@/lib/activeRu';
 
 const ALL = 'ALL';
 
@@ -17,6 +17,13 @@ export const RuSwitcher = () => {
   const { isCrossRu, userRu, isVendor } = usePermissions();
   const { rus, ruLabel } = useRuList(!isVendor);
   const [selected, setSelected] = useState<string>(() => getActiveRu() ?? ALL);
+
+  // RU dipilih dari dialog "Pilih RU dulu" (tanpa memuat ulang halaman)
+  useEffect(() => {
+    const sync = () => setSelected(getActiveRu() ?? ALL);
+    window.addEventListener(RU_CHANGED_EVENT, sync);
+    return () => window.removeEventListener(RU_CHANGED_EVENT, sync);
+  }, []);
 
   // Pilihan RU hanya berlaku untuk user lintas RU; sisa pilihan user sebelumnya dibuang
   useEffect(() => {

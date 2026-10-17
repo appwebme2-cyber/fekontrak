@@ -1,7 +1,7 @@
 // Memantau semua request fetch ke API: kalau server balas 401 (token expired/invalid),
 // broadcast event supaya AuthProvider bisa logout & redirect ke halaman login otomatis.
 // Sekaligus menambahkan header "X-Ru" (RU pilihan Super Admin / Head Office) ke setiap request API.
-import { getActiveRu } from './activeRu';
+import { getActiveRu, RU_REQUIRED_EVENT } from './activeRu';
 
 const API_HOST = 'bekontrak-production.up.railway.app';
 
@@ -30,6 +30,11 @@ window.fetch = async (...args: Parameters<typeof fetch>) => {
 
   if (response.status === 401 && isApi) {
     window.dispatchEvent(new Event('auth:expired'));
+  }
+
+  // Multi-RU: menambah data saat "Semua RU" ditolak server; tawarkan pemilihan RU
+  if (response.status === 400 && isApi && response.headers.get('X-Ru-Required')) {
+    window.dispatchEvent(new Event(RU_REQUIRED_EVENT));
   }
 
   return response;

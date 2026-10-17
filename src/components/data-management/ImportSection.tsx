@@ -10,11 +10,15 @@ import { SqlImportSection } from "./SqlImportSection";
 import { usePermissions } from "@/hooks/usePermissions";
 import { Upload, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRuList } from "@/hooks/useRuList";
+import { getActiveRu } from "@/lib/activeRu";
 
 type ImportType = 'kontrak' | 'tagihan' | 'vendor';
 
 export function ImportSection() {
-  const { isSuperAdmin } = usePermissions();
+  const { isSuperAdmin, isCrossRu } = usePermissions();
+  const { ruLabel } = useRuList(isCrossRu);
+  const activeRu = getActiveRu();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importType, setImportType] = useState<ImportType | null>(null);
   
@@ -50,6 +54,25 @@ export function ImportSection() {
   return (
     <div className="space-y-6">
       {isSuperAdmin && <SqlImportSection />}
+
+      {/* Multi-RU: kontrak hasil import masuk ke RU yang dipilih di header */}
+      {isCrossRu && (
+        activeRu ? (
+          <Alert className="border-blue-200 bg-blue-50 text-blue-800">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Kontrak yang diimport akan masuk ke <strong>{ruLabel(activeRu)}</strong> (RU yang dipilih di bagian atas halaman).
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Alert className="border-amber-300 bg-amber-50 text-amber-900">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Saat ini <strong>Semua RU</strong> dipilih. Pilih RU tujuan di bagian atas halaman sebelum mengimport kontrak, supaya data masuk ke RU yang benar.
+            </AlertDescription>
+          </Alert>
+        )
+      )}
 
       <Alert>
         <AlertCircle className="h-4 w-4" />

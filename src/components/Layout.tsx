@@ -38,6 +38,7 @@ import { useIdleTimeout } from '@/hooks/useIdleTimeout';
 import { isVendorRole } from '@/hooks/useRolePermissionsConfig';
 import { ChatbotWidget } from '@/components/chatbot/ChatbotWidget';
 import { RuSwitcher } from '@/components/RuSwitcher';
+import { RuRequiredDialog } from '@/components/RuRequiredDialog';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -407,6 +408,7 @@ const Layout = ({ children }: LayoutProps) => {
 
       {/* Chatbot: role yang boleh diatur server (Chat__AllowedRoles, default admin); External/Vendor tidak pernah */}
       {userProfile && !isVendorRole(userProfile.role) && <ChatbotWidget />}
+      <RuRequiredDialog />
 
       {/* Idle Session Warning Modal */}
       {showIdleWarning && (
