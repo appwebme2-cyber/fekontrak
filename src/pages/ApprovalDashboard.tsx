@@ -85,7 +85,7 @@ const ApprovalDashboard = () => {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-white/90">Total</p>
-              <p className="text-3xl font-bold">{stats.total}</p>
+              <p className="text-2xl font-bold">{stats.total}</p>
             </div>
             <div className="p-2 rounded-lg bg-white/20">
               <FileText className="h-6 w-6 text-white" />
@@ -96,7 +96,7 @@ const ApprovalDashboard = () => {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-white/90">Pending</p>
-              <p className="text-3xl font-bold">{stats.pending}</p>
+              <p className="text-2xl font-bold">{stats.pending}</p>
             </div>
             <div className="p-2 rounded-lg bg-white/20">
               <Clock className="h-6 w-6 text-white" />
@@ -107,7 +107,7 @@ const ApprovalDashboard = () => {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-white/90">Approved</p>
-              <p className="text-3xl font-bold">{stats.approved}</p>
+              <p className="text-2xl font-bold">{stats.approved}</p>
             </div>
             <div className="p-2 rounded-lg bg-white/20">
               <CheckCircle className="h-6 w-6 text-white" />
@@ -118,7 +118,7 @@ const ApprovalDashboard = () => {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-white/90">Rejected</p>
-              <p className="text-3xl font-bold">{stats.rejected}</p>
+              <p className="text-2xl font-bold">{stats.rejected}</p>
             </div>
             <div className="p-2 rounded-lg bg-white/20">
               <XCircle className="h-6 w-6 text-white" />

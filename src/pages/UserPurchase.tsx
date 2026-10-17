@@ -116,7 +116,7 @@ const UserPurchase = () => {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-sm font-medium text-blue-100">Total Pembelian</CardTitle>
-                <div className="text-3xl font-bold mt-2">{filteredPadi.length}</div>
+                <div className="text-2xl font-bold mt-2">{filteredPadi.length}</div>
                 <p className="text-xs text-blue-200 mt-1">{completedPurchases} selesai, {inProgressPurchases} proses</p>
               </div>
               <ShoppingBag className="h-8 w-8 text-blue-200" />
@@ -139,7 +139,7 @@ const UserPurchase = () => {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-sm font-medium text-purple-100">High Value</CardTitle>
-                <div className="text-3xl font-bold mt-2">{highValuePurchases}</div>
+                <div className="text-2xl font-bold mt-2">{highValuePurchases}</div>
                 <p className="text-xs text-purple-200 mt-1">≥ Rp 50 juta</p>
               </div>
               <TrendingUp className="h-8 w-8 text-purple-200" />
@@ -151,7 +151,7 @@ const UserPurchase = () => {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-sm font-medium text-orange-100">Status Progress</CardTitle>
-                <div className="text-3xl font-bold mt-2">
+                <div className="text-2xl font-bold mt-2">
                   {Math.round((completedPurchases / (filteredPadi.length || 1)) * 100)}%
                 </div>
                 <p className="text-xs text-orange-200 mt-1">Completion rate</p>

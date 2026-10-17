@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { AlertTriangle, Info, Loader2, Trash2, Wallet } from 'lucide-react';
+import { AlertTriangle, CalendarDays, CalendarRange, Info, Loader2, PlusCircle, Trash2, Wallet } from 'lucide-react';
+import { GradientStatCard } from '@/components/GradientStatCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,16 +30,6 @@ const FITUR_LABEL: Record<string, string> = {
 
 const shortDate = (iso: string) =>
   new Date(`${iso}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-
-const StatTile = ({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: 'warning' }) => (
-  <Card className={tone === 'warning' ? 'border-amber-300' : undefined}>
-    <CardContent className="p-4">
-      <div className="text-xs font-medium text-gray-500">{label}</div>
-      <div className="mt-1 text-2xl font-semibold text-gray-900">{value}</div>
-      {sub && <div className="mt-0.5 text-xs text-gray-500">{sub}</div>}
-    </CardContent>
-  </Card>
-);
 
 interface DailyTooltipProps {
   active?: boolean;
@@ -143,15 +134,27 @@ const AiUsage = () => {
           )}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatTile
+            {/* Sisa saldo hijau; merah saat saldo menipis. Bar = porsi saldo yang masih tersisa dari total top-up */}
+            <GradientStatCard
               label="Perkiraan sisa saldo"
               value={data.totalTopupUsd > 0 ? usd(data.sisaUsd) : '-'}
+              icon={Wallet}
+              gradient={data.saldoMenipis ? 'from-red-500 to-red-600' : 'from-emerald-500 to-emerald-600'}
+              persen={data.totalTopupUsd > 0 ? (data.sisaUsd / data.totalTopupUsd) * 100 : undefined}
               sub={data.totalTopupUsd > 0 ? `≈ ${idr(data.sisaUsd * data.kursIdr)}` : 'Belum ada top-up tercatat'}
-              tone={data.saldoMenipis ? 'warning' : undefined}
             />
-            <StatTile label="Pemakaian hari ini" value={usd(data.biayaHariIniUsd)} sub={`≈ ${idr(data.biayaHariIniUsd * data.kursIdr)}`} />
-            <StatTile label="Pemakaian bulan ini" value={usd(data.biayaBulanIniUsd)} sub={`≈ ${idr(data.biayaBulanIniUsd * data.kursIdr)}`} />
-            <StatTile label="Total top-up tercatat" value={usd(data.totalTopupUsd)} sub={`Total terpakai ${usd(data.totalBiayaUsd)}`} />
+            <GradientStatCard
+              label="Pemakaian hari ini" value={usd(data.biayaHariIniUsd)} icon={CalendarDays}
+              gradient="from-blue-500 to-blue-600" sub={`≈ ${idr(data.biayaHariIniUsd * data.kursIdr)}`}
+            />
+            <GradientStatCard
+              label="Pemakaian bulan ini" value={usd(data.biayaBulanIniUsd)} icon={CalendarRange}
+              gradient="from-purple-500 to-purple-600" sub={`≈ ${idr(data.biayaBulanIniUsd * data.kursIdr)}`}
+            />
+            <GradientStatCard
+              label="Total top-up tercatat" value={usd(data.totalTopupUsd)} icon={PlusCircle}
+              gradient="from-amber-500 to-amber-600" sub={`Total terpakai ${usd(data.totalBiayaUsd)}`}
+            />
           </div>
 
           <Card>

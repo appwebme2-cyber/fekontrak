@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { ArrowRight, Coins, Factory, FileText, Info, Loader2, Receipt, Users, type LucideIcon } from 'lucide-react';
+import { ArrowRight, Coins, Factory, FileText, Info, Loader2, Receipt, Users } from 'lucide-react';
+import { GradientStatCard } from '@/components/GradientStatCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -44,31 +45,6 @@ const rupiahRingkas = (value: number) => {
 };
 
 const angka = (value: number) => value.toLocaleString('id-ID');
-
-/** Kartu ringkasan bergradien, sama dengan kartu statistik di Approval Dashboard. */
-const StatTile = ({ label, value, sub, icon: Icon, gradient, persen }: {
-  label: string; value: string; sub?: string; icon: LucideIcon; gradient: string; persen?: number;
-}) => (
-  <Card className={`bg-gradient-to-r ${gradient} border-0 text-white shadow-sm`}>
-    <CardContent className="flex h-full flex-col p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-white/90">{label}</p>
-          <p className="mt-1 truncate text-3xl font-bold">{value}</p>
-        </div>
-        <div className="shrink-0 rounded-lg bg-white/20 p-2">
-          <Icon className="h-6 w-6 text-white" />
-        </div>
-      </div>
-      {persen != null && (
-        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/25">
-          <div className="h-full rounded-full bg-white" style={{ width: `${Math.min(100, Math.max(0, persen))}%` }} />
-        </div>
-      )}
-      {sub && <p className="mt-2 text-xs text-white/85">{sub}</p>}
-    </CardContent>
-  </Card>
-);
 
 const ChartTooltip = ({ active, payload, label, format }: any) => {
   if (!active || !payload?.length) return null;
@@ -147,21 +123,21 @@ const RuComparison = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatTile
+            <GradientStatCard
               label="Total Kontrak" value={angka(total.kontrak)} icon={FileText} gradient="from-blue-500 to-blue-600"
               persen={total.kontrak ? (total.aktif / total.kontrak) * 100 : 0}
               sub={`${angka(total.aktif)} aktif · ${ruBerdata} dari ${data.length} RU sudah berisi data`}
             />
-            <StatTile
+            <GradientStatCard
               label="Total Nilai Kontrak" value={rupiahRingkas(total.nilai)} icon={Coins} gradient="from-purple-500 to-purple-600"
               sub="Memakai nilai setelah amandemen bila ada"
             />
-            <StatTile
+            <GradientStatCard
               label="Total Nilai Tagihan" value={rupiahRingkas(total.tagihan)} icon={Receipt} gradient="from-emerald-500 to-emerald-600"
               persen={total.nilai ? (total.tagihan / total.nilai) * 100 : 0}
               sub={`${angka(total.jumlahTagihan)} tagihan · ${(total.nilai ? (total.tagihan / total.nilai) * 100 : 0).toLocaleString('id-ID', { maximumFractionDigits: 1 })}% dari nilai kontrak`}
             />
-            <StatTile
+            <GradientStatCard
               label="Pengguna Aktif" value={angka(total.pengguna)} icon={Users} gradient="from-amber-500 to-amber-600"
               sub="Tidak termasuk Super Admin"
             />
