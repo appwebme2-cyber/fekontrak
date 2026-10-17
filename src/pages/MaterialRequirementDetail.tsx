@@ -105,7 +105,7 @@ const MaterialRequirementDetail = () => {
   const { updateDraft } = useMaterialRequirementDrafts();
   const { createLine, updateLine, deleteLine, deleteAllLines } = useMaterialRequirementLines(id || '');
   const { rabItems, isLoading: rabItemsLoading } = useRabItems(draft?.id_kontrak);
-  const { canEdit, canDelete, canCreate } = usePermissions();
+  const { canEdit, canDelete, canCreate, isVendor } = usePermissions();
 
   const [editDraftOpen, setEditDraftOpen] = useState(false);
   const [rabManagerOpen, setRabManagerOpen] = useState(false);
@@ -290,7 +290,8 @@ const MaterialRequirementDetail = () => {
         </Card>
       </div>
 
-      {canCreate && (
+      {/* AI untuk semua akun internal (dilindungi PIN); menyimpan hasilnya tetap butuh hak tambah data */}
+      {!isVendor && (
         <div className="flex flex-col items-end gap-2">
           <Button
             variant="outline"
@@ -458,6 +459,7 @@ const MaterialRequirementDetail = () => {
         existingLineCount={draft.lines.length}
         onApply={handleApplyAiResult}
         isApplying={applyingAi}
+        canApply={canCreate}
       />
     </div>
   );

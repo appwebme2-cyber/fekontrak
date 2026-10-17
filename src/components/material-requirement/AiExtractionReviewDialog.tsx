@@ -43,9 +43,11 @@ interface AiExtractionReviewDialogProps {
     lines: { jenis: 'Pekerjaan' | 'Material'; id_rab_item?: string; kode_item_snapshot?: string; uraian_pekerjaan: string; satuan: string; volume_kalkulasi: number; volume_klaim?: number; catatan_kalkulasi?: string }[];
   }) => Promise<void>;
   isApplying?: boolean;
+  /** false = akun hanya-baca: hasil AI hanya bisa dilihat, tidak bisa diterapkan ke draft */
+  canApply?: boolean;
 }
 
-export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems, existingLineCount, onApply, isApplying }: AiExtractionReviewDialogProps) {
+export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems, existingLineCount, onApply, isApplying, canApply = true }: AiExtractionReviewDialogProps) {
   const [replaceExisting, setReplaceExisting] = useState(false);
   const [problem, setProblem] = useState('');
   const [rekomendasiSolusi, setRekomendasiSolusi] = useState('');
@@ -245,9 +247,15 @@ export function AiExtractionReviewDialog({ open, onOpenChange, result, rabItems,
           </label>
         )}
 
+        {!canApply && (
+          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            Akun Anda hanya dapat melihat hasil AI. Untuk menyimpannya ke draft, minta pengguna yang memiliki hak tambah data.
+          </p>
+        )}
+
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Batal</Button>
-          <Button type="button" onClick={handleApply} disabled={isApplying}>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{canApply ? 'Batal' : 'Tutup'}</Button>
+          <Button type="button" onClick={handleApply} disabled={isApplying || !canApply}>
             {isApplying ? 'Menerapkan...' : 'Terapkan ke Draft'}
           </Button>
         </DialogFooter>
