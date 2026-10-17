@@ -167,7 +167,7 @@ const NewVendors = () => {
         </div>
         
         {canCRUD && (
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow" onClick={handleAdd}>
+          <Button onClick={handleAdd}>
             <Plus className="mr-2 h-4 w-4" />
             Tambah Vendor
           </Button>

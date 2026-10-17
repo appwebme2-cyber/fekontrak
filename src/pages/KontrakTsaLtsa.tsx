@@ -1,6 +1,7 @@
 import { useOptimizedTsaLogic } from '@/hooks/useOptimizedTsaLogic';
 import { PageHeader } from '@/components/PageHeader';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { ContractsSearchFilter } from "@/components/contracts/ContractsSearchFilter";
 import { ContractList } from "@/components/contracts/ContractList";
 import { ContractTableView } from "@/components/contracts/ContractTableView";
@@ -74,12 +75,10 @@ const KontrakTsaLtsa = () => {
           )}
         </>}
         actions={canCreate && (
-          <button
-            onClick={handleAddContract}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md"
-          >
+          <Button onClick={handleAddContract}>
+            <Plus className="mr-2 h-4 w-4" />
             Tambah Kontrak TSA/LTSA
-          </button>
+          </Button>
         )}
       />
 

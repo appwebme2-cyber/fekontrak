@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 import {
-  CalendarCheck, CalendarClock, ClipboardCheck, Download, FileInput, Flag, GitBranch, History, Loader2,
+  CalendarCheck, CalendarClock, ClipboardCheck, Download, FileInput, Flag, GitBranch, Loader2,
   PlayCircle, Receipt, type LucideIcon,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import type { EnhancedSLAContract } from '@/hooks/useOptimizedSLAMonitoring';
 import { formatTitle } from '@/lib/utils/formatTitle';
 import {
-  buildLinimasa, downloadLaporanSla, fetchKontrakSlaDetail, RISK_LABEL, SLA_STATUS_LABEL,
+  buildLinimasa, downloadLaporanSla, fetchKontrakSlaDetail,
   type JenisPeristiwa,
 } from './contractSlaHistory';
 
@@ -33,10 +33,6 @@ const FILTER: { key: string; label: string; jenis?: JenisPeristiwa[] }[] = [
   { key: 'amandemen', label: 'Amandemen', jenis: ['amandemen'] },
   { key: 'tagihan', label: 'Tagihan', jenis: ['tagihan'] },
 ];
-
-const STATUS_WARNA: Record<EnhancedSLAContract['sla_status'], string> = {
-  on_time: 'bg-green-400/30', warning: 'bg-amber-400/40', overdue: 'bg-red-500/50', completed: 'bg-white/25', invalid: 'bg-white/20',
-};
 
 interface ContractHistoryDialogProps {
   /** Kontrak yang dibuka; null = dialog tertutup */
@@ -68,25 +64,12 @@ export const ContractHistoryDialog = ({ idKontrak, judul, vendor, sla, onOpenCha
 
   return (
     <Dialog open={!!idKontrak} onOpenChange={(open) => { if (!open) setFilter('semua'); onOpenChange(open); }}>
-      {/* Tombol tutup bawaan dibuat putih supaya terlihat di atas kepala bergradien */}
-      <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col gap-0 overflow-hidden p-0 [&>button]:!bg-transparent [&>button]:!text-white [&>button]:opacity-90">
-        {/* Kepala bergradien, sama dengan kepala kartu kontrak */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 pb-5 pt-6 text-white">
-          <div className="flex items-center gap-2 text-sm text-white/80">
-            <History className="h-4 w-4" /> Riwayat Kontrak
-          </div>
-          <DialogTitle className="mt-1 line-clamp-2 pr-6 text-lg font-semibold leading-snug text-white">{namaJudul}</DialogTitle>
-          <DialogDescription className="mt-0.5 text-sm text-white/80">{namaVendor || ' '}</DialogDescription>
-          {sla && (
-            <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium">
-              <span className={`rounded-full px-2.5 py-1 ${STATUS_WARNA[sla.sla_status]}`}>SLA: {SLA_STATUS_LABEL[sla.sla_status]}</span>
-              {sla.days_overdue > 0 && <span className="rounded-full bg-red-500/50 px-2.5 py-1">{sla.days_overdue} hari terlambat</span>}
-              <span className="rounded-full bg-white/20 px-2.5 py-1">Risiko {RISK_LABEL[sla.risk_level]}</span>
-            </div>
-          )}
-        </div>
+      <DialogContent className="flex max-h-[85vh] max-w-2xl flex-col gap-0 overflow-hidden p-0">
+        {/* Judul hanya untuk pembaca layar; tampilan cukup linimasa */}
+        <DialogTitle className="sr-only">Riwayat Kontrak {namaJudul}</DialogTitle>
+        <DialogDescription className="sr-only">{namaVendor}</DialogDescription>
 
-        <div className="flex-1 space-y-5 overflow-y-auto bg-gray-50 px-6 py-5">
+        <div className="flex-1 space-y-5 overflow-y-auto px-6 pb-5 pt-12">
           {isLoading ? (
             <div className="flex items-center justify-center py-12 text-gray-500">
               <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Memuat riwayat...
@@ -128,7 +111,7 @@ export const ContractHistoryDialog = ({ idKontrak, judul, vendor, sla, onOpenCha
                           <li className="mb-2 ml-6 text-[11px] font-semibold uppercase tracking-wide text-gray-400">{bulan}</li>
                         )}
                         <li className="relative mb-3 ml-6">
-                          <span className={`absolute -left-[37px] top-2 flex h-6 w-6 items-center justify-center rounded-full text-white ring-4 ring-gray-50 ${p.peringatan ? 'bg-red-500' : bulat} ${p.rencana ? 'opacity-60' : ''}`}>
+                          <span className={`absolute -left-[37px] top-2 flex h-6 w-6 items-center justify-center rounded-full text-white ring-4 ring-white ${p.peringatan ? 'bg-red-500' : bulat} ${p.rencana ? 'opacity-60' : ''}`}>
                             <Icon className="h-3 w-3" />
                           </span>
                           <div className={`rounded-lg border border-l-4 bg-white px-3 py-2 shadow-sm ${p.peringatan ? 'border-l-red-500' : garis} ${p.rencana ? 'border-dashed bg-white/60' : ''}`}>

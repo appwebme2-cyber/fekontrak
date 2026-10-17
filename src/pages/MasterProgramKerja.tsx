@@ -50,7 +50,7 @@ const MasterProgramKerja = () => {
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <h2 className="text-lg font-semibold text-gray-700">Daftar Program Kerja ({filtered.length})</h2>
         {canCreate && (
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={handleAdd}>
+          <Button onClick={handleAdd}>
             <Plus className="mr-2 h-4 w-4" /> Tambah Program Kerja
           </Button>
         )}

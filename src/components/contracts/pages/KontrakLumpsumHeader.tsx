@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/PageHeader';
-import { FileText } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
 
 interface KontrakLumpsumHeaderProps {
   isAdmin: boolean;
@@ -15,10 +15,8 @@ export function KontrakLumpsumHeader({ isAdmin, onAddContract }: KontrakLumpsumH
       title="Kontrak Lumpsum"
       description="Daftar kontrak pekerjaan dengan nilai borongan (lumpsum)"
       actions={isAdmin && (
-        <Button
-          onClick={onAddContract}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
-        >
+        <Button onClick={onAddContract}>
+          <Plus className="mr-2 h-4 w-4" />
           Tambah Kontrak Lumpsum
         </Button>
       )}
