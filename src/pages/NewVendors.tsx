@@ -11,6 +11,7 @@ import { VendorFormDialog } from "@/components/vendors/VendorFormDialog";
 import { ConfirmDeleteDialog } from "@/components/shared/ConfirmDeleteDialog";
 import { useVendors } from "@/hooks/useVendors";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import { isStaffOrAdminRole } from "@/hooks/useRolePermissionsConfig";
 import { Vendor } from "@/types/database";
 
@@ -65,6 +66,9 @@ const NewVendors = () => {
   }, [viewMode]);
 
   const isAdminOrPIC = isStaffOrAdminRole(userProfile?.role);
+  // Vendor dipakai bersama semua RU: hanya Super Admin yang boleh menghapus
+  const { isSuperAdmin } = usePermissions();
+  const bolehHapus = canCRUD && isSuperAdmin;
 
   // Search/filter logic
   const filteredVendors = vendors.filter((v) =>
@@ -217,7 +221,7 @@ const NewVendors = () => {
               vendors={filteredVendors}
               isAdmin={isAdminOrPIC}
               onEdit={canCRUD ? handleEdit : () => {}}
-              onDelete={canCRUD ? handleDelete : () => {}}
+              onDelete={bolehHapus ? handleDelete : undefined}
             />
           </CardContent>
         </Card>
@@ -229,7 +233,7 @@ const NewVendors = () => {
               vendor={vendor}
               isAdmin={isAdminOrPIC}
               onEdit={canCRUD ? handleEdit : undefined}
-              onDelete={canCRUD ? handleDelete : undefined}
+              onDelete={bolehHapus ? handleDelete : undefined}
             />
           ))}
         </div>

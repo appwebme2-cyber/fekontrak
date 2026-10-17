@@ -8,7 +8,8 @@ interface VendorListProps {
   vendors: Vendor[];
   isAdmin: boolean;
   onEdit: (vendor: Vendor) => void;
-  onDelete: (vendor: Vendor) => void;
+  /** Tidak diisi = tombol hapus disembunyikan (hapus vendor khusus Super Admin) */
+  onDelete?: (vendor: Vendor) => void;
 }
 
 export const VendorList = ({ vendors, isAdmin, onEdit, onDelete }: VendorListProps) => {
@@ -100,14 +101,16 @@ export const VendorList = ({ vendors, isAdmin, onEdit, onDelete }: VendorListPro
               >
                 <Edit className="h-4 w-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onDelete(vendor)}
-                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {onDelete && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onDelete(vendor)}
+                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           )}
         </div>

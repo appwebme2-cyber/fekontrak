@@ -48,10 +48,12 @@ export const VendorCard = ({ vendor, isAdmin, onEdit, onDelete }: VendorCardProp
                 className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-colors">
                 <Edit className="h-4 w-4" />
               </button>
-              <button onClick={() => onDelete?.(vendor)} title="Hapus Vendor"
-                className="p-2 text-white/80 hover:text-white hover:bg-red-500/30 rounded-lg transition-colors">
-                <Trash2 className="h-4 w-4" />
-              </button>
+              {onDelete && (
+                <button onClick={() => onDelete(vendor)} title="Hapus Vendor"
+                  className="p-2 text-white/80 hover:text-white hover:bg-red-500/30 rounded-lg transition-colors">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
             </div>
           )}
         </div>

@@ -31,7 +31,9 @@ export const UserTableRow = ({
   onEdit,
   onDelete
 }: UserTableRowProps) => {
-  const { roleLabels } = usePermissions();
+  const { roleLabels, isSuperAdmin } = usePermissions();
+  // Akun sendiri tidak bisa diubah; akun Head Office (akses semua RU) hanya dikelola Super Admin
+  const terkunci = user.id === currentUserId || (user.role === 'head_office' && !isSuperAdmin);
 
   const getRoleBadge = (role: string) => {
     const colors: Record<string, string> = {
@@ -85,7 +87,7 @@ export const UserTableRow = ({
           <Switch
             checked={user.is_active}
             onCheckedChange={() => onToggleStatus(user.id, user.is_active)}
-            disabled={user.id === currentUserId}
+            disabled={terkunci}
           />
         </TableCell>
       )}
@@ -96,7 +98,7 @@ export const UserTableRow = ({
               variant="outline"
               size="sm"
               onClick={() => onEdit(user)}
-              disabled={user.id === currentUserId}
+              disabled={terkunci}
             >
               <Edit className="h-4 w-4" />
             </Button>
@@ -104,7 +106,7 @@ export const UserTableRow = ({
               variant="outline"
               size="sm"
               onClick={() => onDelete(user)}
-              disabled={user.id === currentUserId}
+              disabled={terkunci}
               className="text-red-600 hover:text-red-700"
             >
               <Trash2 className="h-4 w-4" />

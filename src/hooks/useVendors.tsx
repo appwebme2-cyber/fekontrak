@@ -141,14 +141,18 @@ const canCRUD = true;
         }
       });
 
-      if (!res.ok) throw new Error("Gagal hapus vendor");
+      if (!res.ok) {
+        // Pesan server menjelaskan alasannya (mis. vendor masih dipakai kontrak di RU lain)
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Gagal menghapus vendor");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vendors'] });
       toast({ title: "Berhasil", description: "Vendor berhasil dihapus" });
     },
-    onError: () => {
-      toast({ title: "Error", description: "Gagal menghapus vendor", variant: "destructive" });
+    onError: (error: any) => {
+      toast({ title: "Vendor tidak dihapus", description: error?.message || "Gagal menghapus vendor", variant: "destructive" });
     }
   });
 
