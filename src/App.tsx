@@ -1,3 +1,5 @@
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
 import "@/styles/responsive.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -10,55 +12,63 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import ModuleGuard from "@/components/ModuleGuard";
 import AdminGuard from "@/components/AdminGuard";
 import Layout from "@/components/Layout";
-import ApprovalDashboard from './pages/ApprovalDashboard';
+const ApprovalDashboard = lazy(() => import("./pages/ApprovalDashboard"));
 
 // Import existing pages
 import Login from "@/pages/Login";
 import Auth from "@/pages/Auth";
-import Users from "@/pages/Users";
+const Users = lazy(() => import("@/pages/Users"));
 import NotFound from "@/pages/NotFound";
 
 // Import dashboard pages
-import Dashboard from "@/pages/Dashboard";
-import NewContracts from "@/pages/NewContracts";
-import InvoiceManagement from "@/pages/InvoiceManagement";
-import ContractPerformanceMonitoring from "@/pages/ContractPerformanceMonitoring";
-import AdminSettings from "@/pages/AdminSettings";
-import RoleSettings from "@/pages/RoleSettings";
-import ContractDetail from "@/pages/ContractDetail";
-import InvoiceDetail from "@/pages/InvoiceDetail";
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const NewContracts = lazy(() => import("@/pages/NewContracts"));
+const InvoiceManagement = lazy(() => import("@/pages/InvoiceManagement"));
+const ContractPerformanceMonitoring = lazy(() => import("@/pages/ContractPerformanceMonitoring"));
+const AdminSettings = lazy(() => import("@/pages/AdminSettings"));
+const RoleSettings = lazy(() => import("@/pages/RoleSettings"));
+const ContractDetail = lazy(() => import("@/pages/ContractDetail"));
+const InvoiceDetail = lazy(() => import("@/pages/InvoiceDetail"));
 
 // Import kontrak pages
-import KontrakLumpsum from "@/pages/KontrakLumpsum";
-import KontrakUnitPrice from "@/pages/KontrakUnitPrice";
-import KontrakTsaLtsa from "@/pages/KontrakTsaLtsa";
-import Amandemen from "@/pages/Amandemen";
+const KontrakLumpsum = lazy(() => import("@/pages/KontrakLumpsum"));
+const KontrakUnitPrice = lazy(() => import("@/pages/KontrakUnitPrice"));
+const KontrakTsaLtsa = lazy(() => import("@/pages/KontrakTsaLtsa"));
+const Amandemen = lazy(() => import("@/pages/Amandemen"));
 
 // Import vendor pages
-import Vendors from "@/pages/Vendors";
-import NewVendors from "@/pages/NewVendors";
+const Vendors = lazy(() => import("@/pages/Vendors"));
+const NewVendors = lazy(() => import("@/pages/NewVendors"));
 
 // Import master data pages
-import MasterProgramKerja from "@/pages/MasterProgramKerja";
-import MasterPlanner from "@/pages/MasterPlanner";
+const MasterProgramKerja = lazy(() => import("@/pages/MasterProgramKerja"));
+const MasterPlanner = lazy(() => import("@/pages/MasterPlanner"));
 
 // Import user purchase page
-import UserPurchase from "@/pages/UserPurchase";
-import UserPurchaseDetail from "@/pages/UserPurchaseDetail";
+const UserPurchase = lazy(() => import("@/pages/UserPurchase"));
+const UserPurchaseDetail = lazy(() => import("@/pages/UserPurchaseDetail"));
 
 // Import data management page
-import DataManagement from "@/pages/DataManagement";
-import LaporanHarian from "@/pages/LaporanHarian";
-import Profile from "@/pages/Profile";
-import ReportAkses from "@/pages/ReportAkses";
-import AiUsage from "@/pages/AiUsage";
-import RuComparison from "@/pages/RuComparison";
+const DataManagement = lazy(() => import("@/pages/DataManagement"));
+const LaporanHarian = lazy(() => import("@/pages/LaporanHarian"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const ReportAkses = lazy(() => import("@/pages/ReportAkses"));
+const AiUsage = lazy(() => import("@/pages/AiUsage"));
+const RuComparison = lazy(() => import("@/pages/RuComparison"));
 
-import Favorites from "@/pages/Favorites";
+const Favorites = lazy(() => import("@/pages/Favorites"));
 
 // Import material requirement pages
-import MaterialRequirementList from "@/pages/MaterialRequirementList";
-import MaterialRequirementDetail from "@/pages/MaterialRequirementDetail";
+const MaterialRequirementList = lazy(() => import("@/pages/MaterialRequirementList"));
+const MaterialRequirementDetail = lazy(() => import("@/pages/MaterialRequirementDetail"));
+
+// Setiap halaman dimuat saat dibuka (bukan semuanya di awal), supaya MAESTRO cepat terbuka.
+// Chunk lama yang hilang setelah deploy ditangani di main.tsx (reload sekali).
+const PageLoader = () => (
+  <div className="flex min-h-[50vh] items-center justify-center text-gray-500">
+    <Loader2 className="mr-2 h-5 w-5 animate-spin text-blue-600" /> Memuat halaman...
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -79,6 +89,7 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Layout>
+                      <Suspense fallback={<PageLoader />}>
                       <Routes>
                         <Route path="/" element={<Navigate to="/dashboard" replace />} />
                         <Route path="/dashboard" element={<ModuleGuard moduleKey="dashboard"><Dashboard /></ModuleGuard>} />
@@ -113,6 +124,7 @@ const App = () => (
                         <Route path="/profile" element={<Profile />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
+                      </Suspense>
                     </Layout>
                   </ProtectedRoute>
                 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -36,7 +36,8 @@ import { RealTimeNotifications } from '@/components/ui/real-time-notifications';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useIdleTimeout } from '@/hooks/useIdleTimeout';
 import { isVendorRole } from '@/hooks/useRolePermissionsConfig';
-import { ChatbotWidget } from '@/components/chatbot/ChatbotWidget';
+// Chatbot dimuat terpisah (tidak memperlambat pembukaan halaman pertama)
+const ChatbotWidget = lazy(() => import('@/components/chatbot/ChatbotWidget').then((m) => ({ default: m.ChatbotWidget })));
 import { RuSwitcher } from '@/components/RuSwitcher';
 import { RuRequiredDialog } from '@/components/RuRequiredDialog';
 
@@ -407,7 +408,11 @@ const Layout = ({ children }: LayoutProps) => {
       </div>
 
       {/* Chatbot: role yang boleh diatur server (Chat__AllowedRoles, default admin); External/Vendor tidak pernah */}
-      {userProfile && !isVendorRole(userProfile.role) && <ChatbotWidget />}
+      {userProfile && !isVendorRole(userProfile.role) && (
+        <Suspense fallback={null}>
+          <ChatbotWidget />
+        </Suspense>
+      )}
       <RuRequiredDialog />
 
       {/* Idle Session Warning Modal */}
