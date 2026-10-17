@@ -280,7 +280,13 @@ const ContractPerformanceMonitoring = () => {
         </TabsContent>
       </Tabs>
 
-      <ContractHistoryDialog contract={historyContract} onOpenChange={(open) => !open && setHistoryContract(null)} />
+      <ContractHistoryDialog
+        idKontrak={historyContract?.id_kontrak ?? null}
+        judul={historyContract?.judul_kontrak}
+        vendor={historyContract?.vendor?.nama_vendor}
+        sla={historyContract}
+        onOpenChange={(open) => !open && setHistoryContract(null)}
+      />
     </div>
   );
 };

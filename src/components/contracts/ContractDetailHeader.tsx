@@ -2,7 +2,10 @@
 import { Badge } from "@/components/ui/badge";
 import { formatTitle } from '@/lib/utils/formatTitle';
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Edit, Trash2, Building2, Calendar, Coins } from "lucide-react";
+import { ChevronLeft, Edit, Trash2, Building2, Calendar, Coins, History } from "lucide-react";
+import { useState } from "react";
+import { usePermissions } from "@/hooks/usePermissions";
+import { ContractHistoryDialog } from "@/components/sla/ContractHistoryDialog";
 import { useNavigate } from "react-router-dom";
 import { Kontrak } from "@/types/database";
 import { FavoriteButton } from "@/components/contracts/FavoriteButton";
@@ -31,6 +34,9 @@ export const ContractDetailHeader = ({
   onDelete,
   totalTagihan = 0,
 }: ContractDetailHeaderProps) => {
+  // Riwayat kontrak (modal yang sama dengan tombol History di Performance Monitoring)
+  const [riwayatOpen, setRiwayatOpen] = useState(false);
+  const { isVendor } = usePermissions();
   const navigate = useNavigate();
 
   // Get back navigation URL based on contract type
@@ -76,12 +82,23 @@ export const ContractDetailHeader = ({
             Kembali ke Kontrak {contract.tipe_kontrak}
           </Button>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap justify-end gap-3">
             <FavoriteButton
               contractId={contract.id_kontrak}
               withLabel
               className="h-9 px-3 rounded-md text-sm font-medium bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm hover:scale-105 shadow-lg"
             />
+            {!isVendor && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105 shadow-lg"
+                onClick={() => setRiwayatOpen(true)}
+              >
+                <History className="h-4 w-4 mr-2" />
+                Riwayat
+              </Button>
+            )}
             {canEdit && (
               <>
                 <Button
@@ -163,6 +180,13 @@ export const ContractDetailHeader = ({
           </div>
         </div>
       </div>
+
+      <ContractHistoryDialog
+        idKontrak={riwayatOpen ? contract.id_kontrak : null}
+        judul={contract.judul_kontrak}
+        vendor={getVendorName()}
+        onOpenChange={setRiwayatOpen}
+      />
     </div>
   );
 };

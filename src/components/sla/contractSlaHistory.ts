@@ -118,6 +118,23 @@ export const buildLinimasa = ({ kontrak: k, amandemen, tagihan }: KontrakSlaDeta
   return list.sort((a, b) => a.tanggal.getTime() - b.tanggal.getTime());
 };
 
+/** Angka ringkas untuk kepala dialog Riwayat: nilai berlaku, tagihan, dan progres waktu pelaksanaan. */
+export const ringkasanKontrak = ({ kontrak: k, amandemen, tagihan }: KontrakSlaDetail) => {
+  const nilaiBerlaku = k.hasAmendment && Number(k.nilaiKontrakBaru) > 0 ? Number(k.nilaiKontrakBaru) : Number(k.nilaiAwal) || 0;
+  const totalTagihan = tagihan.reduce((s, t) => s + (Number(t.nilaiTagihan) || 0), 0);
+  const mulai = toDate(k.tanggalMulaiBaru ?? k.tanggalMulai);
+  const selesai = toDate(k.tanggalSelesaiBaru ?? k.tanggalSelesai);
+  let progresWaktu: number | null = null;
+  if (mulai && selesai && selesai > mulai) {
+    progresWaktu = Math.min(100, Math.max(0, ((Date.now() - mulai.getTime()) / (selesai.getTime() - mulai.getTime())) * 100));
+  }
+  return {
+    nilaiBerlaku, totalTagihan, mulai, selesai, progresWaktu,
+    persenTertagih: nilaiBerlaku > 0 ? (totalTagihan / nilaiBerlaku) * 100 : 0,
+    jumlahAmandemen: amandemen.length, jumlahTagihan: tagihan.length,
+  };
+};
+
 const safeFileName = (title: string) =>
   (title.trim() || 'Kontrak').replace(/[\\/:*?"<>|]+/g, '-').slice(0, 70);
 
@@ -128,9 +145,9 @@ const sheet = (rows: (string | number | null)[][], widths: number[]) => {
 };
 
 /** Unduh laporan SLA satu kontrak (.xlsx): ringkasan, linimasa, amandemen, tagihan. */
-export const downloadLaporanSla = (sla: EnhancedSLAContract, detail: KontrakSlaDetail) => {
+export const downloadLaporanSla = (sla: EnhancedSLAContract | null, detail: KontrakSlaDetail) => {
   const { kontrak: k, amandemen, tagihan } = detail;
-  const judul = formatTitle(k.judulKontrak ?? sla.judul_kontrak);
+  const judul = formatTitle(k.judulKontrak ?? sla?.judul_kontrak);
   const nilaiBerlaku = k.hasAmendment && Number(k.nilaiKontrakBaru) > 0 ? k.nilaiKontrakBaru : k.nilaiAwal;
   const totalTagihan = tagihan.reduce((s, t) => s + (Number(t.nilaiTagihan) || 0), 0);
 
@@ -141,21 +158,21 @@ export const downloadLaporanSla = (sla: EnhancedSLAContract, detail: KontrakSlaD
     ['Judul kontrak', judul],
     ['No. dokumen kontrak', k.noDokumenKontrak ?? '-'],
     ['No. PO/PR', k.noPoPr ?? '-'],
-    ['Vendor', formatTitle(sla.vendor?.nama_vendor ?? k.vendor?.namaVendor) || '-'],
-    ['Tipe kontrak', k.tipeKontrak ?? sla.tipe_kontrak],
-    ['Status kontrak', k.statusKontrak ?? sla.status_kontrak],
+    ['Vendor', formatTitle(sla?.vendor?.nama_vendor ?? k.vendor?.namaVendor) || '-'],
+    ['Tipe kontrak', k.tipeKontrak ?? sla?.tipe_kontrak],
+    ['Status kontrak', k.statusKontrak ?? sla?.status_kontrak],
     ['Direksi pekerjaan', k.direksiPekerjaan ?? '-'],
     ['Disiplin', k.disiplin ?? '-'],
     ['', ''],
     ['SLA KOM', ''],
     ['Dokumen diterima', tglIndo(k.tanggalTerimaDokumen)],
-    ['Batas SLA (hari)', k.slaKomHari ?? sla.sla_kom_hari],
-    ['Target KOM', tglIndo(k.estimasiTanggalKom ?? sla.estimasi_tanggal_kom)],
+    ['Batas SLA (hari)', k.slaKomHari ?? sla?.sla_kom_hari],
+    ['Target KOM', tglIndo(k.estimasiTanggalKom ?? sla?.estimasi_tanggal_kom)],
     ['Realisasi KOM', tglIndo(k.tanggalKom)],
-    ['Status SLA', SLA_STATUS_LABEL[sla.sla_status] ?? sla.sla_status],
-    ['Hari terlambat', sla.days_overdue],
-    ['Tingkat risiko', RISK_LABEL[sla.risk_level] ?? sla.risk_level],
-    ['Progress SLA (%)', Math.round(sla.sla_progress * 10) / 10],
+    ['Status SLA', sla ? SLA_STATUS_LABEL[sla.sla_status] ?? sla.sla_status : '-'],
+    ['Hari terlambat', sla?.days_overdue ?? '-'],
+    ['Tingkat risiko', sla ? RISK_LABEL[sla.risk_level] ?? sla.risk_level : '-'],
+    ['Progress SLA (%)', sla ? Math.round(sla.sla_progress * 10) / 10 : '-'],
     ['', ''],
     ['PELAKSANAAN & NILAI', ''],
     ['Mulai pekerjaan', tglIndo(k.tanggalMulai)],
