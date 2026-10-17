@@ -7,12 +7,14 @@ import { ImportProgress } from "./ImportProgress";
 import { ImportPreview } from "./ImportPreview";
 import { useImportData } from "./hooks/useImportData";
 import { SqlImportSection } from "./SqlImportSection";
+import { usePermissions } from "@/hooks/usePermissions";
 import { Upload, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type ImportType = 'kontrak' | 'tagihan' | 'vendor';
 
 export function ImportSection() {
+  const { isSuperAdmin } = usePermissions();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importType, setImportType] = useState<ImportType | null>(null);
   
@@ -47,7 +49,7 @@ export function ImportSection() {
 
   return (
     <div className="space-y-6">
-      <SqlImportSection />
+      {isSuperAdmin && <SqlImportSection />}
 
       <Alert>
         <AlertCircle className="h-4 w-4" />

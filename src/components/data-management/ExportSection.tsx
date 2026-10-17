@@ -5,9 +5,11 @@ import { Separator } from "@/components/ui/separator";
 import { ExportFieldSelector } from "./ExportFieldSelector";
 import { useExportData } from "./hooks/useExportData";
 import { SqlBackupExport } from "./SqlBackupExport";
+import { usePermissions } from "@/hooks/usePermissions";
 import { FileDown, FileSpreadsheet } from "lucide-react";
 
 export function ExportSection() {
+  const { isSuperAdmin } = usePermissions();
   const [selectedContractFields, setSelectedContractFields] = useState<string[]>([
     "judul_kontrak",
     "tipe_kontrak", 
@@ -45,7 +47,7 @@ export function ExportSection() {
 
   return (
     <div className="space-y-6">
-      <SqlBackupExport />
+      {isSuperAdmin && <SqlBackupExport />}
 
       {/* Export Kontrak */}
       <Card>

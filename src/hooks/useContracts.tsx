@@ -87,6 +87,7 @@ export const useContracts = () => {
       if (!res.ok) throw new Error(data.message || "Gagal ambil kontrak");
       return data.map((c: any) => ({
         id_kontrak: c.idKontrak,
+        id_ru: c.idRu ?? null,
         id_vendor: c.idVendor,
         judul_kontrak: c.judulKontrak,
         no_dokumen_kontrak: c.noDokumenKontrak,

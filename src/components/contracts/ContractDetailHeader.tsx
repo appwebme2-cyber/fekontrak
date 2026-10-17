@@ -6,6 +6,7 @@ import { ChevronLeft, Edit, Trash2, Building2, Calendar, Coins } from "lucide-re
 import { useNavigate } from "react-router-dom";
 import { Kontrak } from "@/types/database";
 import { FavoriteButton } from "@/components/contracts/FavoriteButton";
+import { RuBadge } from "@/components/RuBadge";
 
 interface ContractDetailHeaderProps {
   contract: Kontrak;
@@ -114,6 +115,7 @@ export const ContractDetailHeader = ({
               <Badge variant="secondary" className="bg-white/20 text-white border-white/20">
                 {contract.tipe_kontrak}
               </Badge>
+              <RuBadge idRu={contract.id_ru} onlyWhenAllRu={false} className="bg-white/20 text-white border-white/20 hover:bg-white/30" />
             </div>
             
             <h1 className="text-2xl font-bold mb-3 animate-slide-in-right leading-tight">

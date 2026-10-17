@@ -7,6 +7,7 @@ import { Kontrak } from '@/types/database';
 import { ProgressStatusBadge } from '@/components/shared/ProgressStatusBadge';
 import { FavoriteButton } from '@/components/contracts/FavoriteButton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { RuBadge } from '@/components/RuBadge';
 
 interface ContractCardHeaderProps {
   contract: Kontrak;
@@ -64,6 +65,7 @@ export const ContractCardHeader = ({
             {contract.tipe_kontrak}
           </Badge>
           <ProgressStatusBadge contractId={contract.id_kontrak} className="bg-white/20 text-white" />
+          <RuBadge idRu={contract.id_ru} className="bg-white/20 text-white hover:bg-white/30" />
         </div>
 
         <div className="flex gap-1 flex-shrink-0 -mt-1 -mr-1">

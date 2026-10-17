@@ -52,6 +52,7 @@ import LaporanHarian from "@/pages/LaporanHarian";
 import Profile from "@/pages/Profile";
 import ReportAkses from "@/pages/ReportAkses";
 import AiUsage from "@/pages/AiUsage";
+import RuComparison from "@/pages/RuComparison";
 
 import Favorites from "@/pages/Favorites";
 
@@ -94,8 +95,8 @@ const App = () => (
                         <Route path="/invoice-detail/:id" element={<ModuleGuard moduleKey="invoices"><InvoiceDetail /></ModuleGuard>} />
                         <Route path="/sla-monitoring" element={<Navigate to="/contract-performance" replace />} />
                         <Route path="/contract-performance" element={<ModuleGuard moduleKey="contract-performance"><ContractPerformanceMonitoring /></ModuleGuard>} />
-                        <Route path="/admin-settings" element={<AdminGuard><AdminSettings /></AdminGuard>} />
-                        <Route path="/role-settings" element={<AdminGuard><RoleSettings /></AdminGuard>} />
+                        <Route path="/admin-settings" element={<AdminGuard level="superAdmin"><AdminSettings /></AdminGuard>} />
+                        <Route path="/role-settings" element={<AdminGuard level="superAdmin"><RoleSettings /></AdminGuard>} />
                         <Route path="/users" element={<AdminGuard><Users /></AdminGuard>} />
                         <Route path="/vendors" element={<AdminGuard><NewVendors /></AdminGuard>} />
                         <Route path="/master/program-kerja" element={<AdminGuard><MasterProgramKerja /></AdminGuard>} />
@@ -104,7 +105,8 @@ const App = () => (
                         <Route path="/user-purchase/:id" element={<ModuleGuard moduleKey="user-purchase"><UserPurchaseDetail /></ModuleGuard>} />
                         <Route path="/data-management" element={<AdminGuard><DataManagement /></AdminGuard>} />
                         <Route path="/report-akses" element={<AdminGuard><ReportAkses /></AdminGuard>} />
-                        <Route path="/ai-usage" element={<AdminGuard><AiUsage /></AdminGuard>} />
+                        <Route path="/ai-usage" element={<AdminGuard level="superAdmin"><AiUsage /></AdminGuard>} />
+                        <Route path="/ru-comparison" element={<AdminGuard level="crossRu"><RuComparison /></AdminGuard>} />
                         <Route path="/laporan-harian" element={<ModuleGuard moduleKey="laporan-harian"><LaporanHarian /></ModuleGuard>} />
                         <Route path="/material-requirement" element={<ModuleGuard moduleKey="material-requirement"><MaterialRequirementList /></ModuleGuard>} />
                         <Route path="/material-requirement/:id" element={<ModuleGuard moduleKey="material-requirement"><MaterialRequirementDetail /></ModuleGuard>} />

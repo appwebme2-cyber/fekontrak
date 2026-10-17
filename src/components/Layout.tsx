@@ -25,6 +25,7 @@ import {
   Calculator,
   Star,
   Wallet,
+  Factory,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -67,7 +68,7 @@ const Layout = ({ children }: LayoutProps) => {
     }
   }, [location.pathname]);
   const { signOut, userProfile } = useAuth();
-  const { isAdmin, canViewMenu } = usePermissions();
+  const { isAdmin, isSuperAdmin, isCrossRu, canViewMenu } = usePermissions();
 
   // useEffect(() => {
   //   localStorage.setItem('sidebar-collapsed', JSON.stringify(sidebarCollapsed));
@@ -88,7 +89,10 @@ const Layout = ({ children }: LayoutProps) => {
       items: filterByMenuKey([
         { key: 'dashboard', name: 'Executive Dashboard', href: '/dashboard', icon: LayoutDashboard },
         { key: 'contract-performance', name: 'Performance Monitoring', href: '/contract-performance', icon: Target },
-      ])
+      ]).concat(
+        // Multi-RU: perbandingan antar RU untuk Super Admin & Head Office
+        isCrossRu ? [{ key: 'ru-comparison', name: 'Perbandingan RU', href: '/ru-comparison', icon: Factory }] : []
+      )
     },
     {
       title: 'Contract Management',
@@ -126,10 +130,12 @@ const Layout = ({ children }: LayoutProps) => {
       show: showAdministration,
       items: [
         { name: 'Manajemen Data', href: '/data-management', icon: Database },
-        { name: 'Pengaturan Admin', href: '/admin-settings', icon: Settings },
-        { name: 'Pengaturan Role', href: '/role-settings', icon: Shield },
+        ...(isSuperAdmin ? [
+          { name: 'Pengaturan Admin', href: '/admin-settings', icon: Settings },
+          { name: 'Pengaturan Role', href: '/role-settings', icon: Shield },
+        ] : []),
         { name: 'Report Akses', href: '/report-akses', icon: ClipboardList },
-        { name: 'Pemakaian AI', href: '/ai-usage', icon: Wallet },
+        ...(isSuperAdmin ? [{ name: 'Pemakaian AI', href: '/ai-usage', icon: Wallet }] : []),
       ]
     }
   ];

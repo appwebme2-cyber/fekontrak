@@ -28,6 +28,7 @@ export interface Planner {
 
 export interface Kontrak {
   id_kontrak: string;
+  id_ru?: string | null; // multi-RU: RU pemilik kontrak
   id_vendor: string;
   judul_kontrak: string;
   no_dokumen_kontrak?: string;
