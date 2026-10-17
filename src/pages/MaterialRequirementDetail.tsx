@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Pencil, Plus, Trash2, Settings2, FileText, Image as ImageIcon, Sparkles, Download } from 'lucide-react';
+import { ArrowLeft, Pencil, Plus, Trash2, Settings2, FileText, Image as ImageIcon, Sparkles, Download, AlertTriangle, Lightbulb } from 'lucide-react';
 import { useMaterialRequirementDraft, useMaterialRequirementDrafts, MaterialRequirementDraft, AiExtractionResult } from '@/hooks/useMaterialRequirementDrafts';
 import { useMaterialRequirementLines, MaterialRequirementLine, LineJenis } from '@/hooks/useMaterialRequirementLines';
 import { useMaterialRequirementDocumentUpload } from '@/hooks/useMaterialRequirementDocumentUpload';
@@ -280,13 +280,23 @@ const MaterialRequirementDetail = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Problem</CardTitle></CardHeader>
-          <CardContent><p className="text-sm whitespace-pre-wrap">{draft.problem || '-'}</p></CardContent>
+        <Card className="border-l-4 border-l-red-400">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2.5 text-base">
+              <span className="rounded-lg bg-red-100 p-1.5"><AlertTriangle className="h-4 w-4 text-red-600" /></span>
+              Problem
+            </CardTitle>
+          </CardHeader>
+          <CardContent><p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">{draft.problem || '-'}</p></CardContent>
         </Card>
-        <Card>
-          <CardHeader><CardTitle className="text-base">Rekomendasi / Solusi</CardTitle></CardHeader>
-          <CardContent><p className="text-sm whitespace-pre-wrap">{draft.rekomendasi_solusi || '-'}</p></CardContent>
+        <Card className="border-l-4 border-l-green-500">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2.5 text-base">
+              <span className="rounded-lg bg-green-100 p-1.5"><Lightbulb className="h-4 w-4 text-green-600" /></span>
+              Rekomendasi / Solusi
+            </CardTitle>
+          </CardHeader>
+          <CardContent><p className="text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">{draft.rekomendasi_solusi || '-'}</p></CardContent>
         </Card>
       </div>
 
