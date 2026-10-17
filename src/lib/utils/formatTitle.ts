@@ -17,7 +17,19 @@ const ACRONYMS = new Set([
   'SWD', 'LPS', 'MPS', 'HPS', 'LPG', 'BBM', 'CDU', 'HVU', 'FCC', 'RCC', 'NHT', 'CCR', 'SRU',
   'PLC', 'DCS', 'UPS', 'AC', 'DC', 'HVAC', 'MCC', 'ELCB', 'MCB', 'ACB', 'PRV', 'PSV', 'CCTV',
   'IT', 'ICT', 'ID', 'OD', 'MA', 'P&S', 'ROW', 'WTP', 'IPAL',
+  // Unit & sistem kilang
+  'RFCC', 'FGDS', 'FGS', 'F&G', 'VDU', 'HDT', 'HTU', 'ARU', 'SWS', 'NPU', 'PAU', 'KLBB', 'LOC', 'PX',
+  'GTG', 'STG', 'HRSG', 'BFW', 'FO', 'HSD', 'LSWR', 'NGL', 'LNG', 'CNG', 'MDO', 'IDO', 'SPM',
+  // Listrik, instrumen & kontrol
+  'LV', 'MV', 'HV', 'GIS', 'RTU', 'SCADA', 'ESD', 'SDV', 'ESDV', 'MOV', 'VFD', 'VSD', 'BMS', 'CEMS',
+  'UV', 'IR', 'PA', 'GA', 'LAN', 'WAN', 'SIL',
+  // Dokumen, K3 & inspeksi
+  'P&ID', 'PFD', 'HAZOP', 'HAZID', 'MSDS', 'SDS', 'APAR', 'APD', 'SOP', 'JSA', 'PTW', 'LOTO',
+  'NDE', 'PMI', 'PWHT', 'OEM', 'ATEX', 'IECEX', 'SNI', 'EPC',
 ]);
+
+// Kata huruf besar pendek di dalam kurung, mis. "(FGDS)" atau "(HAZOP)", dianggap singkatan
+const MAX_SINGKATAN_DALAM_KURUNG = 5;
 
 const SMALL_WORDS = new Set([
   'dan', 'di', 'ke', 'dari', 'untuk', 'pada', 'yang', 'atau', 'dengan', 'serta', 'oleh', 'dalam', 'per',
@@ -43,6 +55,9 @@ const formatWord = (word: string, isFirstWord: boolean): string => {
   if (!match) return word;
   const [, lead, core, trail] = match;
   if (/\d/.test(core) || ACRONYMS.has(core.toUpperCase())) return lead + formatCore(core, isFirstWord) + trail;
+  if (lead.includes('(') && trail.includes(')') && /^\p{L}+$/u.test(core) && core.length <= MAX_SINGKATAN_DALAM_KURUNG) {
+    return lead + core.toUpperCase() + trail;
+  }
   const parts = core.split(/([-/])/);
   const formatted = parts
     .map((part, i) => (part === '-' || part === '/' ? part : formatCore(part, isFirstWord && i === 0)))
