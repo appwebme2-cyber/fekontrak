@@ -4,6 +4,7 @@ const API_URL = "https://bekontrak-production.up.railway.app/api";
 
 export interface LogAksesItem {
   id: string;
+  idRu?: string | null;
   userId: string;
   namaUser: string;
   role: string;

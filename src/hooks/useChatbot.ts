@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getActiveRu, RU_CHANGED_EVENT } from '@/lib/activeRu';
 
 const API_URL = "https://bekontrak-production.up.railway.app/api";
 
@@ -46,6 +47,9 @@ export interface ChatSessionSummary {
 
 const STORAGE_KEY = 'maestro_chatbot_messages';
 const SESSION_KEY = 'maestro_chatbot_session';
+// Multi-RU: RU yang aktif saat percakapan dimulai. Ganti RU = mulai percakapan baru, supaya jawaban
+// dari RU sebelumnya tidak tercampur (dan tidak ikut terkirim sebagai riwayat ke pertanyaan berikutnya).
+const RU_KEY = 'maestro_chatbot_ru';
 const HISTORY_LIMIT = 12;
 
 const newId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -144,9 +148,13 @@ const readEventStream = async (
   throw new Error('Koneksi terputus sebelum jawaban selesai. Coba lagi.');
 };
 
+const percakapanRuSama = () => readStorage<string>(RU_KEY, '') === (getActiveRu() ?? '');
+
 export const useChatbot = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>(() => readStorage<ChatMessage[]>(STORAGE_KEY, []));
-  const [sessionId, setSessionId] = useState<string | null>(() => readStorage<string | null>(SESSION_KEY, null));
+  const [messages, setMessages] = useState<ChatMessage[]>(() =>
+    percakapanRuSama() ? readStorage<ChatMessage[]>(STORAGE_KEY, []) : []);
+  const [sessionId, setSessionId] = useState<string | null>(() =>
+    percakapanRuSama() ? readStorage<string | null>(SESSION_KEY, null) : null);
   const [isLoading, setIsLoading] = useState(false);
   const [statusText, setStatusText] = useState<string | null>(null);
   const [remaining, setRemaining] = useState<number | null>(null);
@@ -184,6 +192,7 @@ export const useChatbot = () => {
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => { writeStorage(STORAGE_KEY, messages.slice(-40)); }, [messages]);
+  useEffect(() => { writeStorage(RU_KEY, getActiveRu() ?? ''); }, []);
   useEffect(() => { writeStorage(SESSION_KEY, sessionId); }, [sessionId]);
 
   /** Ambil sisa kuota. Mengembalikan false kalau akun ini tidak diizinkan memakai chatbot (403/401). */
@@ -268,6 +277,16 @@ export const useChatbot = () => {
     setMessages([]);
     setSessionId(null);
   }, []);
+
+  // RU diganti tanpa memuat ulang halaman (dialog "Pilih RU dulu"): mulai percakapan baru
+  useEffect(() => {
+    const onRuChanged = () => {
+      reset();
+      writeStorage(RU_KEY, getActiveRu() ?? '');
+    };
+    window.addEventListener(RU_CHANGED_EVENT, onRuChanged);
+    return () => window.removeEventListener(RU_CHANGED_EVENT, onRuChanged);
+  }, [reset]);
 
   const loadSessions = useCallback(async () => {
     setSessionsLoading(true);

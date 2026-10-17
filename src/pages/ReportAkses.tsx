@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { useUserManagement } from '@/components/user-management/hooks/useUserManagement';
 import { useLogAkses, type LogAksesItem, type LogAksesResponse } from '@/hooks/useLogAkses';
 import { useToast } from '@/hooks/use-toast';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useRuList } from '@/hooks/useRuList';
+import { getActiveRu } from '@/lib/activeRu';
 import {
   useRolePermissionsConfig,
   resolveConfigurableRole,
@@ -107,6 +110,12 @@ const MenuList = ({ labels }: { labels: string[] }) => {
 
 const ReportAkses: React.FC = () => {
   const { toast } = useToast();
+  // Multi-RU: kolom RU hanya berguna saat Super Admin / Head Office melihat "Semua RU"
+  const { isCrossRu } = usePermissions();
+  const { rus } = useRuList(isCrossRu);
+  const showRu = isCrossRu && !getActiveRu();
+  const ruKode = (idRu?: string | null) =>
+    !idRu ? '-' : idRu === 'PUSAT' ? 'Pusat' : rus.find((r) => r.idRu === idRu)?.kode ?? idRu;
   const [search, setSearch] = useState('');
   const { users, loading } = useUserManagement();
   const { matrix, labels, isLoading: matrixLoading } = useRolePermissionsConfig();
@@ -169,9 +178,9 @@ const ReportAkses: React.FC = () => {
         return !q || l.namaUser.toLowerCase().includes(q) || l.role.toLowerCase().includes(q);
       });
 
-      const headers = ['Waktu', 'Nama User', 'Role', 'Menu', 'Aktivitas', 'Detail', 'IP Address'];
+      const headers = ['Waktu', 'Nama User', 'Role', ...(showRu ? ['RU'] : []), 'Menu', 'Aktivitas', 'Detail', 'IP Address'];
       const rows = allItems.map((l) => [
-        formatLogTime(l.createdAt), l.namaUser, l.role, l.menu, l.activity, l.detail || '', l.ipAddress || '',
+        formatLogTime(l.createdAt), l.namaUser, l.role, ...(showRu ? [ruKode(l.idRu)] : []), l.menu, l.activity, l.detail || '', l.ipAddress || '',
       ]);
       const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
       const csv = [headers, ...rows].map((r) => r.map(escape).join(',')).join('\n');
@@ -471,6 +480,7 @@ const ReportAkses: React.FC = () => {
                   <TableHead className="min-w-40">Waktu</TableHead>
                   <TableHead className="min-w-40">Nama User</TableHead>
                   <TableHead>Role</TableHead>
+                  {showRu && <TableHead>RU</TableHead>}
                   <TableHead>Menu</TableHead>
                   <TableHead>Aktivitas</TableHead>
                   <TableHead className="min-w-56">Detail</TableHead>
@@ -480,14 +490,14 @@ const ReportAkses: React.FC = () => {
               <TableBody>
                 {logLoading && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={showRu ? 8 : 7} className="text-center py-8 text-muted-foreground">
                       Memuat log...
                     </TableCell>
                   </TableRow>
                 )}
                 {!logLoading && !logFiltered.length && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={showRu ? 8 : 7} className="text-center py-8 text-muted-foreground">
                       Tidak ada aktivitas ditemukan
                     </TableCell>
                   </TableRow>
@@ -501,6 +511,7 @@ const ReportAkses: React.FC = () => {
                         {l.role}
                       </span>
                     </TableCell>
+                    {showRu && <TableCell className="text-sm whitespace-nowrap">{ruKode(l.idRu)}</TableCell>}
                     <TableCell className="text-sm">{l.menu}</TableCell>
                     <TableCell>
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${ACTIVITY_BADGE_COLOR[l.activity] ?? ACTIVITY_BADGE_COLOR.Lihat}`}>
