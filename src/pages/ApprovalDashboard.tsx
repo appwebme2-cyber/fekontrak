@@ -230,15 +230,16 @@ const ApprovalDashboard = () => {
                       <>
                         <Button
                           size="sm"
-                          className="bg-green-600 hover:bg-green-700 gap-1"
+                          variant="outline"
+                          className="gap-1 border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800"
                           onClick={() => handleReview(dok, 'Approved')}
                         >
                           <CheckCircle className="h-3 w-3" /> Approve
                         </Button>
                         <Button
                           size="sm"
-                          variant="destructive"
-                          className="gap-1"
+                          variant="outline"
+                          className="gap-1 border-red-200 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800"
                           onClick={() => handleReview(dok, 'Rejected')}
                         >
                           <XCircle className="h-3 w-3" /> Reject
@@ -286,7 +287,7 @@ const ApprovalDashboard = () => {
             <Button
               onClick={handleConfirmReview}
               disabled={reviewDokumen.isPending || (reviewAction === 'Rejected' && !catatan.trim())}
-              className={reviewAction === 'Approved' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}
+              className={reviewAction === 'Approved' ? 'bg-green-700 hover:bg-green-800' : 'bg-red-700 hover:bg-red-800'}
             >
               {reviewDokumen.isPending ? 'Memproses...' : `Konfirmasi ${reviewAction}`}
             </Button>

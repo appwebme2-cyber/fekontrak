@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 import {
-  CalendarCheck, CalendarClock, ClipboardCheck, Coins, Download, FileInput, Flag, GitBranch, History, Loader2,
+  CalendarCheck, CalendarClock, ClipboardCheck, Download, FileInput, Flag, GitBranch, History, Loader2,
   PlayCircle, Receipt, type LucideIcon,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -11,8 +11,8 @@ import { Button } from '@/components/ui/button';
 import type { EnhancedSLAContract } from '@/hooks/useOptimizedSLAMonitoring';
 import { formatTitle } from '@/lib/utils/formatTitle';
 import {
-  buildLinimasa, downloadLaporanSla, fetchKontrakSlaDetail, ringkasanKontrak, rupiah, RISK_LABEL, SLA_STATUS_LABEL,
-  tglIndo, type JenisPeristiwa,
+  buildLinimasa, downloadLaporanSla, fetchKontrakSlaDetail, RISK_LABEL, SLA_STATUS_LABEL,
+  type JenisPeristiwa,
 } from './contractSlaHistory';
 
 const GAYA: Record<JenisPeristiwa, { icon: LucideIcon; bulat: string; garis: string }> = {
@@ -48,18 +48,7 @@ interface ContractHistoryDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const Ringkas = ({ icon: Icon, label, value, sub }: { icon: LucideIcon; label: string; value: string; sub?: string }) => (
-  <div className="flex min-w-0 items-start gap-2.5 rounded-lg border bg-white px-3 py-2.5">
-    <div className="shrink-0 rounded-md bg-blue-50 p-1.5"><Icon className="h-4 w-4 text-blue-600" /></div>
-    <div className="min-w-0">
-      <div className="text-[11px] text-gray-500">{label}</div>
-      <div className="truncate text-sm font-semibold text-gray-900" title={value}>{value}</div>
-      {sub && <div className="truncate text-[11px] text-gray-500">{sub}</div>}
-    </div>
-  </div>
-);
-
-/** Riwayat satu kontrak: ringkasan, progres waktu, dan linimasa dokumen → KOM → pelaksanaan → amandemen → tagihan. */
+/** Riwayat satu kontrak: linimasa dokumen → KOM → pelaksanaan → amandemen → tagihan. */
 export const ContractHistoryDialog = ({ idKontrak, judul, vendor, sla, onOpenChange }: ContractHistoryDialogProps) => {
   const [filter, setFilter] = useState('semua');
   const { data, isLoading, error } = useQuery({
@@ -70,7 +59,6 @@ export const ContractHistoryDialog = ({ idKontrak, judul, vendor, sla, onOpenCha
   });
 
   const linimasa = useMemo(() => (data ? buildLinimasa(data) : []), [data]);
-  const ringkasan = useMemo(() => (data ? ringkasanKontrak(data) : null), [data]);
   const jenisAktif = FILTER.find((f) => f.key === filter)?.jenis;
   const tampil = jenisAktif ? linimasa.filter((p) => jenisAktif.includes(p.jenis)) : linimasa;
   const idxHariIni = tampil.findIndex((p) => p.rencana);
@@ -105,30 +93,8 @@ export const ContractHistoryDialog = ({ idKontrak, judul, vendor, sla, onOpenCha
             </div>
           ) : error ? (
             <p className="py-6 text-sm text-red-600">{(error as Error).message}</p>
-          ) : data && ringkasan ? (
+          ) : data ? (
             <>
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-                <Ringkas icon={CalendarCheck} label="KOM" value={tglIndo(data.kontrak.tanggalKom)} sub={`Target ${tglIndo(data.kontrak.estimasiTanggalKom)}`} />
-                <Ringkas icon={Coins} label="Nilai berlaku" value={rupiah(ringkasan.nilaiBerlaku)} sub={ringkasan.jumlahAmandemen ? `${ringkasan.jumlahAmandemen} amandemen` : 'Belum diamandemen'} />
-                <Ringkas icon={Receipt} label="Tertagih" value={rupiah(ringkasan.totalTagihan)} sub={`${ringkasan.jumlahTagihan} tagihan · ${ringkasan.persenTertagih.toLocaleString('id-ID', { maximumFractionDigits: 1 })}%`} />
-                <Ringkas icon={Flag} label="Selesai (berlaku)" value={tglIndo(ringkasan.selesai)} sub={`Mulai ${tglIndo(ringkasan.mulai)}`} />
-              </div>
-
-              {ringkasan.progresWaktu != null && (
-                <div className="rounded-lg border bg-white px-4 py-3">
-                  <div className="mb-1.5 flex justify-between text-xs text-gray-500">
-                    <span>Waktu pelaksanaan terpakai</span>
-                    <span className="font-semibold text-gray-800">{Math.round(ringkasan.progresWaktu)}%</span>
-                  </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
-                    <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-purple-500" style={{ width: `${ringkasan.progresWaktu}%` }} />
-                  </div>
-                  <div className="mt-1 flex justify-between text-[11px] text-gray-400">
-                    <span>{tglIndo(ringkasan.mulai)}</span><span>{tglIndo(ringkasan.selesai)}</span>
-                  </div>
-                </div>
-              )}
-
               <div className="flex flex-wrap gap-2">
                 {FILTER.map((f) => (
                   <button

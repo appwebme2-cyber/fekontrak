@@ -118,23 +118,6 @@ export const buildLinimasa = ({ kontrak: k, amandemen, tagihan }: KontrakSlaDeta
   return list.sort((a, b) => a.tanggal.getTime() - b.tanggal.getTime());
 };
 
-/** Angka ringkas untuk kepala dialog Riwayat: nilai berlaku, tagihan, dan progres waktu pelaksanaan. */
-export const ringkasanKontrak = ({ kontrak: k, amandemen, tagihan }: KontrakSlaDetail) => {
-  const nilaiBerlaku = k.hasAmendment && Number(k.nilaiKontrakBaru) > 0 ? Number(k.nilaiKontrakBaru) : Number(k.nilaiAwal) || 0;
-  const totalTagihan = tagihan.reduce((s, t) => s + (Number(t.nilaiTagihan) || 0), 0);
-  const mulai = toDate(k.tanggalMulaiBaru ?? k.tanggalMulai);
-  const selesai = toDate(k.tanggalSelesaiBaru ?? k.tanggalSelesai);
-  let progresWaktu: number | null = null;
-  if (mulai && selesai && selesai > mulai) {
-    progresWaktu = Math.min(100, Math.max(0, ((Date.now() - mulai.getTime()) / (selesai.getTime() - mulai.getTime())) * 100));
-  }
-  return {
-    nilaiBerlaku, totalTagihan, mulai, selesai, progresWaktu,
-    persenTertagih: nilaiBerlaku > 0 ? (totalTagihan / nilaiBerlaku) * 100 : 0,
-    jumlahAmandemen: amandemen.length, jumlahTagihan: tagihan.length,
-  };
-};
-
 const safeFileName = (title: string) =>
   (title.trim() || 'Kontrak').replace(/[\\/:*?"<>|]+/g, '-').slice(0, 70);
 
