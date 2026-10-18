@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ArrowLeft, Bot, History, Maximize2, MessageCircle, Minimize2, SquarePen, Send, X } from 'lucide-react';
+import { ArrowLeft, Bot, History, Maximize2, Minimize2, Sparkles, SquarePen, Send, X } from 'lucide-react';
 import { useChatbot, type ChatPageContext } from '@/hooks/useChatbot';
 import { ChatAnswerBlocks } from './ChatAnswerBlocks';
 import { ChatHistoryPanel } from './ChatHistoryPanel';
@@ -105,7 +105,7 @@ export const ChatbotWidget = () => {
         className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
         style={{ background: '#E31E24' }}
       >
-        <MessageCircle className="h-6 w-6" />
+        <Sparkles className="h-6 w-6" />
       </button>
     );
   }
