@@ -13,6 +13,7 @@ import ModuleGuard from "@/components/ModuleGuard";
 import AdminGuard from "@/components/AdminGuard";
 import Layout from "@/components/Layout";
 const ApprovalDashboard = lazy(() => import("./pages/ApprovalDashboard"));
+const DownloadApp = lazy(() => import("@/pages/DownloadApp"));
 
 // Import existing pages
 import Login from "@/pages/Login";
@@ -93,6 +94,7 @@ const App = () => (
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/download" element={<Suspense fallback={<PageLoader />}><DownloadApp /></Suspense>} />
               
               <Route
                 path="/*"

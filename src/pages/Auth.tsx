@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
 import {
-  Mail, Lock, Eye, EyeOff, ClipboardList, BarChart3, Wallet, Wrench, ShieldCheck, Radio, FileBarChart, AlertTriangle,
+  Mail, Lock, Eye, EyeOff, ClipboardList, BarChart3, Wallet, Wrench, ShieldCheck, Radio, FileBarChart, AlertTriangle, Smartphone,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { isVendorRole } from '@/hooks/useRolePermissionsConfig';
@@ -348,6 +348,11 @@ const Auth = () => {
                 </div>
               </div>
             </>
+
+          {/* Unduh aplikasi Android */}
+          <Link to="/download" className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+            <Smartphone className="h-4 w-4 text-blue-600" /> Unduh aplikasi MAESTRO untuk Android
+          </Link>
 
           {/* Footer */}
           <p className="text-center text-[11px] text-gray-300 dark:text-gray-600 mt-5">
