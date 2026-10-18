@@ -26,6 +26,7 @@ import {
   Star,
   Wallet,
   Factory,
+  Smartphone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -304,6 +305,38 @@ const Layout = ({ children }: LayoutProps) => {
                 )}
               </div>
             ))}
+        </div>
+
+        {/* Unduh MAESTRO Mobile (halaman /download) */}
+        <div className="px-3 pb-3 flex-shrink-0">
+          {sidebarCollapsed && !isMobile ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  to="/download"
+                  className="flex h-10 w-full items-center justify-center rounded-lg bg-gradient-to-br from-[#002060] via-[#003B8E] to-[#0055B3] text-white hover:opacity-90"
+                >
+                  <Smartphone className="h-5 w-5" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right"><p>Unduh MAESTRO Mobile</p></TooltipContent>
+            </Tooltip>
+          ) : (
+            <Link
+              to="/download"
+              onClick={() => isMobile && setSidebarOpen(false)}
+              className="relative flex items-center gap-3 overflow-hidden rounded-xl bg-gradient-to-br from-[#002060] via-[#003B8E] to-[#0055B3] p-3 text-white shadow-sm transition-opacity hover:opacity-90"
+            >
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#E4002B]" />
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white/15">
+                <Smartphone className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold leading-tight">MAESTRO Mobile</p>
+                <p className="text-xs text-white/75 leading-tight">Unduh aplikasi Android</p>
+              </div>
+            </Link>
+          )}
         </div>
 
         {/* User Profile */}
