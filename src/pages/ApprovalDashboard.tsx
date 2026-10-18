@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useDokumenApproval, DokumenApproval } from '@/hooks/useDokumenApproval';
 import { useAuth } from '@/hooks/useAuth';
+import { openFileInTab } from '@/lib/utils/fileTokenUtils';
 
 const StatusBadge = ({ status }: { status: string }) => {
   if (status === 'Approved') return <Badge className="bg-green-100 text-green-800 border-green-300"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
@@ -220,10 +221,8 @@ const ApprovalDashboard = () => {
 
                   <div className="flex flex-col gap-2 min-w-[120px]">
                     {dok.file_url && (
-                      <Button variant="outline" size="sm" asChild className="gap-1">
-                        <a href={getFileUrl(dok.file_url) || '#'} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-3 w-3" /> Lihat File
-                        </a>
+                      <Button variant="outline" size="sm" className="gap-1" onClick={() => openFileInTab(getFileUrl(dok.file_url) ?? '')}>
+                        <ExternalLink className="h-3 w-3" /> Lihat File
                       </Button>
                     )}
                     {dok.status_approval === 'Pending' && (

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, FileText, X, CheckCircle, Clock, XCircle, Trash2, ExternalLink } from 'lucide-react';
 import { useDokumenApproval, DokumenApproval } from '@/hooks/useDokumenApproval';
 import { useAuth } from '@/hooks/useAuth';
+import { openFileInTab } from '@/lib/utils/fileTokenUtils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface DokumenUploadFormProps {
@@ -222,12 +223,11 @@ export const DokumenUploadForm = ({ idKontrak, judulKontrak }: DokumenUploadForm
                       <Button
                         variant="ghost"
                         size="sm"
-                        asChild
                         className="text-blue-600"
+                        aria-label="Lihat file"
+                        onClick={() => openFileInTab(getFileUrl(dok.file_url) ?? '')}
                       >
-                        <a href={getFileUrl(dok.file_url) || '#'} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
+                        <ExternalLink className="h-4 w-4" />
                       </Button>
                     )}
                     <AlertDialog>
