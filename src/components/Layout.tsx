@@ -41,6 +41,7 @@ import { isVendorRole } from '@/hooks/useRolePermissionsConfig';
 const ChatbotWidget = lazy(() => import('@/components/chatbot/ChatbotWidget').then((m) => ({ default: m.ChatbotWidget })));
 import { RuSwitcher } from '@/components/RuSwitcher';
 import { RuRequiredDialog } from '@/components/RuRequiredDialog';
+import { TAMPILKAN_ASISTEN } from '@/lib/fitur';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -441,7 +442,7 @@ const Layout = ({ children }: LayoutProps) => {
       </div>
 
       {/* Chatbot: role yang boleh diatur server (Chat__AllowedRoles, default admin); External/Vendor tidak pernah */}
-      {userProfile && !isVendorRole(userProfile.role) && (
+      {TAMPILKAN_ASISTEN && userProfile && !isVendorRole(userProfile.role) && (
         <Suspense fallback={null}>
           <ChatbotWidget />
         </Suspense>

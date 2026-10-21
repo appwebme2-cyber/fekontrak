@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { isVendorRole } from '@/hooks/useRolePermissionsConfig';
+import { TAMPILKAN_UNDUH_DI_LOGIN } from '@/lib/fitur';
 
 const getRedirectPath = (role?: string) =>
   isVendorRole(role) ? '/kontrak-lumpsum' : '/dashboard';
@@ -349,10 +350,10 @@ const Auth = () => {
               </div>
             </>
 
-          {/* Unduh aplikasi Android */}
-          <Link to="/download" className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          {/* Unduh aplikasi Android (disembunyikan sementara, lihat lib/fitur.ts) */}
+          {TAMPILKAN_UNDUH_DI_LOGIN && <Link to="/download" className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-gray-700 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
             <Smartphone className="h-4 w-4 text-blue-600" /> Unduh aplikasi MAESTRO untuk Android
-          </Link>
+          </Link>}
 
           {/* Footer */}
           <p className="text-center text-[11px] text-gray-300 dark:text-gray-600 mt-5">
