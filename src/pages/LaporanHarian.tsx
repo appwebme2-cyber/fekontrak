@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { ClipboardList, Filter, RefreshCw, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ClipboardList, Filter, RefreshCw, Search, ChevronLeft, ChevronRight, FileSpreadsheet, X } from 'lucide-react';
 import { useDailyReport } from '@/hooks/useDailyReport';
+import { AnalisaLaporan } from '@/components/laporan-harian/AnalisaLaporan';
+import { unduhExcel } from '@/components/laporan-harian/hitungLaporan';
 
 const DISIPLIN_OPTIONS = [
   'Electrical', 'Instrument', 'Rotating', 'Stationary',
@@ -65,6 +67,9 @@ const LaporanHarian = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  // Saringan tambahan dari panel Analisa (mis. backlog > 30 hari): hanya baris tertentu yang tampil di tabel
+  const [fokus, setFokus] = useState<{ label: string; ids: Set<string> } | null>(null);
+  const tabelRef = useRef<HTMLDivElement>(null);
 
   const activeFilters = {
     disiplin:       filters.disiplin       || undefined,
@@ -83,17 +88,28 @@ const LaporanHarian = () => {
     r.tagNumber?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const ditampilkan = fokus ? filtered.filter(r => fokus.ids.has(r.idReport)) : filtered;
+  const totalPages = Math.max(1, Math.ceil(ditampilkan.length / pageSize));
+  const paginated = ditampilkan.slice((page - 1) * pageSize, page * pageSize);
+
+  const keTabel = () => setTimeout(() => tabelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+
+  const keteranganFilter = [
+    filters.disiplin, filters.kategori, filters.direksi, filters.status,
+    filters.tanggal_dari && `dari ${filters.tanggal_dari}`, filters.tanggal_sampai && `sampai ${filters.tanggal_sampai}`,
+    search && `cari "${search}"`,
+  ].filter(Boolean).join(', ');
 
   const resetFilters = () => {
     setFilters({ disiplin: '', kategori: '', status: '', tanggal_dari: '', tanggal_sampai: '', direksi: '' });
     setSearch('');
+    setFokus(null);
     setPage(1);
   };
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(f => ({ ...f, [key]: value === 'all' ? '' : value }));
+    setFokus(null);
     setPage(1);
   };
 
@@ -115,30 +131,36 @@ const LaporanHarian = () => {
         title="Laporan Harian"
         description="Data laporan kegiatan maintenance harian via WhatsApp"
         actions={
-          <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
+          <>
+            <Button variant="outline" size="sm" onClick={() => unduhExcel(filtered, keteranganFilter)} disabled={filtered.length === 0} className="gap-2">
+              <FileSpreadsheet className="h-4 w-4" />
+              Unduh Excel
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </Button>
+          </>
         }
       />
 
 
       {/* Filter */}
-      <Card>
-        <CardHeader className="pb-3">
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2.5 text-white">
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-500" />
-            <CardTitle className="text-base">Filter</CardTitle>
+            <Filter className="h-4 w-4" />
+            <CardTitle className="text-sm font-semibold">Filter</CardTitle>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Cari deskripsi atau tag number..."
                 value={search}
-                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                onChange={e => { setSearch(e.target.value); setFokus(null); setPage(1); }}
                 className="pl-9"
               />
             </div>
@@ -202,14 +224,37 @@ const LaporanHarian = () => {
         </CardContent>
       </Card>
 
+      {/* Analisa (mengikuti filter & pencarian) */}
+      {!isLoading && (
+        <AnalisaLaporan
+          reports={filtered}
+          onPilihTag={tag => { setSearch(tag); setFokus(null); setPage(1); keTabel(); }}
+          onPilihDisiplin={d => { handleFilterChange('disiplin', d); keTabel(); }}
+          onPilihBacklog={(label, pekerjaan) => {
+            setFokus({ label, ids: new Set(pekerjaan.map(p => p.terakhir.idReport)) });
+            setPage(1);
+            keTabel();
+          }}
+        />
+      )}
+
       {/* Table */}
+      <div ref={tabelRef} className="scroll-mt-4">
+      {fokus && (
+        <div className="mb-3 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-800">
+          <span>Menampilkan <span className="font-semibold">{fokus.label}</span> · {ditampilkan.length} pekerjaan (laporan terakhirnya)</span>
+          <Button variant="ghost" size="sm" className="ml-auto h-7 gap-1 text-blue-800" onClick={() => { setFokus(null); setPage(1); }}>
+            <X className="h-3.5 w-3.5" /> Tampilkan semua
+          </Button>
+        </div>
+      )}
       <Card>
         <CardContent className="p-0">
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
             </div>
-          ) : filtered.length === 0 ? (
+          ) : ditampilkan.length === 0 ? (
             <div className="text-center py-16 text-gray-400">
               <ClipboardList className="h-12 w-12 mx-auto mb-3 opacity-30" />
               <p>Belum ada data laporan</p>
@@ -282,7 +327,7 @@ const LaporanHarian = () => {
 
                 <div className="flex items-center gap-1">
                   <span className="text-sm text-gray-600 mr-2">
-                    {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} dari {filtered.length}
+                    {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, ditampilkan.length)} dari {ditampilkan.length}
                   </span>
                   <Button variant="outline" size="sm" className="h-8 w-8 p-0"
                     onClick={() => setPage(1)} disabled={page === 1}>
@@ -309,6 +354,7 @@ const LaporanHarian = () => {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };
