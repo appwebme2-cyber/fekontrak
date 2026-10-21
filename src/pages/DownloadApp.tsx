@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import {
-  ArrowLeft, Bell, Camera, CheckCircle2, Download, Fingerprint, FileText, Loader2, ShieldCheck, Smartphone, Sparkles, Upload, WifiOff,
+  ArrowLeft, Bell, Camera, CheckCircle2, Download, Fingerprint, FileText, Link2, Loader2, ShieldCheck, Smartphone, Sparkles, Upload, WifiOff,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -164,6 +164,35 @@ function UnggahApk({ onSelesai }: { onSelesai: (i: InfoApk) => void }) {
   const [versi, setVersi] = useState('');
   const [catatan, setCatatan] = useState('');
   const [persen, setPersen] = useState<number | null>(null);
+  // Bawaan: server mengambil APK dari link EAS (tidak bergantung kecepatan internet pengunggah)
+  const [cara, setCara] = useState<'link' | 'file'>('link');
+  const [link, setLink] = useState('');
+  const [mengambil, setMengambil] = useState(false);
+
+  const berhasil = (data: InfoApk) => {
+    onSelesai(data);
+    setFile(null); setLink(''); setVersi(''); setCatatan('');
+    toast({ title: 'APK berhasil disimpan', description: `Versi ${data?.versi} sekarang tersedia di halaman ini.` });
+  };
+
+  const ambilDariLink = async () => {
+    if (!link.trim() || !versi.trim()) return;
+    setMengambil(true);
+    try {
+      const res = await fetch(`${API_URL}/app/android/dari-link`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token') ?? ''}` },
+        body: JSON.stringify({ url: link.trim(), versi: versi.trim(), catatan: catatan.trim() || null }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok) berhasil(data);
+      else toast({ title: 'Gagal mengambil APK', description: data?.message ?? `HTTP ${res.status}`, variant: 'destructive' });
+    } catch {
+      toast({ title: 'Gagal mengambil APK', description: 'Tidak dapat terhubung ke server MAESTRO. Coba lagi.', variant: 'destructive' });
+    } finally {
+      setMengambil(false);
+    }
+  };
 
   const unggah = () => {
     if (!file || !versi.trim()) return;
@@ -182,14 +211,15 @@ function UnggahApk({ onSelesai }: { onSelesai: (i: InfoApk) => void }) {
       let data: any = null;
       try { data = JSON.parse(xhr.responseText); } catch { /* bukan JSON */ }
       if (xhr.status >= 200 && xhr.status < 300) {
-        onSelesai(data);
-        setFile(null); setVersi(''); setCatatan('');
-        toast({ title: 'APK berhasil diunggah', description: `Versi ${data?.versi} sekarang tersedia di halaman ini.` });
+        berhasil(data);
       } else {
         toast({ title: 'Gagal mengunggah APK', description: data?.message ?? `HTTP ${xhr.status}`, variant: 'destructive' });
       }
     };
-    xhr.onerror = () => { setPersen(null); toast({ title: 'Gagal mengunggah APK', description: 'Periksa koneksi lalu coba lagi.', variant: 'destructive' }); };
+    xhr.onerror = () => {
+      setPersen(null);
+      toast({ title: 'Gagal mengunggah APK', description: 'Koneksi terputus saat mengunggah. Pakai "Ambil dari link EAS" supaya tidak bergantung kecepatan internet.', variant: 'destructive' });
+    };
     setPersen(0);
     xhr.send(form);
   };
@@ -197,13 +227,35 @@ function UnggahApk({ onSelesai }: { onSelesai: (i: InfoApk) => void }) {
   return (
     <div className="mt-8 rounded-3xl bg-white p-6 text-gray-900 shadow-xl">
       <div className="flex items-center gap-2 text-lg font-bold"><Upload className="h-5 w-5 text-blue-600" /> Unggah APK versi baru</div>
-      <p className="text-sm text-gray-500">Hanya Super Admin. Unduh file .apk dari halaman build Expo (expo.dev), lalu unggah di sini; link & QR code di atas tetap sama.</p>
+      <p className="text-sm text-gray-500">Hanya Super Admin. Link &amp; QR code di atas tetap sama setelah APK diganti.</p>
+      <div className="mt-4 inline-flex rounded-xl bg-gray-100 p-1 text-sm font-semibold">
+        <button type="button" onClick={() => setCara('link')}
+          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 ${cara === 'link' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
+          <Link2 className="h-4 w-4" /> Ambil dari link EAS
+        </button>
+        <button type="button" onClick={() => setCara('file')}
+          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 ${cara === 'file' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'}`}>
+          <Upload className="h-4 w-4" /> Unggah file
+        </button>
+      </div>
       <div className="mt-4 grid gap-4 md:grid-cols-[1.4fr_0.6fr]">
-        <div>
-          <Label htmlFor="apk">File APK</Label>
-          <Input id="apk" type="file" accept=".apk,application/vnd.android.package-archive" className="mt-1"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-        </div>
+        {cara === 'link' ? (
+          <div>
+            <Label htmlFor="link">Link unduhan APK dari expo.dev</Label>
+            <Input id="link" className="mt-1" placeholder="https://expo.dev/artifacts/eas/....apk" value={link} onChange={(e) => setLink(e.target.value)} />
+            <p className="mt-1 text-xs text-gray-500">
+              Di halaman build expo.dev, buka menu <b>⋮</b> di samping <b>Install</b>, lalu klik kanan <b>Download</b> dan pilih <b>Salin alamat link</b> (link diawali expo.dev/artifacts/). Server MAESTRO yang mengambil
+              APK-nya, jadi tidak bergantung kecepatan internet Anda. Link EAS hanya berlaku sementara, tapi salinan di MAESTRO tetap.
+            </p>
+          </div>
+        ) : (
+          <div>
+            <Label htmlFor="apk">File APK</Label>
+            <Input id="apk" type="file" accept=".apk,application/vnd.android.package-archive" className="mt-1"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            <p className="mt-1 text-xs text-gray-500">Butuh internet yang cukup cepat; file besar bisa terputus di tengah jalan.</p>
+          </div>
+        )}
         <div>
           <Label htmlFor="versi">Versi</Label>
           <Input id="versi" className="mt-1" placeholder="mis. 1.0.0" value={versi} onChange={(e) => setVersi(e.target.value)} />
@@ -214,6 +266,11 @@ function UnggahApk({ onSelesai }: { onSelesai: (i: InfoApk) => void }) {
         <Textarea id="catatan" className="mt-1" rows={2} placeholder="mis. Tambah fitur kalender & ekspor PDF"
           value={catatan} onChange={(e) => setCatatan(e.target.value)} />
       </div>
+      {mengambil && (
+        <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+          <Loader2 className="h-4 w-4 animate-spin text-blue-600" /> Server MAESTRO sedang mengambil APK dari expo.dev…
+        </div>
+      )}
       {persen !== null && (
         <div className="mt-3">
           <div className="mb-1 flex justify-between text-xs text-gray-500"><span>Mengunggah…</span><span>{persen}%</span></div>
@@ -221,10 +278,17 @@ function UnggahApk({ onSelesai }: { onSelesai: (i: InfoApk) => void }) {
         </div>
       )}
       <div className="mt-4 flex justify-end">
-        <Button onClick={unggah} disabled={!file || !versi.trim() || persen !== null} className="bg-black text-white hover:bg-gray-800">
-          {persen !== null ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-          Unggah APK
-        </Button>
+        {cara === 'link' ? (
+          <Button onClick={ambilDariLink} disabled={!link.trim() || !versi.trim() || mengambil} className="bg-black text-white hover:bg-gray-800">
+            {mengambil ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+            Ambil &amp; simpan APK
+          </Button>
+        ) : (
+          <Button onClick={unggah} disabled={!file || !versi.trim() || persen !== null} className="bg-black text-white hover:bg-gray-800">
+            {persen !== null ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+            Unggah APK
+          </Button>
+        )}
       </div>
     </div>
   );
