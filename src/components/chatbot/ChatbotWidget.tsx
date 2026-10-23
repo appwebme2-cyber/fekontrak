@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ArrowLeft, Bot, History, Maximize2, Minimize2, Sparkles, SquarePen, Send, X } from 'lucide-react';
+import { ArrowLeft, Bot, History, Maximize2, Mic, Minimize2, Sparkles, Square, SquarePen, Send, Volume2, X } from 'lucide-react';
 import { useChatbot, type ChatPageContext } from '@/hooks/useChatbot';
 import { ChatAnswerBlocks } from './ChatAnswerBlocks';
 import { ChatHistoryPanel } from './ChatHistoryPanel';
 import { ChatPinGate } from './ChatPinGate';
+import { teksUntukDibaca, useBacakan, useDikte } from './suara';
 
 const SUGGESTIONS = [
   'Berapa jumlah kontrak aktif per tipe?',
@@ -60,6 +61,9 @@ export const ChatbotWidget = () => {
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // Tanya pakai suara (dikte ke kotak pertanyaan) & bacakan jawaban, memakai fitur bawaan browser
+  const dikte = useDikte(setInput);
+  const suara = useBacakan();
 
   useEffect(() => {
     let cancelled = false;
@@ -83,6 +87,7 @@ export const ChatbotWidget = () => {
   const submit = (text?: string) => {
     const question = (text ?? input).trim();
     if (!question || isLoading || quotaExhausted) return;
+    if (dikte.aktif) dikte.berhenti();
     setInput('');
     send(question, buildPageContext(location.pathname));
   };
@@ -134,14 +139,14 @@ export const ChatbotWidget = () => {
         >
           {showHistory ? <ArrowLeft className="h-4 w-4" /> : <History className="h-4 w-4" />}
         </button>
-        <button type="button" onClick={() => { reset(); setShowHistory(false); }} title="Percakapan baru" className="rounded p-1.5 hover:bg-white/15">
+        <button type="button" onClick={() => { suara.hentikan(); reset(); setShowHistory(false); }} title="Percakapan baru" className="rounded p-1.5 hover:bg-white/15">
           <SquarePen className="h-4 w-4" />
         </button>
         </>)}
         <button type="button" onClick={() => setExpanded((v) => !v)} title={expanded ? 'Perkecil' : 'Perbesar'} className="hidden rounded p-1.5 hover:bg-white/15 sm:block">
           {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
         </button>
-        <button type="button" onClick={() => setOpen(false)} title="Tutup" className="rounded p-1.5 hover:bg-white/15">
+        <button type="button" onClick={() => { suara.hentikan(); dikte.berhenti(); setOpen(false); }} title="Tutup" className="rounded p-1.5 hover:bg-white/15">
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -201,6 +206,19 @@ export const ChatbotWidget = () => {
               </div>
               <div className={`min-w-0 flex-1 rounded-2xl rounded-tl-sm border px-3.5 py-2.5 ${m.isError ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-white'}`}>
                 <ChatAnswerBlocks blocks={m.blocks ?? []} onNavigate={() => setExpanded(false)} />
+                {suara.didukung && !m.isError && (
+                  <div className="mt-1.5 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => (suara.dibaca === m.id ? suara.hentikan() : suara.bacakan(m.id, teksUntukDibaca(m.blocks ?? [])))}
+                      title={suara.dibaca === m.id ? 'Hentikan' : 'Dengarkan jawaban'}
+                      className={`flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] hover:bg-gray-100 ${suara.dibaca === m.id ? 'text-[#E31E24]' : 'text-gray-400'}`}
+                    >
+                      {suara.dibaca === m.id ? <Square className="h-3 w-3" /> : <Volume2 className="h-3.5 w-3.5" />}
+                      {suara.dibaca === m.id ? 'Hentikan' : 'Dengarkan'}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ),
@@ -230,6 +248,12 @@ export const ChatbotWidget = () => {
             Batas pertanyaan hari ini sudah habis. Silakan coba lagi besok.
           </div>
         )}
+        {dikte.galat && (
+          <div className="mb-2 flex items-start justify-between gap-2 rounded-md bg-amber-50 px-3 py-1.5 text-xs text-amber-700">
+            <span>{dikte.galat}</span>
+            <button type="button" onClick={dikte.hapusGalat} aria-label="Tutup pesan" className="shrink-0"><X className="h-3.5 w-3.5" /></button>
+          </div>
+        )}
         <div className="flex items-end gap-2">
           <textarea
             ref={inputRef}
@@ -239,9 +263,21 @@ export const ChatbotWidget = () => {
             rows={1}
             maxLength={2000}
             disabled={quotaExhausted}
-            placeholder="Tulis pertanyaan... (Enter untuk kirim)"
+            placeholder={dikte.aktif ? 'Mendengarkan... silakan bicara' : 'Tulis pertanyaan... (Enter untuk kirim)'}
             className="max-h-32 min-h-[40px] flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-500/15 disabled:bg-gray-50"
           />
+          {dikte.didukung && (
+            <button
+              type="button"
+              onClick={() => (dikte.aktif ? dikte.berhenti() : dikte.mulai(input))}
+              disabled={quotaExhausted}
+              aria-label={dikte.aktif ? 'Berhenti mendengarkan' : 'Tanya pakai suara'}
+              title={dikte.aktif ? 'Berhenti mendengarkan' : 'Tanya pakai suara'}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors disabled:opacity-40 ${dikte.aktif ? 'animate-pulse border-[#E31E24] bg-red-50 text-[#E31E24]' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+            >
+              {dikte.aktif ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => submit()}
