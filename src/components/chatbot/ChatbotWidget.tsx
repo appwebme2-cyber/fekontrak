@@ -5,7 +5,7 @@ import { useChatbot, type ChatPageContext } from '@/hooks/useChatbot';
 import { ChatAnswerBlocks } from './ChatAnswerBlocks';
 import { ChatHistoryPanel } from './ChatHistoryPanel';
 import { ChatPinGate } from './ChatPinGate';
-import { teksUntukDibaca, useBacakan, useDikte } from './suara';
+import { teksUntukDibaca, useBacakan, useDikte, useTemanTunggu } from './suara';
 
 const SUGGESTIONS = [
   'Berapa jumlah kontrak aktif per tipe?',
@@ -65,6 +65,8 @@ export const ChatbotWidget = () => {
   // (diam ±2 detik atau ucapan "kirim"), dan jawabannya langsung dibacakan.
   const suara = useBacakan();
   const bacakanJawaban = useRef(false);
+  // Pertanyaan lewat suara yang sedang ditunggu jawabannya: selama menunggu Asisten "bergumam" mengisi jeda
+  const [pertanyaanSuara, setPertanyaanSuara] = useState<string | null>(null);
   const kirimRef = useRef<(teks: string) => void>(() => {});
   const dikte = useDikte(setInput, (teks) => kirimRef.current(teks));
 
@@ -92,18 +94,24 @@ export const ChatbotWidget = () => {
     if (!question || isLoading || quotaExhausted) return;
     if (dikte.aktif) dikte.berhenti();
     bacakanJawaban.current = lewatSuara;
+    setPertanyaanSuara(lewatSuara ? question : null);
     setInput('');
     send(question, buildPageContext(location.pathname));
   };
   kirimRef.current = (teks) => submit(teks, true);
 
-  // Jawaban untuk pertanyaan lewat suara langsung dibacakan begitu muncul
+  // Berhenti bergumam bila jendela ditutup atau mikrofon sedang mendengarkan (supaya tidak ikut terekam)
+  useTemanTunggu(open && isLoading && !!pertanyaanSuara && !dikte.aktif, pertanyaanSuara, statusText);
+
+  // Jawaban untuk pertanyaan lewat suara langsung dibacakan begitu muncul (menggantikan ucapan pengisi)
   useEffect(() => {
     if (!bacakanJawaban.current || isLoading) return;
     const terakhir = messages[messages.length - 1];
     if (terakhir?.role !== 'assistant') return;
     bacakanJawaban.current = false;
-    if (!terakhir.isError) suara.bacakan(terakhir.id, teksUntukDibaca(terakhir.blocks ?? []));
+    setPertanyaanSuara(null);
+    if (terakhir.isError) suara.hentikan();
+    else suara.bacakan(terakhir.id, teksUntukDibaca(terakhir.blocks ?? []));
   }, [messages, isLoading, suara]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {

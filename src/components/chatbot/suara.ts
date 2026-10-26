@@ -193,3 +193,96 @@ export function useBacakan() {
 
   return { didukung, dibaca, bacakan, hentikan };
 }
+
+// ===================================================================== TEMAN MENUNGGU
+// Selama Asisten mencari jawaban untuk pertanyaan lewat suara, Asisten "bergumam" seperti orang yang sedang
+// mengecek data: sapaan sesuai topik, kabar tiap langkah dari server, dan sesekali kalimat pengisi.
+
+const acak = <T,>(list: readonly T[]) => list[Math.floor(Math.random() * list.length)];
+
+const SAPAAN_TOPIK: [RegExp, string[]][] = [
+  [/tagihan|invoice|bayar|pembayaran|sla/i, ['Oke, aku cek data tagihannya dulu ya.', 'Siap, sebentar ya, aku lihat tagihannya.']],
+  [/approval|dokumen|persetujuan/i, ['Oke, aku cek dokumen yang masuk dulu ya.', 'Sebentar ya, aku lihat dokumen approval-nya.']],
+  [/material|bom|rab/i, ['Sebentar ya, aku buka data kebutuhan materialnya.', 'Oke, aku cek draft materialnya dulu.']],
+  [/laporan|harian|maintenance/i, ['Oke, aku cek laporan hariannya dulu ya.', 'Sebentar, aku lihat laporan dari lapangan.']],
+  [/vendor|kontraktor|rekanan/i, ['Sebentar ya, aku cari data vendornya.', 'Oke, aku cek vendornya dulu.']],
+  [/amandemen|addendum/i, ['Oke, aku cek amandemennya dulu ya.']],
+  [/kom\b|kontrak|progress|s-?curve|nilai/i, ['Siap, aku lihat data kontraknya sebentar ya.', 'Oke, sebentar ya, aku cek kontraknya dulu.']],
+];
+const SAPAAN_UMUM = ['Oke, sebentar ya, aku cek dulu.', 'Siap, aku carikan dulu ya.', 'Hmm, sebentar ya, aku lihat datanya.'];
+
+/** Kabar langkah dari server (status) -> ucapan santai; null = tidak diucapkan */
+const dariStatus = (status: string): string | null => {
+  const s = status.toLowerCase();
+  if (s.startsWith('memahami')) return null; // sudah diwakili sapaan pembuka
+  if (s.includes('menyusun jawaban')) return acak(['Oke, sudah ketemu. Aku rangkum dulu ya.', 'Datanya sudah dapat, tinggal aku susun jawabannya.']);
+  if (s.includes('statistik')) return acak(['Sekarang aku hitung angkanya, biar akurat.', 'Aku jumlahkan dulu ya angka-angkanya.']);
+  if (s.includes('detail kontrak')) return 'Aku buka detail kontraknya dulu.';
+  if (s.includes('mencari kontrak')) return acak(['Lagi aku cari kontraknya.', 'Aku telusuri daftar kontraknya dulu.']);
+  if (s.includes('tagihan')) return acak(['Lagi aku telusuri tagihannya.', 'Aku cek tahap-tahap tagihannya dulu.']);
+  if (s.includes('amandemen')) return 'Aku lihat riwayat amandemennya.';
+  if (s.includes('query')) return acak(['Datanya lagi aku olah ya.', 'Aku olah datanya dulu supaya tepat.']);
+  return acak(['Aku ambil datanya dulu ya.', 'Sedang aku kumpulkan datanya.']);
+};
+
+const ISIAN = [
+  'Masih aku proses ya, sebentar lagi.',
+  'Datanya lumayan banyak, aku pastikan dulu supaya akurat.',
+  'Sedikit lagi ya.',
+  'Hampir selesai, tinggal aku rapikan.',
+];
+const JEDA_ISIAN = 7000; // ms tanpa suara sebelum kalimat pengisi
+const MAKS_ISIAN = 3;
+
+const ucapkan = (teks: string) => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(teks);
+  u.lang = 'id-ID';
+  const suara = suaraIndonesia();
+  if (suara) u.voice = suara;
+  u.rate = 1.05;
+  window.speechSynthesis.speak(u);
+};
+
+/**
+ * Aktif selama menunggu jawaban atas pertanyaan lewat suara. Jawaban yang datang dibacakan dengan bacakan()
+ * yang membatalkan semua ucapan pengisi yang masih antre.
+ */
+export function useTemanTunggu(aktif: boolean, pertanyaan: string | null, status: string | null) {
+  const terakhir = useRef(0);
+  const jumlahIsian = useRef(0);
+  const sudahDiucap = useRef(new Set<string>());
+
+  const bicara = (teks: string) => {
+    terakhir.current = Date.now();
+    ucapkan(teks);
+  };
+
+  // Sapaan pembuka + kalimat pengisi berkala selama menunggu
+  useEffect(() => {
+    if (!aktif) return;
+    jumlahIsian.current = 0;
+    sudahDiucap.current = new Set();
+    const topik = SAPAAN_TOPIK.find(([pola]) => pola.test(pertanyaan ?? ''));
+    bicara(acak(topik ? topik[1] : SAPAAN_UMUM));
+    const t = setInterval(() => {
+      if (window.speechSynthesis?.speaking || jumlahIsian.current >= MAKS_ISIAN) return;
+      if (Date.now() - terakhir.current < JEDA_ISIAN) return;
+      jumlahIsian.current++;
+      bicara(ISIAN[(jumlahIsian.current - 1) % ISIAN.length]);
+    }, 1000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pertanyaan dibaca sekali saat mulai menunggu
+  }, [aktif]);
+
+  // Kabar langkah dari server diucapkan (satu kali per jenis, tidak menumpuk)
+  useEffect(() => {
+    if (!aktif || !status) return;
+    const kalimat = dariStatus(status);
+    const kunci = status.replace(/".*"/, '').trim();
+    if (!kalimat || sudahDiucap.current.has(kunci)) return;
+    if (window.speechSynthesis?.pending) return; // masih ada antrean ucapan; lewati supaya tidak cerewet
+    sudahDiucap.current.add(kunci);
+    bicara(kalimat);
+  }, [aktif, status]);
+}
