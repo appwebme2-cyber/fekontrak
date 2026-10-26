@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ambilSuaraPremium, type ChatBlock } from '@/hooks/useChatbot';
+import type { ChatBlock } from '@/hooks/useChatbot';
 
 // Suara untuk Asisten MAESTRO memakai fitur bawaan browser (tanpa biaya/server tambahan):
 // - dikte: Web Speech API (Chrome/Edge; pengenalan suara diproses layanan browser),
@@ -149,96 +149,6 @@ const suaraIndonesia = () => {
   return id.find((v) => /natural|online/i.test(v.name)) ?? id.find((v) => /google/i.test(v.name)) ?? id[0] ?? null;
 };
 
-// ===================================================================== PEMUTAR SUARA
-// Suara natural ElevenLabs lewat server MAESTRO lebih dulu; bila tidak tersedia (kunci belum dipasang, kuota
-// gratis habis, gangguan) langsung pakai suara bawaan browser, lalu ElevenLabs tidak dicoba lagi selama 10 menit.
-
-const BATAS_PREMIUM = 2500; // jawaban lebih panjang dari ini dibacakan suara browser (hemat kuota)
-let premiumMatiSampai = 0;
-let audioAktif: HTMLAudioElement | null = null;
-// Naik setiap kali suara dihentikan; pemutaran yang masih menunggu unduhan dibatalkan bila generasinya sudah lewat
-let generasi = 0;
-const cacheAudio = new Map<string, string>();
-
-async function urlPremium(teks: string): Promise<string | null> {
-  if (teks.length > BATAS_PREMIUM || Date.now() < premiumMatiSampai) return null;
-  const ada = cacheAudio.get(teks);
-  if (ada) return ada;
-  const blob = await ambilSuaraPremium(teks);
-  if (!blob) {
-    premiumMatiSampai = Date.now() + 10 * 60_000;
-    return null;
-  }
-  const url = URL.createObjectURL(blob);
-  cacheAudio.set(teks, url);
-  if (cacheAudio.size > 40) {
-    const tertua = cacheAudio.keys().next().value;
-    if (tertua !== undefined) {
-      URL.revokeObjectURL(cacheAudio.get(tertua) ?? '');
-      cacheAudio.delete(tertua);
-    }
-  }
-  return url;
-}
-
-/** Hentikan semua suara (ElevenLabs & browser), termasuk yang masih menunggu unduhan */
-function hentikanSemua() {
-  generasi++;
-  audioAktif?.pause();
-  audioAktif = null;
-  if (typeof window !== 'undefined') window.speechSynthesis?.cancel();
-}
-
-export const sedangBicara = () =>
-  !!audioAktif || (typeof window !== 'undefined' && !!window.speechSynthesis?.speaking);
-
-function putar(url: string, selesai?: () => void): Promise<boolean> {
-  const a = new Audio(url);
-  audioAktif = a;
-  const akhir = () => {
-    if (audioAktif === a) audioAktif = null;
-    selesai?.();
-  };
-  a.onended = akhir;
-  a.onerror = akhir;
-  // Browser bisa menolak memutar audio otomatis; saat itu pakai suara browser
-  return a.play().then(() => true).catch(() => {
-    if (audioAktif === a) audioAktif = null;
-    return false;
-  });
-}
-
-function ucapkanBrowser(teks: string, rate: number, selesai?: () => void) {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-    selesai?.();
-    return;
-  }
-  // Kalimat panjang dipecah: beberapa browser berhenti sendiri pada teks yang sangat panjang
-  const kalimat = teks.match(/[^.!?]+[.!?]*/g)?.map((k) => k.trim()).filter(Boolean) ?? [teks];
-  const suara = suaraIndonesia();
-  kalimat.forEach((k, i) => {
-    const u = new SpeechSynthesisUtterance(k);
-    u.lang = 'id-ID';
-    if (suara) u.voice = suara;
-    u.rate = rate;
-    if (i === kalimat.length - 1) {
-      u.onend = () => selesai?.();
-      u.onerror = () => selesai?.();
-    }
-    window.speechSynthesis.speak(u);
-  });
-}
-
-/** Ucapkan teks: ElevenLabs bila tersedia, kalau tidak suara browser */
-async function ucapkanSaja(teks: string, rate = 1.05, selesai?: () => void) {
-  const gen = generasi;
-  const url = await urlPremium(teks);
-  if (gen !== generasi) return; // sudah dihentikan / digantikan selama menunggu unduhan
-  if (url && (await putar(url, selesai))) return;
-  if (gen !== generasi) return;
-  ucapkanBrowser(teks, rate, selesai);
-}
-
 /** Bacakan jawaban; hanya satu jawaban dibacakan sekaligus. `dibaca` = id pesan yang sedang dibacakan. */
 export function useBacakan() {
   const didukung = typeof window !== 'undefined' && 'speechSynthesis' in window;
@@ -252,20 +162,33 @@ export function useBacakan() {
     window.speechSynthesis.addEventListener?.('voiceschanged', muat);
     return () => {
       window.speechSynthesis.removeEventListener?.('voiceschanged', muat);
-      hentikanSemua();
+      window.speechSynthesis.cancel();
     };
   }, [didukung]);
 
   const hentikan = useCallback(() => {
-    hentikanSemua();
+    if (didukung) window.speechSynthesis.cancel();
     setDibaca(null);
-  }, []);
+  }, [didukung]);
 
   const bacakan = useCallback((id: string, teks: string) => {
     if (!didukung || !teks) return;
-    hentikanSemua(); // jawaban menggantikan ucapan apa pun yang sedang berjalan
+    window.speechSynthesis.cancel();
+    // Kalimat panjang dipecah: beberapa browser berhenti sendiri pada teks yang sangat panjang
+    const kalimat = teks.match(/[^.!?]+[.!?]*/g)?.map((k) => k.trim()).filter(Boolean) ?? [teks];
+    const suara = suaraIndonesia();
+    kalimat.forEach((k, i) => {
+      const u = new SpeechSynthesisUtterance(k);
+      u.lang = 'id-ID';
+      if (suara) u.voice = suara;
+      u.rate = 1.02;
+      if (i === kalimat.length - 1) {
+        u.onend = () => setDibaca((cur) => (cur === id ? null : cur));
+        u.onerror = () => setDibaca((cur) => (cur === id ? null : cur));
+      }
+      window.speechSynthesis.speak(u);
+    });
     setDibaca(id);
-    void ucapkanSaja(teks, 1.02, () => setDibaca((cur) => (cur === id ? null : cur)));
   }, [didukung]);
 
   return { didukung, dibaca, bacakan, hentikan };
@@ -311,6 +234,16 @@ const ISIAN = [
 const JEDA_ISIAN = 7000; // ms tanpa suara sebelum kalimat pengisi
 const MAKS_ISIAN = 3;
 
+const ucapkan = (teks: string) => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(teks);
+  u.lang = 'id-ID';
+  const suara = suaraIndonesia();
+  if (suara) u.voice = suara;
+  u.rate = 1.05;
+  window.speechSynthesis.speak(u);
+};
+
 /**
  * Aktif selama menunggu jawaban atas pertanyaan lewat suara. Jawaban yang datang dibacakan dengan bacakan()
  * yang membatalkan semua ucapan pengisi yang masih antre.
@@ -322,7 +255,7 @@ export function useTemanTunggu(aktif: boolean, pertanyaan: string | null, status
 
   const bicara = (teks: string) => {
     terakhir.current = Date.now();
-    void ucapkanSaja(teks);
+    ucapkan(teks);
   };
 
   // Sapaan pembuka + kalimat pengisi berkala selama menunggu
@@ -333,7 +266,7 @@ export function useTemanTunggu(aktif: boolean, pertanyaan: string | null, status
     const topik = SAPAAN_TOPIK.find(([pola]) => pola.test(pertanyaan ?? ''));
     bicara(acak(topik ? topik[1] : SAPAAN_UMUM));
     const t = setInterval(() => {
-      if (sedangBicara() || jumlahIsian.current >= MAKS_ISIAN) return;
+      if (window.speechSynthesis?.speaking || jumlahIsian.current >= MAKS_ISIAN) return;
       if (Date.now() - terakhir.current < JEDA_ISIAN) return;
       jumlahIsian.current++;
       bicara(ISIAN[(jumlahIsian.current - 1) % ISIAN.length]);
@@ -348,7 +281,7 @@ export function useTemanTunggu(aktif: boolean, pertanyaan: string | null, status
     const kalimat = dariStatus(status);
     const kunci = status.replace(/".*"/, '').trim();
     if (!kalimat || sudahDiucap.current.has(kunci)) return;
-    if (sedangBicara()) return; // masih berbicara; lewati supaya tidak menumpuk & cerewet
+    if (window.speechSynthesis?.pending) return; // masih ada antrean ucapan; lewati supaya tidak cerewet
     sudahDiucap.current.add(kunci);
     bicara(kalimat);
   }, [aktif, status]);
