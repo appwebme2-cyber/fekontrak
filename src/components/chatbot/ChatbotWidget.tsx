@@ -276,7 +276,28 @@ export const ChatbotWidget = () => {
             <button type="button" onClick={dikte.hapusGalat} aria-label="Tutup pesan" className="shrink-0"><X className="h-3.5 w-3.5" /></button>
           </div>
         )}
-        <div className="flex items-end gap-2">
+        <div className="relative flex items-end gap-2">
+          {/* Petunjuk saat merekam: tooltip melayang di atas tombol mikrofon */}
+          {dikte.aktif && (
+            <div role="status" className="pointer-events-none absolute -top-2 right-0 z-10 -translate-y-full animate-in fade-in slide-in-from-bottom-1">
+              <div className="flex items-center gap-2.5 rounded-xl bg-gray-900/95 px-3 py-2 text-white shadow-lg ring-1 ring-white/10">
+                <span className="flex h-4 items-end gap-[3px]" aria-hidden="true">
+                  {[0, 1, 2, 3].map((i) => (
+                    <span
+                      key={i}
+                      className="w-[3px] animate-pulse rounded-full bg-red-400"
+                      style={{ height: `${[45, 100, 70, 85][i]}%`, animationDelay: `${i * 150}ms`, animationDuration: '0.9s' }}
+                    />
+                  ))}
+                </span>
+                <span className="text-xs leading-tight">
+                  <span className="font-semibold">Silakan bicara</span>
+                  <span className="block text-[11px] text-gray-300">Terkirim otomatis saat diam 2 detik, atau ucapkan "kirim"</span>
+                </span>
+              </div>
+              <span className="absolute -bottom-1 right-[62px] h-2.5 w-2.5 rotate-45 bg-gray-900/95" aria-hidden="true" />
+            </div>
+          )}
           <textarea
             ref={inputRef}
             value={input}
@@ -285,7 +306,7 @@ export const ChatbotWidget = () => {
             rows={1}
             maxLength={2000}
             disabled={quotaExhausted}
-            placeholder={dikte.aktif ? 'Silakan bicara… terkirim otomatis saat diam atau ucapkan "kirim"' : 'Tulis pertanyaan... (Enter untuk kirim)'}
+            placeholder={dikte.aktif ? 'Mendengarkan…' : 'Tulis pertanyaan... (Enter untuk kirim)'}
             className="max-h-32 min-h-[40px] flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-500/15 disabled:bg-gray-50"
           />
           {dikte.didukung && (
