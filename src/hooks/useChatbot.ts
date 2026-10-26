@@ -60,6 +60,22 @@ const authHeader = () => ({ Authorization: `Bearer ${localStorage.getItem('token
 let chatPin: string | null = null;
 const chatHeaders = (): Record<string, string> => ({ ...authHeader(), ...(chatPin ? { 'X-Chat-Pin': chatPin } : {}) });
 
+/** Suara natural ElevenLabs untuk teks (lewat server MAESTRO); null bila tidak tersedia, pakai suara browser */
+export const ambilSuaraPremium = async (teks: string): Promise<Blob | null> => {
+  try {
+    const res = await fetch(`${API_URL}/Chat/suara`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...chatHeaders() },
+      body: JSON.stringify({ teks }),
+    });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return blob.size > 0 ? blob : null;
+  } catch {
+    return null;
+  }
+};
+
 // Percakapan yang sedang terbuka disimpan per tab (sessionStorage) supaya tidak hilang saat pindah
 // halaman; percakapan lengkap tersimpan di server dan bisa dibuka lagi lewat Riwayat.
 const readStorage = <T,>(key: string, fallback: T): T => {
