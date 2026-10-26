@@ -61,9 +61,12 @@ export const ChatbotWidget = () => {
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  // Tanya pakai suara (dikte ke kotak pertanyaan) & bacakan jawaban, memakai fitur bawaan browser
-  const dikte = useDikte(setInput);
+  // Tanya pakai suara & bacakan jawaban, memakai fitur bawaan browser. Pertanyaan lewat suara terkirim otomatis
+  // (diam ±2 detik atau ucapan "kirim"), dan jawabannya langsung dibacakan.
   const suara = useBacakan();
+  const bacakanJawaban = useRef(false);
+  const kirimRef = useRef<(teks: string) => void>(() => {});
+  const dikte = useDikte(setInput, (teks) => kirimRef.current(teks));
 
   useEffect(() => {
     let cancelled = false;
@@ -84,13 +87,24 @@ export const ChatbotWidget = () => {
 
   const quotaExhausted = remaining === 0;
 
-  const submit = (text?: string) => {
+  const submit = (text?: string, lewatSuara = false) => {
     const question = (text ?? input).trim();
     if (!question || isLoading || quotaExhausted) return;
     if (dikte.aktif) dikte.berhenti();
+    bacakanJawaban.current = lewatSuara;
     setInput('');
     send(question, buildPageContext(location.pathname));
   };
+  kirimRef.current = (teks) => submit(teks, true);
+
+  // Jawaban untuk pertanyaan lewat suara langsung dibacakan begitu muncul
+  useEffect(() => {
+    if (!bacakanJawaban.current || isLoading) return;
+    const terakhir = messages[messages.length - 1];
+    if (terakhir?.role !== 'assistant') return;
+    bacakanJawaban.current = false;
+    if (!terakhir.isError) suara.bacakan(terakhir.id, teksUntukDibaca(terakhir.blocks ?? []));
+  }, [messages, isLoading, suara]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -263,13 +277,17 @@ export const ChatbotWidget = () => {
             rows={1}
             maxLength={2000}
             disabled={quotaExhausted}
-            placeholder={dikte.aktif ? 'Mendengarkan... silakan bicara' : 'Tulis pertanyaan... (Enter untuk kirim)'}
+            placeholder={dikte.aktif ? 'Silakan bicara… terkirim otomatis saat diam atau ucapkan "kirim"' : 'Tulis pertanyaan... (Enter untuk kirim)'}
             className="max-h-32 min-h-[40px] flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-500/15 disabled:bg-gray-50"
           />
           {dikte.didukung && (
             <button
               type="button"
-              onClick={() => (dikte.aktif ? dikte.berhenti() : dikte.mulai(input))}
+              onClick={() => {
+                if (dikte.aktif) return dikte.berhenti();
+                suara.hentikan(); // jangan sampai suara bacaan ikut terekam mikrofon
+                dikte.mulai(input);
+              }}
               disabled={quotaExhausted}
               aria-label={dikte.aktif ? 'Berhenti mendengarkan' : 'Tanya pakai suara'}
               title={dikte.aktif ? 'Berhenti mendengarkan' : 'Tanya pakai suara'}

@@ -36,42 +36,94 @@ const PESAN_GALAT: Record<string, string> = {
   network: 'Pengenalan suara butuh koneksi internet.',
 };
 
+/** Diam selama ini (ms) setelah bicara = pertanyaan dianggap selesai lalu dikirim */
+export const JEDA_KIRIM = 2000;
+// Ucapan "kirim" di akhir kalimat = kirim sekarang (kata "kirim" tidak ikut terkirim)
+const KATA_KIRIM = /[\s,.]*\bkirim\b[\s.!]*$/i;
+
 /**
- * Dikte pertanyaan: teks hasil ucapan dikirim ke onTeks (sementara & akhir). Mengembalikan status untuk tombol.
- * Teks tidak dikirim otomatis; pengguna masih bisa memeriksa/mengubahnya sebelum menekan Kirim.
+ * Dikte pertanyaan: teks ucapan ditampilkan lewat onTeks selama bicara. Pertanyaan dikirim otomatis lewat
+ * onSelesai bila pengguna diam ±2 detik atau mengucapkan "kirim". Bila tombol mikrofon ditekan lagi untuk
+ * berhenti, teks tidak dikirim (pengguna bisa memeriksa/mengubahnya dulu).
  */
-export function useDikte(onTeks: (teks: string) => void) {
+export function useDikte(onTeks: (teks: string) => void, onSelesai?: (teks: string) => void) {
   const didukung = !!pengenal();
   const [aktif, setAktif] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
   const ref = useRef<PengenalSuara | null>(null);
+  const jeda = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const kirimSaatSelesai = useRef(false);
+  const teksTerakhir = useRef('');
   const onTeksRef = useRef(onTeks);
+  const onSelesaiRef = useRef(onSelesai);
   onTeksRef.current = onTeks;
+  onSelesaiRef.current = onSelesai;
 
-  const berhenti = useCallback(() => ref.current?.stop(), []);
+  const hapusJeda = () => {
+    if (jeda.current) clearTimeout(jeda.current);
+    jeda.current = null;
+  };
+
+  /** Berhenti manual (tombol): teks tetap di kotak, tidak dikirim */
+  const berhenti = useCallback(() => {
+    hapusJeda();
+    kirimSaatSelesai.current = false;
+    ref.current?.stop();
+  }, []);
 
   const mulai = useCallback((teksAwal: string) => {
     const Kelas = pengenal();
     if (!Kelas) return;
     setGalat(null);
+    kirimSaatSelesai.current = false;
     const r = new Kelas();
     r.lang = 'id-ID';
-    r.continuous = false;
+    r.continuous = true;
     r.interimResults = true;
     const awalan = teksAwal.trim() ? `${teksAwal.trim()} ` : '';
+    teksTerakhir.current = awalan.trim();
+
+    const selesaikan = () => {
+      hapusJeda();
+      kirimSaatSelesai.current = true;
+      r.stop();
+    };
+
     r.onresult = (e) => {
       let teks = '';
       for (let i = 0; i < e.results.length; i++) teks += e.results[i][0].transcript;
-      onTeksRef.current(awalan + teks.trim());
+      const lengkap = (awalan + teks.trim()).trim();
+      if (KATA_KIRIM.test(lengkap)) {
+        teksTerakhir.current = lengkap.replace(KATA_KIRIM, '').trim();
+        onTeksRef.current(teksTerakhir.current);
+        selesaikan();
+        return;
+      }
+      teksTerakhir.current = lengkap;
+      onTeksRef.current(lengkap);
+      // Hitung ulang jeda diam setiap ada ucapan baru
+      hapusJeda();
+      jeda.current = setTimeout(selesaikan, JEDA_KIRIM);
     };
-    r.onerror = (e) => { if (e.error !== 'aborted') setGalat(PESAN_GALAT[e.error] ?? 'Pengenalan suara gagal. Coba lagi.'); };
-    r.onend = () => { setAktif(false); ref.current = null; };
+    r.onerror = (e) => {
+      hapusJeda();
+      kirimSaatSelesai.current = false;
+      if (e.error !== 'aborted') setGalat(PESAN_GALAT[e.error] ?? 'Pengenalan suara gagal. Coba lagi.');
+    };
+    r.onend = () => {
+      hapusJeda();
+      setAktif(false);
+      ref.current = null;
+      const teks = teksTerakhir.current;
+      if (kirimSaatSelesai.current && teks) onSelesaiRef.current?.(teks);
+      kirimSaatSelesai.current = false;
+    };
     ref.current = r;
     setAktif(true);
     r.start();
   }, []);
 
-  useEffect(() => () => ref.current?.abort(), []);
+  useEffect(() => () => { hapusJeda(); ref.current?.abort(); }, []);
 
   return { didukung, aktif, galat, mulai, berhenti, hapusGalat: () => setGalat(null) };
 }
