@@ -16,7 +16,9 @@ export const ContractFormNavigation = ({
   isLoading = false,
   isEditing = false
 }: ContractFormNavigationProps) => {
-  const tabs = ['basic', 'technical', 'vendor', 'progress', 'amendments', 'documents'];
+  // Harus sama dengan tab yang ada di ContractFormTabs (tab "amendments" sudah tidak ada,
+  // dulu bikin tombol Selanjutnya dari Progress membuka halaman kosong).
+  const tabs = ['basic', 'technical', 'vendor', 'progress', 'documents'];
   const currentIndex = tabs.indexOf(activeTab);
   
   const handleNext = () => {
@@ -59,6 +61,20 @@ export const ContractFormNavigation = ({
       </div>
 
       <div className="flex gap-2">
+        {/* Mode edit: bisa langsung simpan dari tab mana pun, tanpa harus
+            klik Selanjutnya sampai tab terakhir. type="button" + requestSubmit
+            supaya menekan Enter di dalam input tidak ikut menyimpan. */}
+        {isEditing && !isLastTab && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={(e) => e.currentTarget.form?.requestSubmit()}
+            disabled={isLoading}
+            className="border-blue-600 text-blue-700 hover:bg-blue-50"
+          >
+            {isLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
+          </Button>
+        )}
         {!isLastTab ? (
           <Button
             type="button"
