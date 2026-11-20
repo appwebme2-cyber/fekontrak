@@ -132,6 +132,7 @@ export const ContractDetailContent = ({
     try {
       await updateTagihan.mutateAsync({ id: editingTagihan.id_tagihan, ...data });
       queryClient.invalidateQueries({ queryKey: ['contractTagihans', contract.id_kontrak] });
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
       setEditingTagihan(null);
     } catch (error) {
       console.error('Error updating tagihan:', error);
@@ -143,6 +144,7 @@ export const ContractDetailContent = ({
     deleteTagihan.mutate(deletingTagihan.id_tagihan, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['contractTagihans', contract.id_kontrak] });
+        queryClient.invalidateQueries({ queryKey: ['contracts'] });
         setDeletingTagihan(null);
       }
     });

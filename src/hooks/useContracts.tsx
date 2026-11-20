@@ -103,6 +103,8 @@ export const useContracts = () => {
         tanggal_kom: c.tanggalKom,
         tanggal_lkp: c.tanggalLkp,
         nilai_awal: c.nilaiAwal,
+        total_nilai_tagihan: c.totalNilaiTagihan ?? 0,
+        jumlah_tagihan: c.jumlahTagihan ?? 0,
         has_amendment: c.hasAmendment ?? false,
         nilai_kontrak_baru: c.nilaiKontrakBaru ?? null,
         durasi_amandemen: c.durasiAmandemen ?? null,

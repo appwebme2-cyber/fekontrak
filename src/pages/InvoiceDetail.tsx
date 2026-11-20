@@ -162,6 +162,7 @@ const InvoiceDetail = () => {
       await updateTagihan.mutateAsync({ id: invoice.id_tagihan, ...data });
       queryClient.invalidateQueries({ queryKey: ['invoice', id] });
       queryClient.invalidateQueries({ queryKey: ['contract-invoices', invoice.id_kontrak] });
+      queryClient.invalidateQueries({ queryKey: ['contracts'] });
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error('Error updating invoice:', error);

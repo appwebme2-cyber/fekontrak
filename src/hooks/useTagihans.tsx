@@ -105,6 +105,7 @@ export const useCreateTagihan = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tagihans'] });
+      queryClient.invalidateQueries({ queryKey: ['contracts'] }); // total tertagih di daftar kontrak
       toast({ title: "Berhasil", description: "Tagihan berhasil ditambahkan" });
     },
     onError: (error: Error) => {
@@ -152,6 +153,7 @@ export const useUpdateTagihan = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tagihans'] });
+      queryClient.invalidateQueries({ queryKey: ['contracts'] }); // total tertagih di daftar kontrak
       toast({ title: "Berhasil", description: "Tagihan berhasil diperbarui" });
     },
     onError: (error: Error) => {
@@ -179,6 +181,7 @@ export const useDeleteTagihan = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tagihans'] });
+      queryClient.invalidateQueries({ queryKey: ['contracts'] }); // total tertagih di daftar kontrak
       toast({ title: "Berhasil", description: "Tagihan berhasil dihapus" });
     },
     onError: (error: Error) => {

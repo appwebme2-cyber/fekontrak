@@ -63,6 +63,9 @@ export interface Kontrak {
   tanggal_mpl?: number;
   tanggal_mpa?: number;
   masa_pemeliharaan_hari?: number;
+  // Ringkasan tagihan (dari GET /contracts)
+  total_nilai_tagihan?: number;
+  jumlah_tagihan?: number;
   // Amendment fields
   has_amendment?: boolean;
   no_amandemen?: string;
